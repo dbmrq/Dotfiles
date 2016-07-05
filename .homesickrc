@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+# Install Vim plugins via Vundle
+system("vim +PluginInstall +qall")
