@@ -4,6 +4,9 @@ source ~/.vim/ftplugin/plaintex.vim
 " set formatoptions=tcroqln
 " set comments+=b:\\item
 
+set spell
+set spelllang=en,pt
+
 nnoremap <localleader>doc /begin{document}<cr>v/end{document}<cr>
 
 " \ldots
