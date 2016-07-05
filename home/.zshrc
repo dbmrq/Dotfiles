@@ -15,6 +15,12 @@ fi
 export editor='vim'
 export VISUAL='vim'
 
+bindkey -v
+
+setopt menucomplete
+setopt nobeep
+setopt rmstarwait
+
 # Fix Prezto's bs
 alias cp='nocorrect cp'
 alias ln='nocorrect ln'
