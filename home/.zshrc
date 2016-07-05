@@ -15,8 +15,6 @@ fi
 export editor='vim'
 export VISUAL='vim'
 
-alias lsa='ls -a'
-
 # Fix Prezto's bs
 alias cp='nocorrect cp'
 alias ln='nocorrect ln'
