@@ -279,7 +279,7 @@ command! ToggleBG call ToggleBG()
 " plugins
 nnoremap <leader>ut :UndotreeToggle<cr>
 nnoremap <leader>gy :Goyo<cr>
-
+nnoremap <leader>tp :TogglePencil<cr>
 
 
 " PLUGIN SETTINGS
@@ -342,10 +342,12 @@ let g:lexical#spelllang = ['en','pt',]
 augroup reedes
   autocmd!
   autocmd FileType markdown,mkd,text,tex call lexical#init()
+                                     \ | call pencil#init()
                                      \ | call textobj#sentence#init()
 augroup END
 
 let g:lexical#spell_key = '<leader>ss'
+let g:pencil#textwidth = &textwidth
 
 
 " incsearch.vim
