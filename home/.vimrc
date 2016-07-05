@@ -10,7 +10,6 @@ call vundle#begin()
     Plugin 'tpope/vim-sensible'
     Plugin 'tpope/vim-unimpaired'
     Plugin 'tpope/vim-surround'
-    " Plugin 'Valloric/YouCompleteMe'
     Plugin 'Shougo/neocomplete.vim'
     Plugin 'lervag/vimtex'
     Plugin 'SirVer/ultisnips'
@@ -159,7 +158,7 @@ nnoremap <leader>i `^i
 
 " edit and source vimrc
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
-nnoremap <leader>sv :source $MYVIMRC<cr>:source $MYGVIMRC<cr>
+nnoremap <leader>sv :source $MYVIMRC<cr>
     \ :let &ft=&ft<cr>:set shortmess+=c<cr>
 
 " select everything
@@ -179,11 +178,11 @@ nnoremap <leader>W <c-w><c-w>
 " move lines up and down
 " (needs unimpaired.vim)
 let s:uname = system("uname -s")
-if s:uname == "Darwin"
+if s:uname =~ "Darwin"
     nmap k [e
-    nmap j [e
+    nmap j ]e
     vmap k [egv
-    vmap j [egv
+    vmap j ]egv
 else
     nmap <m-k> [e
     nmap <m-j> ]e
@@ -320,11 +319,6 @@ function! s:lightline_update()
 endfunction
 
 
-" YankRing
-
-let g:yankring_history_file = '.vim/YankRing/yankring_history'
-
-
 " UltiSnips
 
 " Use <CR> to accept snippets
@@ -397,35 +391,6 @@ xmap T <Plug>Sneak_T
 omap t <Plug>Sneak_t
 omap T <Plug>Sneak_T
 
-" nmap f <Plug>Sneak_s
-" nmap F <Plug>Sneak_S
-" xmap f <Plug>Sneak_s
-" xmap F <Plug>Sneak_S
-" omap f <Plug>Sneak_s
-" omap F <Plug>Sneak_S
-
-
-" " YouCompleteMe/Vimtex compatibility
-
-" if !exists('g:ycm_semantic_triggers')
-"     let g:ycm_semantic_triggers = {}
-" endif
-" let g:ycm_semantic_triggers.tex = [
-"         \ 're!\\[A-Za-z]*cite[A-Za-z]*(\[[^]]*\]){0,2}{[^}]*',
-"         \ 're!\\[A-Za-z]*ref({[^}]*|range{([^,{}]*(}{)?))',
-"         \ 're!\\hyperref\[[^]]*',
-"         \ 're!\\includegraphics\*?(\[[^]]*\]){0,2}{[^}]*',
-"         \ 're!\\(include(only)?|input){[^}]*',
-"         \ 're!\\\a*(gls|Gls|GLS)(pl)?\a*(\s*\[[^]]*\]){0,2}\s*\{[^}]*',
-"         \ 're!\\includepdf(\s*\[[^]]*\])?\s*\{[^}]*',
-"         \ 're!\\includestandalone(\s*\[[^]]*\])?\s*\{[^}]*',
-"         \ ]
-
-
-" " YouCompleteMe
-
-" let g:ycm_filetype_blacklist = {}
-
 
 " vim-expand-region
 
@@ -475,31 +440,10 @@ let g:neocomplete#enable_smart_case = 1
 let g:neocomplete#sources#syntax#min_keyword_length = 2
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
-" " Define dictionary.
-" let g:neocomplete#sources#dictionary#dictionaries = {
-"     \ 'default' : '',
-"     \ 'vimshell' : $HOME.'/.vimshell_hist',
-"     \ 'scheme' : $HOME.'/.gosh_completions'
-"         \ }
-
-" " Define keyword.
-" if !exists('g:neocomplete#keyword_patterns')
-"     let g:neocomplete#keyword_patterns = {}
-" endif
-" let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-
 " Plugin key-mappings.
 inoremap <expr><C-g>     neocomplete#undo_completion()
 inoremap <expr><C-l>     neocomplete#complete_common_string()
 
-" Recommended key-mappings.
-" " <CR>: close popup and save indent.
-" inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-" function! s:my_cr_function()
-"   return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
-"   " For no inserting <CR> key.
-"   "return pumvisible() ? "\<C-y>" : "\<CR>"
-" endfunction
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
@@ -508,15 +452,6 @@ inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 " Close popup by <Space>.
 "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
 
-" AutoComplPop like behavior.
-" let g:neocomplete#enable_auto_select = 1
-
-" Shell like behavior(not recommended).
-"set completeopt+=longest
-"let g:neocomplete#enable_auto_select = 1
-"let g:neocomplete#disable_auto_complete = 1
-"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
-
 " Enable omni completion.
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
@@ -524,15 +459,21 @@ autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
-" " Enable heavy omni completion.
-" if !exists('g:neocomplete#sources#omni#input_patterns')
-"   let g:neocomplete#sources#omni#input_patterns = {}
-" endif
-" "let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-" "let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-" "let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
-" " For perlomni.vim setting.
-" " https://github.com/c9s/perlomni.vim
-" let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+" neocomplete/Vimtex compatibility
+
+if !exists('g:neocomplete#sources#omni#input_patterns')
+    let g:neocomplete#sources#omni#input_patterns = {}
+endif
+let g:neocomplete#sources#omni#input_patterns.tex =
+        \ '\v\\%('
+        \ . '\a*cite\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+        \ . '|\a*ref%(\s*\{[^}]*|range\s*\{[^,}]*%(}\{)?)'
+        \ . '|hyperref\s*\[[^]]*'
+        \ . '|includegraphics\*?%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+        \ . '|%(include%(only)?|input)\s*\{[^}]*'
+        \ . '|\a*(gls|Gls|GLS)(pl)?\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+        \ . '|includepdf%(\s*\[[^]]*\])?\s*\{[^}]*'
+        \ . '|includestandalone%(\s*\[[^]]*\])?\s*\{[^}]*'
+        \ . ')'
 

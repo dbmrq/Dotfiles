@@ -1,0 +1,49 @@
+snippet "\\?newc(ommand)?" "\newcommand" br
+\newcommand{${1:cmd}}[${2:args}]{${3:def}}
+endsnippet
+
+snippet "\\?renewc(ommand)?" "\newcommand" br
+\newcommand{${1:cmd}}[${2:args}]{${3:def}}
+endsnippet
+
+snippet "\\?emph" "\emph{}" r
+\emph{$1}$0
+endsnippet
+
+snippet "\\?(text)?sc" "\textsc" r
+\textsc{$1}$0
+endsnippet
+
+snippet "\\?textc(ite)?" "\textcite" r
+\textcite[$1]{$2}$0
+endsnippet
+
+snippet "\\?textc(ite)?\*" "\textcite*" r
+\textcite*[$1]{$2}$0
+endsnippet
+
+snippet "\\?apud" "\apud" r
+\apud[$1][$2]{$3}{$4}$0
+endsnippet
+
+snippet document "document environment" b
+\begin{document}
+$1
+\end{document}
+endsnippet
+
+snippet quote "quotation"
+\`\`$1''$0
+endsnippet
+
+snippet itemize "itemize environment" b
+\begin{itemize}
+	\item $1
+\end{itemize}
+$0
+endsnippet
+
+snippet "\\?it" "\item" br
+\item $1
+$0
+endsnippet

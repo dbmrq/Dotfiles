@@ -1,0 +1,606 @@
+#################
+#  Entry Types  #
+#################
+
+snippet @
+@$1{$2,
+	${3:author = {$4},}
+	${5:title = {$6},}
+	${7:date = {$8},}
+	$9
+}
+endsnippet
+
+snippet "@?article" "article entry" r
+@article{$1,
+	author = {$2},
+	title = {$3},
+	date = {$5},
+	journaltitle = {$6},
+	${7:location = {$8},}
+	${9:volume = {$10},}
+	${11:number = {$12},}
+	${13:pages = {$14},}
+}
+endsnippet
+
+snippet "@?book" "book entry" br
+@book{$1,
+	author = {$2},
+	title = {$3},
+	date = {$5},
+	${6:publisher = {$7},}
+	${8:location = {$9},}
+}
+endsnippet
+
+snippet "@?mvbook" "mvbook entry" br
+@mvbook{$1,
+	author = {$2},
+	title = {$3},
+	date = {$5},
+	${6:volumes = {$7},}
+	${8:publisher = {$9},}
+	${10:location = {$11},}
+}
+endsnippet
+
+
+#################
+#  Field Types  #
+#################
+
+# I'm not using regular expressions because snippets won't show in YCM
+
+snippet abstract
+abstract = {$1},
+endsnippet
+
+snippet addendum
+addendum = {$1},
+endsnippet
+
+snippet afterword
+afterword = {$1},
+endsnippet
+
+snippet annotation
+annotation = {$1},
+endsnippet
+
+snippet annotator
+annotator = {$1},
+endsnippet
+
+snippet author
+author = {$1},
+endsnippet
+
+snippet authortype
+authortype = {$1},
+endsnippet
+
+snippet bookauthor
+bookauthor = {$1},
+endsnippet
+
+snippet bookpagination
+bookpagination = {$1},
+endsnippet
+
+snippet booksubtitle
+booksubtitle = {$1},
+endsnippet
+
+snippet booktitle
+booktitle = {$1},
+endsnippet
+
+snippet booktitleaddon
+booktitleaddon = {$1},
+endsnippet
+
+snippet chapter
+chapter = {$1},
+endsnippet
+
+snippet commentator
+commentator = {$1},
+endsnippet
+
+snippet date
+date = {$1},
+endsnippet
+
+snippet doi
+doi = {$1},
+endsnippet
+
+snippet edition
+edition = {$1},
+endsnippet
+
+snippet editor
+editor = {$1},
+endsnippet
+
+snippet editora
+editora = {$1},
+endsnippet
+
+snippet editorb
+editorb = {$1},
+endsnippet
+
+snippet editorc
+editorc = {$1},
+endsnippet
+
+snippet editortype
+editortype = {$1},
+endsnippet
+
+snippet editoratype
+editoratype = {$1},
+endsnippet
+
+snippet editorbtype
+editorbtype = {$1},
+endsnippet
+
+snippet editorctype
+editorctype = {$1},
+endsnippet
+
+snippet eid
+eid = {$1},
+endsnippet
+
+snippet eprint
+eprint = {$1},
+endsnippet
+
+snippet eprintclass
+eprintclass = {$1},
+endsnippet
+
+snippet eprinttype
+eprinttype = {$1},
+endsnippet
+
+snippet eventdate
+eventdate = {$1},
+endsnippet
+
+snippet eventtitle
+eventtitle = {$1},
+endsnippet
+
+snippet eventtitleaddon
+eventtitleaddon = {$1},
+endsnippet
+
+snippet file
+file = {$1},
+endsnippet
+
+snippet foreword
+foreword = {$1},
+endsnippet
+
+snippet holder
+holder = {$1},
+endsnippet
+
+snippet howpublished
+howpublished = {$1},
+endsnippet
+
+snippet indextitle
+indextitle = {$1},
+endsnippet
+
+snippet institution
+institution = {$1},
+endsnippet
+
+snippet introduction
+introduction = {$1},
+endsnippet
+
+snippet isan
+isan = {$1},
+endsnippet
+
+snippet isbn
+isbn = {$1},
+endsnippet
+
+snippet ismn
+ismn = {$1},
+endsnippet
+
+snippet isrn
+isrn = {$1},
+endsnippet
+
+snippet issn
+issn = {$1},
+endsnippet
+
+snippet issue
+issue = {$1},
+endsnippet
+
+snippet issuesubtitle
+issuesubtitle = {$1},
+endsnippet
+
+snippet issuetitle
+issuetitle = {$1},
+endsnippet
+
+snippet iswc
+iswc = {$1},
+endsnippet
+
+snippet journalsubtitle
+journalsubtitle = {$1},
+endsnippet
+
+snippet label
+label = {$1},
+endsnippet
+
+snippet language
+language = {$1},
+endsnippet
+
+snippet library
+library = {$1},
+endsnippet
+
+snippet location
+location = {$1},
+endsnippet
+
+snippet mainsubtitle
+mainsubtitle = {$1},
+endsnippet
+
+snippet maintitle
+maintitle = {$1},
+endsnippet
+
+snippet maintitleaddon
+maintitleaddon = {$1},
+endsnippet
+
+snippet month
+month = {$1},
+endsnippet
+
+snippet nameaddon
+nameaddon = {$1},
+endsnippet
+
+snippet note
+note = {$1},
+endsnippet
+
+snippet number
+number = {$1},
+endsnippet
+
+snippet organization
+organization = {$1},
+endsnippet
+
+snippet origdate
+origdate = {$1},
+endsnippet
+
+snippet origlanguage
+origlanguage = {$1},
+endsnippet
+
+snippet origlocation
+origlocation = {$1},
+endsnippet
+
+snippet origpublisher
+origpublisher = {$1},
+endsnippet
+
+snippet origtitle
+origtitle = {$1},
+endsnippet
+
+snippet pages
+pages = {$1},
+endsnippet
+
+snippet pagetotal
+pagetotal = {$1},
+endsnippet
+
+snippet pagination
+pagination = {$1},
+endsnippet
+
+snippet part
+part = {$1},
+endsnippet
+
+snippet publisher
+publisher = {$1},
+endsnippet
+
+snippet pubstate
+pubstate = {$1},
+endsnippet
+
+snippet reprinttitle
+reprinttitle = {$1},
+endsnippet
+
+snippet series
+series = {$1},
+endsnippet
+
+snippet shortauthor
+shortauthor = {$1},
+endsnippet
+
+snippet shorteditor
+shorteditor = {$1},
+endsnippet
+
+snippet shorthand
+shorthand = {$1},
+endsnippet
+
+snippet shorthandintro
+shorthandintro = {$1},
+endsnippet
+
+snippet shortjournal
+shortjournal = {$1},
+endsnippet
+
+snippet shortseries
+shortseries = {$1},
+endsnippet
+
+snippet shorttitle
+shorttitle = {$1},
+endsnippet
+
+snippet subtitle
+subtitle = {$1},
+endsnippet
+
+snippet title
+title = {$1},
+endsnippet
+
+snippet titleaddon
+titleaddon = {$1},
+endsnippet
+
+snippet translator
+translator = {$1},
+endsnippet
+
+snippet type
+type = {$1},
+endsnippet
+
+snippet url
+url = {$1},
+endsnippet
+
+snippet urldate
+urldate = {$1},
+endsnippet
+
+snippet venue
+venue = {$1},
+endsnippet
+
+snippet version
+version = {$1},
+endsnippet
+
+snippet volume
+volume = {$1},
+endsnippet
+
+snippet volumes
+volumes = {$1},
+endsnippet
+
+snippet year
+year = {$1},
+endsnippet
+
+snippet crossref
+crossref = {$1},
+endsnippet
+
+snippet entryset
+entryset = {$1},
+endsnippet
+
+snippet execute
+execute = {$1},
+endsnippet
+
+snippet gender
+gender = {$1},
+endsnippet
+
+snippet langid
+langid = {$1},
+endsnippet
+
+snippet langidopts
+langidopts = {$1},
+endsnippet
+
+snippet ids
+ids = {$1},
+endsnippet
+
+snippet indexsorttitle
+indexsorttitle = {$1},
+endsnippet
+
+snippet keywords
+keywords = {$1},
+endsnippet
+
+snippet options
+options = {$1},
+endsnippet
+
+snippet presort
+presort = {$1},
+endsnippet
+
+snippet related
+related = {$1},
+endsnippet
+
+snippet relatedoptions
+relatedoptions = {$1},
+endsnippet
+
+snippet relatedtype
+relatedtype = {$1},
+endsnippet
+
+snippet relatedstring
+relatedstring = {$1},
+endsnippet
+
+snippet sortkey
+sortkey = {$1},
+endsnippet
+
+snippet sortname
+sortname = {$1},
+endsnippet
+
+snippet sortshorthand
+sortshorthand = {$1},
+endsnippet
+
+snippet sorttitle
+sorttitle = {$1},
+endsnippet
+
+snippet sortyear
+sortyear = {$1},
+endsnippet
+
+snippet xdata
+xdata = {$1},
+endsnippet
+
+snippet xref
+xref = {$1},
+endsnippet
+
+snippet namea
+namea = {$1},
+endsnippet
+
+snippet nameb
+nameb = {$1},
+endsnippet
+
+snippet namec
+namec = {$1},
+endsnippet
+
+snippet nameatype
+nameatype {$1},
+endsnippet
+
+snippet namebtype
+namebtype = {$1},
+endsnippet
+
+snippet namectype
+namectype = {$1},
+endsnippet
+
+snippet lista
+lista = {$1},
+endsnippet
+
+snippet listb
+listb = {$1},
+endsnippet
+
+snippet listc
+listc = {$1},
+endsnippet
+
+snippet listd
+listd = {$1},
+endsnippet
+
+snippet liste
+liste = {$1},
+endsnippet
+
+snippet listf
+listf = {$1},
+endsnippet
+
+snippet verba
+verba = {$1},
+endsnippet
+
+snippet verbb
+verbb = {$1},
+endsnippet
+
+snippet verbc
+verbc = {$1},
+endsnippet
+
+snippet address
+address = {$1},
+endsnippet
+
+snippet annote
+annote = {$1},
+endsnippet
+
+snippet archiveprefix
+archiveprefix = {$1},
+endsnippet
+
+snippet journal
+journal = {$1},
+endsnippet
+
+snippet key
+key = {$1},
+endsnippet
+
+snippet pdf
+pdf = {$1},
+endsnippet
+
+snippet primaryclass
+primaryclass = {$1},
+endsnippet
+
+snippet school
+school = {$1},
+endsnippet
+
