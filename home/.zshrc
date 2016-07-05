@@ -12,5 +12,5 @@ fi
 
 # Customize to your needs...
 
-export EDITOR=/usr/bin/vim
-export VISUAL=/usr/bin/vim
+export editor='vim'
+export VISUAL='vim'
