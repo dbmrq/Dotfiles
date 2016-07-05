@@ -39,7 +39,6 @@ call vundle#begin()
     Plugin 'kana/vim-textobj-entire'
     Plugin 'kana/vim-textobj-syntax'
     Plugin 'reedes/vim-pencil'
-    Plugin 'reedes/vim-lexical'
     Plugin 'reedes/vim-textobj-sentence'
     " Plugin 'tpope/vim-abolish'
     " Plugin 'reedes/vim-wordy'
@@ -164,12 +163,30 @@ nnoremap <leader>sv :source $MYVIMRC<cr>
 " select everything
 nnoremap <leader>a ggVG
 
-" set spelllang
-nnoremap <silent> <leader>sen :setlocal spell! spelllang=en<cr>
-nnoremap <silent> <leader>spt :setlocal spell! spelllang=pt<cr>
 
-" faster spelling
+" spelling
+
 nnoremap zz 1z=
+nnoremap <leader>tsp :set spell!<cr>
+nnoremap <expr> <leader>sen ToggleSpellEN()
+nnoremap <expr> <leader>spt ToggleSpellPT()
+
+function! ToggleSpellEN()
+    if &l:spelllang =~ "en"
+        return ":setlocal spell spelllang-=en\<cr>"
+    else
+        return ":setlocal spell spelllang+=en\<cr>"
+    endif
+endfunction
+
+function! ToggleSpellPT()
+    if &l:spelllang =~ "pt"
+        return ":setlocal spell spelllang-=pt\<cr>"
+    else
+        return ":setlocal spell spelllang+=pt\<cr>"
+    endif
+endfunction
+
 
 " switch windows
 nnoremap <leader>w <c-w><c-w>
@@ -337,16 +354,12 @@ inoremap <silent><expr> <CR> "<C-R>=SnippetOrCR()<CR>"
 
 " Reedes
 
-let g:lexical#spelllang = ['en','pt',]
-
 augroup reedes
   autocmd!
-  autocmd FileType markdown,mkd,text,tex call lexical#init()
-                                     \ | call pencil#init()
+  autocmd FileType markdown,mkd,text,tex call pencil#init()
                                      \ | call textobj#sentence#init()
 augroup END
 
-let g:lexical#spell_key = '<leader>ss'
 let g:pencil#textwidth = &textwidth
 
 
@@ -444,7 +457,7 @@ let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
 " Plugin key-mappings.
 inoremap <expr><C-g>     neocomplete#undo_completion()
-inoremap <expr><C-l>     neocomplete#complete_common_string()
+" inoremap <expr><C-l>     neocomplete#complete_common_string()
 
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
