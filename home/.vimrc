@@ -168,22 +168,14 @@ nnoremap <leader>a ggVG
 
 nnoremap zz 1z=
 nnoremap <leader>tsp :set spell!<cr>
-nnoremap <expr> <leader>sen ToggleSpellEN()
-nnoremap <expr> <leader>spt ToggleSpellPT()
+nnoremap <expr> <leader>sen ToggleSpellLang("en")
+nnoremap <expr> <leader>spt ToggleSpellLang("pt")
 
-function! ToggleSpellEN()
-    if &l:spelllang =~ "en"
-        return ":setlocal spell spelllang-=en\<cr>"
+function! ToggleSpellLang(lang)
+    if &l:spelllang =~ a:lang
+        return ":setlocal spell spelllang-=" . a:lang . "\<cr>"
     else
-        return ":setlocal spell spelllang+=en\<cr>"
-    endif
-endfunction
-
-function! ToggleSpellPT()
-    if &l:spelllang =~ "pt"
-        return ":setlocal spell spelllang-=pt\<cr>"
-    else
-        return ":setlocal spell spelllang+=pt\<cr>"
+        return ":setlocal spell spelllang+=" . a:lang . "\<cr>"
     endif
 endfunction
 
@@ -195,15 +187,15 @@ nnoremap <leader>W <c-w><c-w>
 " move lines up and down
 " (needs unimpaired.vim)
 let s:uname = system("uname -s")
-if s:uname =~ "Darwin"
+if !has("gui_running") && s:uname =~ "Darwin"
     nmap k [e
     nmap j ]e
     vmap k [egv
     vmap j ]egv
 else
     nmap <m-k> [e
-    nmap <m-j> ]e
     vmap <m-k> [egv
+    nmap <m-j> ]e
     vmap <m-j> ]egv
 endif
 
@@ -339,7 +331,7 @@ endfunction
 " UltiSnips
 
 " Use <CR> to accept snippets
-let g:UltiSnipsExpandTrigger = "<c-j>"
+" let g:UltiSnipsExpandTrigger = "<c-j>"
 let g:ulti_expand_res = 0
 function! SnippetOrCR()
     let snippet = UltiSnips#ExpandSnippet()
@@ -360,6 +352,7 @@ augroup reedes
                                      \ | call textobj#sentence#init()
 augroup END
 
+let g:pencil#conceallevel = 0
 let g:pencil#textwidth = &textwidth
 
 
