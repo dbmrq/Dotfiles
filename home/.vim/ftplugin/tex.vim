@@ -5,7 +5,7 @@ source ~/.vim/ftplugin/plaintex.vim
 " set comments+=b:\\item
 
 set spell
-set spelllang=en,pt
+set spelllang=pt
 
 nnoremap <localleader>doc /begin{document}<cr>v/end{document}<cr>
 
