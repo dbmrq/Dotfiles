@@ -6,7 +6,7 @@ snippet "\\?renewc(ommand)?" "\newcommand" br
 \newcommand{${1:cmd}}[${2:args}]{${3:def}}
 endsnippet
 
-snippet "\\?em(p)?(h)?" "\emph{}" r
+snippet " \\?em(p)?(h)?" "\emph{}" r
 \emph{$1}$0
 endsnippet
 
@@ -15,19 +15,19 @@ snippet "\\?(text)?sc" "\textsc" r
 endsnippet
 
 snippet "\\?cite" "\cite" r
-\cite${1:[${2:p.~$3}]}{$4}$0
+\cite${1:[$2]}{$3}$0
 endsnippet
 
 snippet "\\?textc(ite)?" "\textcite" r
-\textcite${1:[${2:p.~$3}]}{$4}$0
+\textcite${1:[$2]}{$3}$0
 endsnippet
 
 snippet "\\?textc(ite)?\*" "\textcite*" r
-\textcite*${1:[${2:p.~$3}]}{$4}$0
+\textcite*${1:[$2]}{$3}$0
 endsnippet
 
 snippet "\\?apud" "\apud" r
-\apud${1:[${2}]}${3:[${4:p.~$5}]}${6:{$7}}${9:[${10:p.~$11}]}{$12}$0
+\apud${1:[${2}]}${3:[$4}]}${5:{$6}}${7:[$8]}{$9}$0
 endsnippet
 
 snippet document "document environment" b
