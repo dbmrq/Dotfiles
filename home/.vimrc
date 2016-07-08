@@ -155,10 +155,20 @@ nnoremap <leader>b `.
 " insert at last position
 nnoremap <leader>i `^i
 
+
 " edit and source vimrc
+
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
-nnoremap <leader>sv :source $MYVIMRC<cr>
-    \ :let &ft=&ft<cr>:set shortmess+=c<cr>
+nnoremap <expr> <leader>sv SourceVimRC()
+
+function! SourceVimRC()
+    let command = ":so $MYVIMRC\<cr>:let &ft=&ft\<cr>:set shortmess+=c\<cr>"
+    if has('gui_running') && filereadable(expand('~/.gvimrc'))
+        let command = command . ":so ~/.gvimrc\<cr>"
+    endif
+    return command
+endfunction
+
 
 " select everything
 nnoremap <leader>a ggVG
@@ -294,6 +304,26 @@ nnoremap <leader>tp :TogglePencil<cr>
 " PLUGIN SETTINGS
 
 
+" vim-surround
+
+function! ChangeDetectedSurrounding()
+    let chars = ['(', '[', '{', '<', '"', '`', "'",
+               \ '.', ',', ';', ':', '~', '!', '?', '/', '\', '|']
+    let column = 1
+    while col('.')-column >= 0
+        echom getline('.')[col('.')-column]
+        let char = getline('.')[col('.')-column]
+        if index(chars, char) >= 0
+            echom "cs" . char
+            return "cs" . char
+        endif
+        let column += 1
+    endwhile
+endfunction
+
+nmap <expr> cd ChangeDetectedSurrounding()
+
+
 " NERD Commenter
 
 let g:NERDSpaceDelims = 1
@@ -331,7 +361,7 @@ endfunction
 " UltiSnips
 
 " Use <CR> to accept snippets
-" let g:UltiSnipsExpandTrigger = "<c-j>"
+let g:UltiSnipsExpandTrigger = "<c-j>"
 let g:ulti_expand_res = 0
 function! SnippetOrCR()
     let snippet = UltiSnips#ExpandSnippet()
@@ -455,7 +485,7 @@ inoremap <expr><C-g>     neocomplete#undo_completion()
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+" inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
 inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 " Close popup by <Space>.
 "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
