@@ -6,7 +6,7 @@ snippet "\\?renewc(ommand)?" "\newcommand" br
 \newcommand{${1:cmd}}[${2:args}]{${3:def}}
 endsnippet
 
-snippet " \\?em(p)?(h)?" "\emph{}" r
+snippet "\\?emp(h)?" "\emph{}" r
 \emph{$1}$0
 endsnippet
 
@@ -28,6 +28,14 @@ endsnippet
 
 snippet "\\?apud" "\apud" r
 \apud${1:[${2}]}${3:[$4}]}${5:{$6}}${7:[$8]}{$9}$0
+endsnippet
+
+snippet `` "quote"
+\`\`$1''$0
+endsnippet
+
+snippet ... "\ldots" iA
+\ldots
 endsnippet
 
 snippet document "document environment" b

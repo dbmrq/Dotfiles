@@ -21,6 +21,9 @@ inoremap ... \ldots
 nnoremap <leader>em viw<esc>a}<esc>bi\emph{<esc>
 vnoremap <leader>em <esc>`>a}<esc>`<i\emph{<esc>%
 
+vnoremap <leader>` <esc>`>a''<esc>`<i``<esc>%
+nnoremap <leader>` viw<esc>a''<esc>bi``<esc>
+
 function! InstallPackages()
     let winview = winsaveview()
     call inputsave()
