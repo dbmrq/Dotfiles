@@ -1,4 +1,3 @@
-
 function! SourceVimRC()
     let command = ":so $MYVIMRC\<cr>:let &ft=&ft\<cr>:set shortmess+=c\<cr>"
     if has('gui_running') && filereadable(expand('~/.gvimrc'))
@@ -69,49 +68,18 @@ function! ToggleSpellLang(lang)
     endif
 endfunction
 
+function! LocalSpell(origcmd, newcmd)
+    if &l:spellfile == ""
+        return "normal! " . a:origcmd
+    else
+        execute "normal! " . a:newcmd
+    endif
+endfunction
 
-" Loop through spellling mistakes
-
-" let s:spell_position = []
-" let s:spell_count = 0
-" let s:spell_word = ""
-
-" function! LoopSpell()
-
-"     if s:spell_position != getpos('.') ||
-"             \ (s:spell_count > 0 && s:spell_word !~ expand("<cword>"))
-"         let s:spell_count = 0
-"         let s:spell_position = getpos('.')
-"     endif
-
-"     if getline('.')[col('.')-1] =~# '[.,;-=\(\)\{\}\[\] ]'
-"         return
-"     endif
-
-"     if s:spell_count > 0
-"         silent execute "normal! u"
-"     endif
-
-"     let s:current_word = expand("<cword>")
-"     if len(s:current_word) <= 0
-"         return
-"     endif
-
-"     let s:spell_suggestions = spellsuggest(expand(s:current_word))
-"     if len(s:spell_suggestions) <= 0
-"         return
-"     endif
-
-"     if s:spell_count >= len(s:spell_suggestions)
-"         let s:spell_word = s:current_word
-"         let s:spell_count = 0
-"     else
-"         let s:spell_word = s:spell_suggestions[s:spell_count]
-"         let s:spell_count += 1
-"     endif
-"     silent execute "normal! ciw" . s:spell_word
-"     silent execute "normal! b"
-"     let s:spell_position = getpos('.')
-
-" endfunction
+function! GlobalSpell(cmd)
+    let b:spellfile = &l:spellfile
+    setlocal spellfile=
+    execute "normal! " . a:cmd
+    let &l:spellfile = b:spellfile
+endfunction
 

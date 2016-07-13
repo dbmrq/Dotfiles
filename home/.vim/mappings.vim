@@ -7,14 +7,6 @@ inoremap jk <esc>
 inoremap kj <esc>
 inoremap JK <esc>
 inoremap KJ <esc>
-" vnoremap jk <esc>
-" vnoremap kj <esc>
-" vnoremap JK <esc>
-" vnoremap KJ <esc>
-" cnoremap jk <C-c>
-" cnoremap kj <C-c>
-" cnoremap JK <C-c>
-" cnoremap KJ <C-c>
 
 " format paragraphs
 nnoremap <leader>gq vipgq
@@ -23,8 +15,8 @@ nnoremap <leader>gq vipgq
 noremap G G$
 
 " insert single character
-" nnoremap <leader>s i_<Esc>r
-" nnoremap <leader>S a_<Esc>r
+nnoremap <leader>s i_<Esc>r
+nnoremap <leader>S a_<Esc>r
 
 " go to last change
 nnoremap <leader>b `.
@@ -42,21 +34,6 @@ nnoremap <leader>a ggVG
 nnoremap <leader>w <c-w><c-w>
 nnoremap <leader>W <c-w><c-w>
 
-" move lines up and down
-" (needs unimpaired.vim)
-let s:uname = system("uname -s")
-if !has("gui_running") && s:uname =~ "Darwin"
-    nmap k [e
-    nmap j ]e
-    vmap k [egv
-    vmap j ]egv
-else
-    nmap <m-k> [e
-    vmap <m-k> [egv
-    nmap <m-j> ]e
-    vmap <m-j> ]egv
-endif
-
 " move faster
 nnoremap <leader>j 15j
 nnoremap <leader>k 15k
@@ -72,6 +49,7 @@ vnoremap <leader>l 10l
 " move in insert mode
 inoremap <c-l> <right>
 inoremap <c-h> <left>
+inoremap <c-o> <esc>o
 
 " copy everything, unwrapping it when necessary
 nnoremap <expr> Y CopyAll()
@@ -93,14 +71,20 @@ nnoremap <leader>bg :call ToggleBG()<cr>
 command! ToggleBG call ToggleBG()
 
 " spelling
-nnoremap zz 1z=
 nnoremap <leader>tsp :set spell!<cr>
 nnoremap <expr> <leader>sen ToggleSpellLang("en")
 nnoremap <expr> <leader>spt ToggleSpellLang("pt")
-nnoremap <c-m> :call LoopSpell()<CR>
 
-" plugins
-nnoremap <leader>ut :UndotreeToggle<cr>
-nnoremap <leader>gy :Goyo<cr>
-nnoremap <leader>tp :TogglePencil<cr>
+" this uses zg and zw for the global spellfiles
+" and zG and zW for file specific spellfiles.
+let &l:spellfile = expand('%:p:h') . '/.' .
+    \ substitute(expand('%:t'), '\(.*\)\..*', '\1', '') . '.utf-8.add'
+nnoremap zG :call LocalSpell("zG", "zg")<cr>
+nnoremap zW :call LocalSpell("zW", "zw")<cr>
+nnoremap zuG :call LocalSpell("zuG", "zug")<cr>
+nnoremap zuW :call LocalSpell("zuW", "zuw")<cr>
+nnoremap zg :call GlobalSpell("zg")<cr>
+nnoremap zw :call GlobalSpell("zw")<cr>
+nnoremap zug :call GlobalSpell("zug")<cr>
+nnoremap zuw :call GlobalSpell("zuw")<cr>
 

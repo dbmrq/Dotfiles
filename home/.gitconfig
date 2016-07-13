@@ -1,9 +1,11 @@
 [user]
 	name = Daniel M.
 	email = danielbmarques@gmail.com
+
 [core]
 	safecrlf = true
 	autocrlf = input
+
 [alias]
 	co = checkout
 	ci = commit
@@ -12,6 +14,24 @@
 	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
 	type = cat-file -t
 	dump = cat-file -p
+
+    last = log -1 HEAD --format=format:"%Cred%H"
+
+    branches = branch -a
+    tags = tag
+    stashes = stash list
+    remotes = remote -v
+
+    unstage = reset -q HEAD --
+    discard = checkout --
+    uncommit = reset --mixed HEAD~
+    amend = commit --amend
+
+    nevermind = !git reset --hard HEAD && git clean -d -f
+
+[github]
+    user = danielbmarques
+
 [filter "lfs"]
 	clean = git-lfs clean %f
 	smudge = git-lfs smudge %f

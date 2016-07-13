@@ -26,6 +26,7 @@ call vundle#begin()
     Plugin 'itchyny/lightline.vim'
     Plugin 'henrik/vim-indexed-search'
     Plugin 'haya14busa/incsearch.vim'
+    Plugin 'tweekmonster/spellrotate.vim'
     Plugin 'kopischke/vim-stay'
     Plugin 'tommcdo/vim-exchange'
     Plugin 'nelstrom/vim-visual-star-search'

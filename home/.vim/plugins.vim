@@ -1,3 +1,46 @@
+" Mappings
+
+nnoremap <leader>ut :UndotreeToggle<cr>
+nnoremap <leader>gy :Goyo<cr>
+nnoremap <leader>tp :TogglePencil<cr>
+
+
+"unimpaired.vim
+
+" move lines up and down
+let s:uname = system("uname -s")
+if !has("gui_running") && s:uname =~ "Darwin"
+    nmap k [e
+    nmap j ]e
+    vmap k [egv
+    vmap j ]egv
+else
+    nmap <m-k> [e
+    vmap <m-k> [egv
+    nmap <m-j> ]e
+    vmap <m-j> ]egv
+endif
+
+
+" vim-textobj-user
+
+call textobj#user#plugin('latex', {
+\   'code': {
+\     'pattern': ['\\.*{', '}'],
+\     'select-a': 'a\',
+\     'select-i': 'i\',
+\   },
+\ })
+
+
+" Spellrotate
+
+nmap <silent> =s <Plug>(SpellRotateForward)
+nmap <silent> -s <Plug>(SpellRotateBackward)
+vmap <silent> =s <Plug>(SpellRotateForwardV)
+vmap <silent> -s <Plug>(SpellRotateBackwardV)
+
+
 " MRU
 
 " run :MRU when vim is opened without any file
@@ -70,6 +113,7 @@ nmap <expr> cd ChangeDetectedSurrounding()
 
 let g:NERDSpaceDelims = 1
 let g:NERDDefaultAlign = 'left'
+
 
 " lightline.vim
 
@@ -183,13 +227,6 @@ call expand_region#custom_text_objects({
     \ 'i,': 1, 'i;': 1, 'A,': 1, 'A;': 1, 'as': 1, 'is': 1,
     \ 'ii': 1, 'ai': 1,
     \ })
-
-
-" incsearch.vim
-
-map /  <Plug>(incsearch-forward)
-map ?  <Plug>(incsearch-backward)
-map g/ <Plug>(incsearch-stay)
 
 
 " yankstack

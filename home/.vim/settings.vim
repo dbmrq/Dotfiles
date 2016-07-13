@@ -47,6 +47,7 @@ au BufRead,BufNewFile *.lbx setfiletype plaintex
 au BufRead,BufNewFile *.cls setfiletype plaintex
 au BufRead,BufNewFile *.sty setfiletype plaintex
 
+
 colorscheme solarized
 let g:lightline = {'colorscheme': 'solarized',}
 
