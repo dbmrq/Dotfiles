@@ -26,8 +26,12 @@ snippet "\\?textc(ite)?\*" "\textcite*" r
 \textcite*${1:[$2]}{$3}$0
 endsnippet
 
+snippet "\\?citet(itle)?" "\citetitle" r
+\citetitle${1:[$2]}{$3}$0
+endsnippet
+
 snippet "\\?apud" "\apud" r
-\apud${1:[${2}]}${3:[$4}]}${5:{$6}}${7:[$8]}{$9}$0
+\apud${1:[${2}]}${3:[${4}]}${5:{$6}}${7:[$8]}{$9}$0
 endsnippet
 
 snippet `` "quote"
