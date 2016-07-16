@@ -1,53 +1,53 @@
-set nocompatible
-filetype off
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall | source $MYVIMRC
+endif
 
-set rtp+=~/.vim/bundle/Vundle.vim
+call plug#begin('~/.vim/bundle')
 
-call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-    Plugin 'tpope/vim-sensible'
-    Plugin 'tpope/vim-unimpaired'
-    Plugin 'tpope/vim-surround'
-    Plugin 'tpope/vim-repeat'
-    Plugin 'Shougo/neocomplete.vim'
-    Plugin 'lervag/vimtex'
-    Plugin 'SirVer/ultisnips'
-    Plugin 'honza/vim-snippets'
-    Plugin 'Raimondi/delimitMate'
-    Plugin 'godlygeek/tabular'
-    Plugin 'ntpeters/vim-better-whitespace'
-    Plugin 'junegunn/goyo.vim'
-    Plugin 'yegappan/mru'
-    Plugin 'scrooloose/nerdcommenter'
-    Plugin 'terryma/vim-expand-region'
-    Plugin 'mbbill/undotree'
-    Plugin 'justinmk/vim-sneak'
-    Plugin 'maxbrunsfeld/vim-yankstack'
-    Plugin 'itchyny/lightline.vim'
-    Plugin 'henrik/vim-indexed-search'
-    Plugin 'haya14busa/incsearch.vim'
-    Plugin 'tweekmonster/spellrotate.vim'
-    Plugin 'kopischke/vim-stay'
-    Plugin 'tommcdo/vim-exchange'
-    Plugin 'nelstrom/vim-visual-star-search'
-    Plugin 'Konfekt/FastFold'
-    Plugin 'vim-pandoc/vim-pandoc'
-    Plugin 'vim-pandoc/vim-pandoc-syntax'
-    Plugin 'vim-pandoc/vim-pandoc-after'
-    Plugin 'wellle/targets.vim'
-    Plugin 'kana/vim-textobj-user'
-    Plugin 'kana/vim-textobj-line'
-    Plugin 'kana/vim-textobj-indent'
-    Plugin 'kana/vim-textobj-entire'
-    Plugin 'kana/vim-textobj-syntax'
-    Plugin 'reedes/vim-pencil'
-    Plugin 'reedes/vim-textobj-sentence'
-    " Plugin 'tpope/vim-abolish'
-    " Plugin 'reedes/vim-wordy'
-    Plugin 'https://github.com/altercation/vim-colors-solarized.git'
-call vundle#end()
+    Plug 'tpope/vim-sensible'
+    Plug 'tpope/vim-unimpaired'
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-commentary'
+    Plug 'tpope/vim-repeat'
+    Plug 'junegunn/goyo.vim'
+    Plug 'junegunn/vim-easy-align'
+    Plug 'tommcdo/vim-exchange'
+    Plug 'AndrewRadev/splitjoin.vim'
+    Plug 'Shougo/neocomplete.vim'
+    Plug 'lervag/vimtex'
+    Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+    Plug 'Raimondi/delimitMate'
+    Plug 'ntpeters/vim-better-whitespace'
+    Plug 'yegappan/mru'
+    Plug 'terryma/vim-expand-region'
+    Plug 'mbbill/undotree'
+    Plug 'justinmk/vim-sneak'
+    Plug 'maxbrunsfeld/vim-yankstack'
+    Plug 'itchyny/lightline.vim'
+    Plug 'henrik/vim-indexed-search'
+    Plug 'haya14busa/incsearch.vim'
+    Plug 'tweekmonster/spellrotate.vim'
+    Plug 'nelstrom/vim-visual-star-search'
+    Plug 'Konfekt/FastFold'
+    Plug 'vim-pandoc/vim-pandoc'
+    Plug 'vim-pandoc/vim-pandoc-syntax'
+    Plug 'vim-pandoc/vim-pandoc-after'
+    Plug 'wellle/targets.vim'
+    Plug 'kana/vim-textobj-user'
+    Plug 'kana/vim-textobj-line'
+    Plug 'kana/vim-textobj-indent'
+    Plug 'kana/vim-textobj-entire'
+    Plug 'kana/vim-textobj-syntax'
+    Plug 'reedes/vim-pencil'
+    Plug 'reedes/vim-textobj-sentence'
+    Plug 'altercation/vim-colors-solarized'
 
-filetype plugin indent on
+call plug#end()
+
+command! Plug PlugUpdate | PlugUpgrade | PlugClean! | PlugDiff
+
 
 source ~/.vim/settings.vim
 source ~/.vim/functions.vim

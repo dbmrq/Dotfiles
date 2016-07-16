@@ -68,18 +68,18 @@ function! ToggleSpellLang(lang)
     endif
 endfunction
 
-function! LocalSpell(origcmd, newcmd)
-    if &l:spellfile == ""
-        return "normal! " . a:origcmd
-    else
-        execute "normal! " . a:newcmd
-    endif
-endfunction
+" function! LocalSpell(cmd)
+"     if &l:spellfile == ""
+"         execute "normal! " . a:cmd
+"     else
+"         execute "normal! " . tolower(a:cmd)
+"     endif
+" endfunction
 
-function! GlobalSpell(cmd)
-    let b:spellfile = &l:spellfile
-    setlocal spellfile=
-    execute "normal! " . a:cmd
-    let &l:spellfile = b:spellfile
-endfunction
+" function! GlobalSpell(cmd)
+"     let b:spellfile = &l:spellfile
+"     setlocal spellfile=
+"     execute "normal! " . a:cmd
+"     let &l:spellfile = b:spellfile
+" endfunction
 

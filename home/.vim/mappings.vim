@@ -77,14 +77,22 @@ nnoremap <expr> <leader>spt ToggleSpellLang("pt")
 
 " this uses zg and zw for the global spellfiles
 " and zG and zW for file specific spellfiles.
-let &l:spellfile = expand('%:p:h') . '/.' .
-    \ substitute(expand('%:t'), '\(.*\)\..*', '\1', '') . '.utf-8.add'
-nnoremap zG :call LocalSpell("zG", "zg")<cr>
-nnoremap zW :call LocalSpell("zW", "zw")<cr>
-nnoremap zuG :call LocalSpell("zuG", "zug")<cr>
-nnoremap zuW :call LocalSpell("zuW", "zuw")<cr>
-nnoremap zg :call GlobalSpell("zg")<cr>
-nnoremap zw :call GlobalSpell("zw")<cr>
-nnoremap zug :call GlobalSpell("zug")<cr>
-nnoremap zuw :call GlobalSpell("zuw")<cr>
+" :au BufNewFile,BufRead * let &l:spellfile = expand('%:p:h') . '/.' .
+"     \ substitute(expand('%:t'), '\(.*\)\..*', '\1', '') . '.utf-8.add'
+" nnoremap zG :call LocalSpell("zG")<cr>
+" nnoremap zW :call LocalSpell("zW")<cr>
+" nnoremap zuG :call LocalSpell("zuG")<cr>
+" nnoremap zuW :call LocalSpell("zuW")<cr>
+" nnoremap zg :call GlobalSpell("zg")<cr>
+" nnoremap zw :call GlobalSpell("zw")<cr>
+" nnoremap zug :call GlobalSpell("zug")<cr>
+" nnoremap zuw :call GlobalSpell("zuw")<cr>
+" vnoremap zG :call LocalSpell("gvzG")<cr>
+" vnoremap zW :call LocalSpell("gvzW")<cr>
+" vnoremap zuG :call LocalSpell("gvzuG")<cr>
+" vnoremap zuW :call LocalSpell("gvzuW")<cr>
+" vnoremap zg :call GlobalSpell("gvzg")<cr>
+" vnoremap zw :call GlobalSpell("gvzw")<cr>
+" vnoremap zug :call GlobalSpell("gvzug")<cr>
+" vnoremap zuw :call GlobalSpell("gvzuw")<cr>
 

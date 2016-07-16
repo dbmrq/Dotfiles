@@ -35,6 +35,8 @@ set title
 set visualbell
 set noerrorbells
 
+set foldmethod=marker
+
 set undodir=~/.vim/undo/
 set undofile
 

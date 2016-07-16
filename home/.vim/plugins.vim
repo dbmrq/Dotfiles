@@ -5,6 +5,19 @@ nnoremap <leader>gy :Goyo<cr>
 nnoremap <leader>tp :TogglePencil<cr>
 
 
+
+" delimitMate
+
+let delimitMate_expand_space = 1
+let delimitMate_expand_cr = 1
+
+
+" vim-easy-align
+
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
+
+
 "unimpaired.vim
 
 " move lines up and down
@@ -107,12 +120,6 @@ function! ChangeDetectedSurrounding()
 endfunction
 
 nmap <expr> cd ChangeDetectedSurrounding()
-
-
-" NERD Commenter
-
-let g:NERDSpaceDelims = 1
-let g:NERDDefaultAlign = 'left'
 
 
 " lightline.vim
@@ -218,6 +225,8 @@ omap T <Plug>Sneak_T
 
 " vim-expand-region
 
+vmap v <Plug>(expand_region_expand)
+vmap <C-v> <Plug>(expand_region_shrink)
 call expand_region#custom_text_objects({
     \ 'i(': 1, 'i)': 1, 'ib': 1, 'i{': 1, 'i}': 1, 'iB': 1,
              \ 'i[': 1, 'i]': 1, 'i<': 1, 'i>': 1, 'it': 1,
@@ -265,7 +274,7 @@ inoremap <expr><C-g>     neocomplete#undo_completion()
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
 " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+" inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 " Close popup by <Space>.
 "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
 
@@ -278,6 +287,8 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 
 " neocomplete/Vimtex compatibility
+
+let g:neocomplete#enable_refresh_always = 1
 
 if !exists('g:neocomplete#sources#omni#input_patterns')
     let g:neocomplete#sources#omni#input_patterns = {}
