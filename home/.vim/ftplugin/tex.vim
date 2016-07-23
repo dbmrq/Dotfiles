@@ -7,22 +7,26 @@ source ~/.vim/ftplugin/plaintex.vim
 set spell
 set spelllang=pt
 
+" TODO: Turn this into a text object
 nnoremap <localleader>doc /begin{document}<cr>v/end{document}<cr>
 
 " \ldots
-if has("gui_running")
-    inoremap <m-;> \ldots
-else
-    inoremap ; \ldots
-endif
-iabbrev ... <bs>\ldots
-inoremap ... \ldots
+" if has("gui_running")
+"     inoremap <m-;> \ldots
+" else
+"     inoremap ; \ldots
+" endif
+" iabbrev ... <bs>\ldots
+" inoremap ... \ldots
 
 nnoremap <leader>em viw<esc>a}<esc>bi\emph{<esc>
 vnoremap <leader>em <esc>`>a}<esc>`<i\emph{<esc>%
 
 vnoremap <leader>` <esc>`>a''<esc>`<i``<esc>%
 nnoremap <leader>` viw<esc>a''<esc>bi``<esc>
+
+command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
+
 
 function! InstallPackages()
     let winview = winsaveview()
@@ -37,4 +41,23 @@ function! InstallPackages()
 endfunction
 
 command! InstallPackages call InstallPackages()
+
+
+" vim-textobj-user
+
+call textobj#user#plugin('latexmacro', {
+\   'code': {
+\     'pattern': ['\\.*{', '}'],
+\     'select-a': 'a\',
+\     'select-i': 'i\',
+\   },
+\ })
+
+" call textobj#user#plugin('latexquote', {
+" \   'code': {
+" \     'pattern': ["``", "''"],
+" \     'select-a': "a'",
+" \     'select-i': "i'",
+" \   },
+" \ })
 

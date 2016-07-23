@@ -35,17 +35,6 @@ else
 endif
 
 
-" vim-textobj-user
-
-call textobj#user#plugin('latex', {
-\   'code': {
-\     'pattern': ['\\.*{', '}'],
-\     'select-a': 'a\',
-\     'select-i': 'i\',
-\   },
-\ })
-
-
 " Spellrotate
 
 nmap <silent> =s <Plug>(SpellRotateForward)
@@ -154,7 +143,7 @@ endfunction
 " UltiSnips
 
 " Use <CR> to accept snippets
-let g:UltiSnipsExpandTrigger = "<c-j>"
+let g:UltiSnipsExpandTrigger = "<nop>"
 let g:ulti_expand_res = 0
 function! SnippetOrCR()
     let snippet = UltiSnips#ExpandSnippet()
@@ -234,7 +223,7 @@ call expand_region#custom_text_objects({
              \ 'A[': 1, 'A]': 1, 'A<': 1, 'A>': 1, 'At': 1,
     \ "i'": 1, 'i"': 1, 'i`': 1, "A'": 1, 'A"': 1, 'A`': 1,
     \ 'i,': 1, 'i;': 1, 'A,': 1, 'A;': 1, 'as': 1, 'is': 1,
-    \ 'ii': 1, 'ai': 1,
+    \ 'ii': 1, 'ai': 1, 'i\': 1, 'a\': 1,
     \ })
 
 
@@ -288,7 +277,7 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 " neocomplete/Vimtex compatibility
 
-let g:neocomplete#enable_refresh_always = 1
+" let g:neocomplete#enable_refresh_always = 1
 
 if !exists('g:neocomplete#sources#omni#input_patterns')
     let g:neocomplete#sources#omni#input_patterns = {}
