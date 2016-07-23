@@ -18,7 +18,11 @@ set textwidth=78
 if executable("par")
     set formatprg=par\ -w78
 endif
-let &colorcolumn="79,".join(range(101,999),",")
+if &l:formatoptions =~ "t"
+    let &colorcolumn="79,".join(range(101,999),",")
+else
+    let &colorcolumn="79"
+endif
 
 set backupcopy=yes
 set clipboard=unnamed
