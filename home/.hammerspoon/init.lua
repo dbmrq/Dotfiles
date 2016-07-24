@@ -1,26 +1,3 @@
----------------------
---  Reload config  --
----------------------
-
-function reloadConfig(files)
-    doReload = false
-    for _,file in pairs(files) do
-        if file:sub(-4) == ".lua" then
-            doReload = true
-        end
-    end
-    if doReload then
-        hs.reload()
-    end
-end
-
-hs.pathwatcher.new(os.getenv("HOME") ..
-    "/.hammerspoon/", reloadConfig):start()
-hs.pathwatcher.new(os.getenv("HOME") ..
-    ".homesick/repos/dotfiles/home/.hammerspoon/", reloadConfig):start()
-hs.alert.show("Config loaded")
-
-
 --------------------------
 --  Window positioning  --
 --------------------------
@@ -64,22 +41,24 @@ local function compensateMargins()
     local cell = grid.get(win)
     local frame = win:frame()
     if cell.h < grid.GRIDHEIGHT and cell.h % 1 == 0 then
-        if cell.y == 0 then
-            frame.h = frame.h + grid.MARGINX / 2
-            win:setFrame(frame)
-        else
+        if cell.y ~= 0 then
             frame.h = frame.h + grid.MARGINY / 2
             frame.y = frame.y - grid.MARGINY / 2
             win:setFrame(frame)
         end
+        if cell.y + cell.h ~= grid.GRIDHEIGHT then
+            frame.h = frame.h + grid.MARGINX / 2
+            win:setFrame(frame)
+        end
     end
     if cell.w < grid.GRIDWIDTH and cell.w % 1 == 0 then
-        if cell.x == 0 then
-            frame.w = frame.w + grid.MARGINY / 2
-            win:setFrame(frame)
-        else
+        if cell.x ~= 0 then
             frame.w = frame.w + grid.MARGINY / 2
             frame.x = frame.x - grid.MARGINY / 2
+            win:setFrame(frame)
+        end
+        if cell.x + cell.w ~= grid.GRIDWIDTH then
+            frame.w = frame.w + grid.MARGINY / 2
             win:setFrame(frame)
         end
     end
@@ -110,13 +89,8 @@ hotkey.bind(super, 'J', function()
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
-    if cell.y < grid.GRIDHEIGHT - cell.h and cell.h % 1 == 0 then
+    if cell.y < grid.GRIDHEIGHT - cell.h then
         snapToBottom(win, cell, screen)
-        compensateMargins()
-        return
-    elseif cell.h % 1 ~= 0 then
-        snapToBottom(win, cell, screen)
-        grid.snap(win)
         compensateMargins()
         return
     end
@@ -139,13 +113,8 @@ hotkey.bind(super, 'K', function()
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
-    if cell.y > 0 and cell.h % 1 == 0 then
+    if cell.y > 0 then
         snapToTop(win, cell, screen)
-        compensateMargins()
-        return
-    elseif cell.h % 1 ~= 0 then
-        snapToTop(win, cell, screen)
-        grid.snap(win)
         compensateMargins()
         return
     end
@@ -168,13 +137,8 @@ hotkey.bind(super, 'H', function()
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
-    if cell.x > 0 and cell.w % 1 == 0 then
+    if cell.x > 0 then
         snapToLeft(win, cell, screen)
-        compensateMargins()
-        return
-    elseif cell.w % 1 ~= 0 then
-        snapToLeft(win, cell, screen)
-        grid.snap(win)
         compensateMargins()
         return
     end
@@ -197,13 +161,8 @@ hotkey.bind(super, 'L', function()
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
-    if cell.x < grid.GRIDWIDTH - cell.w and cell.w % 1 == 0 then
+    if cell.x < grid.GRIDWIDTH - cell.w then
         snapToRight(win, cell, screen)
-        compensateMargins()
-        return
-    elseif cell.w % 1 ~= 0 then
-        snapToRight(win, cell, screen)
-        grid.snap(win)
         compensateMargins()
         return
     end
@@ -221,4 +180,27 @@ hotkey.bind(super, 'L', function()
     snapToRight(win, cell, screen)
     compensateMargins()
 end)
+
+
+---------------------
+--  Reload config  --
+---------------------
+
+function reloadConfig(files)
+    doReload = false
+    for _,file in pairs(files) do
+        if file:sub(-4) == ".lua" then
+            doReload = true
+        end
+    end
+    if doReload then
+        hs.reload()
+    end
+end
+
+hs.pathwatcher.new(os.getenv("HOME") ..
+    "/.hammerspoon/", reloadConfig):start()
+hs.pathwatcher.new(os.getenv("HOME") ..
+    ".homesick/repos/dotfiles/home/.hammerspoon/", reloadConfig):start()
+hs.alert.show("Config loaded")
 
