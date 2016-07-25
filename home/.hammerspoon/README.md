@@ -3,30 +3,30 @@
 
 - ⌃⌥⌘K
 
-    Grow and shrink windows while sticking them to the top
+    Grow and shrink windows while keeping them at the top
     
-    ![hammerspoonk](https://cloud.githubusercontent.com/assets/15813674/17087339/e846f122-51dd-11e6-8ac7-406f78222cea.gif)
+    ![hammerspoonk](https://cloud.githubusercontent.com/assets/15813674/17089439/40b7e2b6-51fd-11e6-9602-649c23089c62.gif)
 
 
 - ⌃⌥⌘J
 
-    Grow and shrink windows while sticking them to the bottom
+    Grow and shrink windows while keeping them at the bottom
     
-    ![hammerspoonj](https://cloud.githubusercontent.com/assets/15813674/17087338/e8460686-51dd-11e6-982c-70d5691c41b5.gif)
+    ![hammerspoonj](https://cloud.githubusercontent.com/assets/15813674/17089440/40b9cf0e-51fd-11e6-8158-40163d84fb01.gif)
 
 
 - ⌃⌥⌘H
 
-    Grow and shrink windows while sticking them to the left
+    Grow and shrink windows while keeping them to the left
     
-    ![hammerspoonh](https://cloud.githubusercontent.com/assets/15813674/17087337/e8458a80-51dd-11e6-98db-ec41477eb8cd.gif)
+    ![hammerspoonh](https://cloud.githubusercontent.com/assets/15813674/17089438/40b700ee-51fd-11e6-8dfb-0115aa5804d7.gif)
 
 
 - ⌃⌥⌘L
 
-    Grow and shrink windows while sticking them to the right
+    Grow and shrink windows while keeping them to the right
     
-    ![hammerspoonl](https://cloud.githubusercontent.com/assets/15813674/17087341/e84958e0-51dd-11e6-8b68-1e5f9d48170d.gif)
+    ![hammerspoonl](https://cloud.githubusercontent.com/assets/15813674/17089437/40b5f118-51fd-11e6-8321-cb8be81945bd.gif)
 
 
 - ⌃⌥⌘←
@@ -35,7 +35,7 @@
     
     Move windows left and right
     
-    ![hammerspoonlr](https://cloud.githubusercontent.com/assets/15813674/17087336/e8358e46-51dd-11e6-85cc-17d672052a00.gif)
+    ![hammerspoonlr](https://cloud.githubusercontent.com/assets/15813674/17089436/40b53bec-51fd-11e6-8775-9b8d4db7414b.gif)
 
 
 - ⌃⌥⌘↑
@@ -44,11 +44,11 @@
     
     Move windows up and down
     
-    ![hammerspoonud](https://cloud.githubusercontent.com/assets/15813674/17087340/e84934dc-51dd-11e6-845e-075b6f1ee578.gif)
+    ![hammerspoonud](https://cloud.githubusercontent.com/assets/15813674/17089435/4086fe44-51fd-11e6-8270-d5640fad494e.gif)
 
 
 - All together
     
-    ![hammerspoonall](https://cloud.githubusercontent.com/assets/15813674/17087335/e8172820-51dd-11e6-888e-e250424aee52.gif)
+    ![hammerspoonall](https://cloud.githubusercontent.com/assets/15813674/17089441/40e4d226-51fd-11e6-86a5-7de6420fe352.gif)
 
 
