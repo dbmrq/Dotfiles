@@ -154,6 +154,7 @@ hotkey.bind(super, 'H', function()
     end
     local cell = grid.get(win)
     snapToLeft(win, cell, screen)
+    resizeFinder(cell)
     compensateMargins()
 end)
 
@@ -178,8 +179,24 @@ hotkey.bind(super, 'L', function()
     end
     local cell = grid.get(win)
     snapToRight(win, cell, screen)
+    resizeFinder(cell)
     compensateMargins()
 end)
+
+function resizeFinder(cell)
+    local app = hs.application.frontmostApplication()
+    if app:name() == "Finder" then
+        -- local cell = grid.get(app:focusedWindow())
+        if cell.w == 1 then
+            app:selectMenuItem({"Visualizar", "Ocultar Barra Lateral"})
+            -- app:selectMenuItem({"View", "Hide Sidebar"}) -- In english
+        else
+            app:selectMenuItem({"Visualizar", "Mostrar Barra Lateral"})
+            -- app:selectMenuItem({"View", "Show Sidebar"}) -- In english
+        end
+    end
+end
+
 
 
 ---------------------
