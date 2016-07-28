@@ -42,22 +42,3 @@ endfunction
 
 command! InstallPackages call InstallPackages()
 
-
-" vim-textobj-user
-
-call textobj#user#plugin('latexmacro', {
-\   'code': {
-\     'pattern': ['\\.*{', '}'],
-\     'select-a': 'a\',
-\     'select-i': 'i\',
-\   },
-\ })
-
-" call textobj#user#plugin('latexquote', {
-" \   'code': {
-" \     'pattern': ["``", "''"],
-" \     'select-a': "a'",
-" \     'select-i': "i'",
-" \   },
-" \ })
-
