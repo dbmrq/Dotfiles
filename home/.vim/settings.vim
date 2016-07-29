@@ -47,12 +47,11 @@ set undofile
 let g:tex_comment_nospell=1
 
 let g:tex_flavor = "latex"
-au BufRead,BufNewFile *.bbx setfiletype plaintex
-au BufRead,BufNewFile *.cbx setfiletype plaintex
-au BufRead,BufNewFile *.lbx setfiletype plaintex
-au BufRead,BufNewFile *.cls setfiletype plaintex
-au BufRead,BufNewFile *.sty setfiletype plaintex
-
+au BufRead,BufNewFile *.bbx set ft=plaintex
+au BufRead,BufNewFile *.cbx set ft=plaintex
+au BufRead,BufNewFile *.lbx set ft=plaintex
+au BufRead,BufNewFile *.cls set ft=plaintex
+au BufRead,BufNewFile *.sty set ft=plaintex
 
 colorscheme solarized
 let g:lightline = {'colorscheme': 'solarized',}
