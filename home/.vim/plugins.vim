@@ -7,14 +7,16 @@ nnoremap <leader>tp :TogglePencil<cr>
 
 " ditto
 
+au FileType markdown,text,tex DittoOn
+
 nmap <leader>di <Plug>ToggleDitto
 
-nmap <leader>dg <Plug>DittoGood
-nmap <leader>dw <Plug>DittoBad
+nmap =d <Plug>DittoGood
+nmap -d <Plug>DittoBad
 nmap ]d <Plug>DittoNext
 nmap [d <Plug>DittoPrev
-
-:au BufNewFile,BufRead *.tex DittoOn
+nmap +d <Plug>DittoMore
+nmap _d <Plug>DittoLess
 
 
 " delimitMate
@@ -240,7 +242,7 @@ call expand_region#custom_text_objects({
 
 " yankstack
 
-let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y', 'Y']
+let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y']
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
