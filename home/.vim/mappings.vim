@@ -52,7 +52,8 @@ inoremap <c-h> <left>
 inoremap <c-o> <esc>o
 
 " copy everything, unwrapping it when necessary
-nnoremap <expr> Y CopyAll()
+" nnoremap <expr> Y CopyAll()
+nnoremap Y y$
 
 " fold
 nnoremap <leader>f za
