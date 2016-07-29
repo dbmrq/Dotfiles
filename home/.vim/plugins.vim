@@ -5,6 +5,17 @@ nnoremap <leader>gy :Goyo<cr>
 nnoremap <leader>tp :TogglePencil<cr>
 
 
+" ditto
+
+nmap <leader>di <Plug>ToggleDitto
+
+nmap <leader>dg <Plug>DittoGood
+nmap <leader>dw <Plug>DittoBad
+nmap ]d <Plug>DittoNext
+nmap [d <Plug>DittoPrev
+
+:au BufNewFile,BufRead *.tex DittoOn
+
 
 " delimitMate
 
@@ -229,18 +240,20 @@ call expand_region#custom_text_objects({
 
 " yankstack
 
-let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'X', 'y', 'Y']
+let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y', 'Y']
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
 
 " Vimtex
 
+let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
+let g:vimtex_format_enabled = 1
 let g:vimtex_fold_enabled = 1
-let g:latex_fold_preamble = 1
-let g:vimtex_fold_envs = 0
 let g:vimtex_fold_sections = []
+let g:vimtex_fold_envs = 0
+" let g:latex_fold_preamble = 1
 
 
 " NeoComplete
