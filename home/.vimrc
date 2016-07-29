@@ -6,6 +6,9 @@ endif
 
 call plug#begin('~/.vim/bundle')
 
+    Plug 'danielbmarques/vim-ditto'
+    Plug 'danielbmarques/vim-dialect'
+
     Plug 'tpope/vim-sensible'
     Plug 'tpope/vim-unimpaired'
     Plug 'tpope/vim-surround'
