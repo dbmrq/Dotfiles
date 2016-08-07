@@ -76,24 +76,21 @@ nnoremap <leader>tsp :set spell!<cr>
 nnoremap <expr> <leader>sen ToggleSpellLang("en")
 nnoremap <expr> <leader>spt ToggleSpellLang("pt")
 
-" this uses zg and zw for the global spellfiles
-" and zG and zW for file specific spellfiles.
-" :au BufNewFile,BufRead * let &l:spellfile = expand('%:p:h') . '/.' .
-"     \ substitute(expand('%:t'), '\(.*\)\..*', '\1', '') . '.utf-8.add'
-" nnoremap zG :call LocalSpell("zG")<cr>
-" nnoremap zW :call LocalSpell("zW")<cr>
-" nnoremap zuG :call LocalSpell("zuG")<cr>
-" nnoremap zuW :call LocalSpell("zuW")<cr>
-" nnoremap zg :call GlobalSpell("zg")<cr>
-" nnoremap zw :call GlobalSpell("zw")<cr>
-" nnoremap zug :call GlobalSpell("zug")<cr>
-" nnoremap zuw :call GlobalSpell("zuw")<cr>
-" vnoremap zG :call LocalSpell("gvzG")<cr>
-" vnoremap zW :call LocalSpell("gvzW")<cr>
-" vnoremap zuG :call LocalSpell("gvzuG")<cr>
-" vnoremap zuW :call LocalSpell("gvzuW")<cr>
-" vnoremap zg :call GlobalSpell("gvzg")<cr>
-" vnoremap zw :call GlobalSpell("gvzw")<cr>
-" vnoremap zug :call GlobalSpell("gvzug")<cr>
-" vnoremap zuw :call GlobalSpell("gvzuw")<cr>
+
+" From https://blog.petrzemek.net/2016/04/06/
+"           things-about-vim-i-wish-i-knew-earlier/
+
+" Quickly select the text that was just pasted.
+" This allows you to, e.g., indent it after pasting.
+noremap gV `[v`]
+
+" Allows you to easily replace the current word and all its occurrences.
+nnoremap <Leader>rc :%s/\<<C-r><C-w>\>/
+vnoremap <Leader>rc y:%s/<C-r>"/
+
+" Allows you to easily change the current word and all occurrences to
+" something else. The difference between this and the previous mapping is that
+" the mapping below pre-fills the current word for you to change.
+nnoremap <Leader>cc :%s/\<<C-r><C-w>\>/<C-r><C-w>/g
+vnoremap <Leader>cc y:%s/<C-r>"/<C-r>"/g
 

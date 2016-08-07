@@ -2,21 +2,34 @@
 
 nnoremap <leader>ut :UndotreeToggle<cr>
 nnoremap <leader>gy :Goyo<cr>
-nnoremap <leader>tp :TogglePencil<cr>
+nnoremap <silent> <leader>aw :ArgWrap<cr>
+" nnoremap <leader>tp :TogglePencil<cr>
+
+
+" Solarized
+
+colorscheme solarized
+let g:lightline = {'colorscheme': 'solarized',}
 
 
 " ditto
 
 au FileType markdown,text,tex DittoOn
+" au FileType markdown,text,tex if &l:readonly == 0 | call ditto#dittoOn() | endif
 
 nmap <leader>di <Plug>ToggleDitto
 
-nmap =d <Plug>DittoGood
-nmap -d <Plug>DittoBad
-nmap ]d <Plug>DittoNext
-nmap [d <Plug>DittoPrev
-nmap +d <Plug>DittoMore
-nmap _d <Plug>DittoLess
+nmap +d <Plug>DittoGood
+nmap _d <Plug>DittoBad
+nmap =d <Plug>DittoNext
+nmap -d <Plug>DittoPrev
+nmap ]d <Plug>DittoMore
+nmap [d <Plug>DittoLess
+
+
+" ArgWrap
+
+let g:argwrap_tail_comma = 1
 
 
 " delimitMate
@@ -56,15 +69,24 @@ vmap <silent> =s <Plug>(SpellRotateForwardV)
 vmap <silent> -s <Plug>(SpellRotateBackwardV)
 
 
-" MRU
+" CtrlP
 
-" run :MRU when vim is opened without any file
+" run :CtrlPMRU when vim is opened without any file
 function! NoFile()
     if @% == ""
-        :MRU
+        :CtrlPMRU
     endif
 endfunction
 autocmd VimEnter * call NoFile()
+
+let g:ctrlp_map = ''
+nnoremap <c-p> :CtrlP 
+
+let g:ctrlp_working_path_mode = 'c'
+let g:ctrlp_path_nolim = 1
+" let g:ctrlp_show_hidden = 1
+" let g:ctrlp_max_files = 0
+" let g:ctrlp_max_depth = 40
 
 
 " vim-surround
@@ -171,14 +193,14 @@ inoremap <silent><expr> <CR> "<C-R>=SnippetOrCR()<CR>"
 
 " Reedes
 
-augroup reedes
-  autocmd!
-  autocmd FileType markdown,mkd,text,tex call pencil#init()
-                                     \ | call textobj#sentence#init()
-augroup END
+" augroup reedes
+"   autocmd!
+"   autocmd FileType markdown,mkd,text,tex call pencil#init()
+"                                      \ | call textobj#sentence#init()
+" augroup END
 
-let g:pencil#conceallevel = 0
-let g:pencil#textwidth = &textwidth
+" let g:pencil#conceallevel = 0
+" let g:pencil#textwidth = &textwidth
 
 
 " incsearch.vim
@@ -197,10 +219,10 @@ nnoremap <silent>n nzv:ShowSearchIndex<CR>
 nnoremap <silent>N Nzv:ShowSearchIndex<CR>
 
 
-" vim-pandoc
+" " vim-pandoc
 
-let g:pandoc#after#modules#enabled = ["ultisnips"]
-let g:pandoc#syntax#conceal#use = 0
+" let g:pandoc#after#modules#enabled = ["ultisnips"]
+" let g:pandoc#syntax#conceal#use = 0
 
 
 " vim-sneak

@@ -12,8 +12,8 @@ fi
 
 # Customize to your needs...
 
-export editor='vim'
-export VISUAL='vim'
+# export editor='vim'
+# export VISUAL='vim'
 
 bindkey -v
 
