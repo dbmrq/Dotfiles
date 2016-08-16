@@ -164,8 +164,7 @@ function! s:lightline_update()
                             \ |jellybeans\|seoul256\|Tomorrow'
             let g:lightline.colorscheme =
                 \ substitute(substitute(g:colors_name, '-', '_', 'g'),
-                           \ '256.*', '', '') .
-                \ (g:colors_name ==# 'solarized' ? '_' . &background : '')
+                \ '256.*', '', '')
             call lightline#init()
             call lightline#colorscheme()
             call lightline#update()
