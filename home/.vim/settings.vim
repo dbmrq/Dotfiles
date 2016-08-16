@@ -49,5 +49,7 @@ let g:tex_comment_nospell=1
 let g:tex_flavor = "latex"
 au BufRead,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
 
+au FileType markdown,text,tex set fo+=a12
+
 set background=dark
 
