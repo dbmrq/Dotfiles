@@ -1,5 +1,7 @@
 source ~/.vim/ftplugin/plaintex.vim
 
+" au CursorHold <buffer> up
+
 " Add \item automatically
 " set formatoptions=tcroqln
 " set comments+=b:\\item
