@@ -76,6 +76,14 @@ nnoremap <leader>tsp :set spell!<cr>
 nnoremap <expr> <leader>sen ToggleSpellLang("en")
 nnoremap <expr> <leader>spt ToggleSpellLang("pt")
 
+" Undo points
+inoremap . .<C-g>u
+inoremap , ,<C-g>u
+inoremap ; ;<C-g>u
+inoremap ! !<C-g>u
+inoremap ? ?<C-g>u
+inoremap : :<C-g>u
+
 
 " From https://blog.petrzemek.net/2016/04/06/
 "           things-about-vim-i-wish-i-knew-earlier/
