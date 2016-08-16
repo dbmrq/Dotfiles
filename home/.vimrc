@@ -25,7 +25,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'ntpeters/vim-better-whitespace'
     Plug 'ctrlpvim/ctrlp.vim'
     Plug 'terryma/vim-expand-region'
-    Plug 'chrisbra/NrrwRgn'
+    " Plug 'chrisbra/NrrwRgn'
     Plug 'FooSoft/vim-argwrap'
     Plug 'mbbill/undotree'
     Plug 'justinmk/vim-sneak'
@@ -45,8 +45,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'kana/vim-textobj-indent'
     Plug 'kana/vim-textobj-entire'
     Plug 'kana/vim-textobj-syntax'
-    " Plug 'reedes/vim-pencil'
-    " Plug 'reedes/vim-textobj-sentence'
+    Plug 'keith/swift.vim'
     Plug 'altercation/vim-colors-solarized'
 
 call plug#end()
