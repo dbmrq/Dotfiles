@@ -68,18 +68,10 @@ function! ToggleSpellLang(lang)
     endif
 endfunction
 
-" function! LocalSpell(cmd)
-"     if &l:spellfile == ""
-"         execute "normal! " . a:cmd
-"     else
-"         execute "normal! " . tolower(a:cmd)
-"     endif
-" endfunction
-
-" function! GlobalSpell(cmd)
-"     let b:spellfile = &l:spellfile
-"     setlocal spellfile=
-"     execute "normal! " . a:cmd
-"     let &l:spellfile = b:spellfile
-" endfunction
+function! Ventilate()
+    normal gggqG
+    %s/\([.!?]\)\([\])"']*\)\s/\1\2\r/g
+    let pattern = '\v[.!?][])"'']*($|\s)'
+    execute 'g/' . pattern . '/execute "normal! V(gq"'
+endfunction
 
