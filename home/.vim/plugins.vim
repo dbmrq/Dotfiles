@@ -27,6 +27,11 @@ nmap ]d <Plug>DittoMore
 nmap [d <Plug>DittoLess
 
 
+" gitgutter
+
+let g:gitgutter_map_keys = 0
+
+
 " ArgWrap
 
 let g:argwrap_tail_comma = 1
@@ -270,6 +275,7 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
 " Vimtex
 
+let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
 let g:vimtex_format_enabled = 1

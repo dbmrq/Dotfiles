@@ -25,6 +25,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'ntpeters/vim-better-whitespace'
     Plug 'ctrlpvim/ctrlp.vim'
     Plug 'terryma/vim-expand-region'
+    Plug 'airblade/vim-gitgutter'
     " Plug 'chrisbra/NrrwRgn'
     Plug 'FooSoft/vim-argwrap'
     Plug 'mbbill/undotree'

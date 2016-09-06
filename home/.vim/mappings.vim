@@ -75,6 +75,8 @@ command! ToggleBG call ToggleBG()
 nnoremap <leader>tsp :set spell!<cr>
 nnoremap <expr> <leader>sen ToggleSpellLang("en")
 nnoremap <expr> <leader>spt ToggleSpellLang("pt")
+" correct last mistake from insert mode
+inoremap <c-s> <esc>[s1z=A
 
 " Undo points
 inoremap . .<C-g>u
@@ -83,6 +85,9 @@ inoremap ; ;<C-g>u
 inoremap ! !<C-g>u
 inoremap ? ?<C-g>u
 inoremap : :<C-g>u
+
+
+nnoremap <expr> <leader>, AddCommas()
 
 
 " From https://blog.petrzemek.net/2016/04/06/

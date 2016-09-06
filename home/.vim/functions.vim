@@ -75,3 +75,11 @@ function! Ventilate()
     execute 'g/' . pattern . '/execute "normal! V(gq"'
 endfunction
 
+function! AddCommas()
+    if getline('.')[col('.')-1] == ' '
+        return "i, ,\<ESC>i"
+    else
+        return "a, ,\<ESC>i"
+    endif
+endfunction
+
