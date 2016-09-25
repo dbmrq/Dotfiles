@@ -8,8 +8,11 @@ inoremap kj <esc>
 inoremap JK <esc>
 inoremap KJ <esc>
 
-" format paragraphs
-nnoremap <leader>gq vipgq
+" move
+nnoremap H ^
+nnoremap L $
+vnoremap H ^
+vnoremap L $h
 
 " really go to the end
 noremap G G$
@@ -51,9 +54,12 @@ inoremap <c-l> <right>
 inoremap <c-h> <left>
 inoremap <c-o> <esc>o
 
-" copy everything, unwrapping it when necessary
-" nnoremap <expr> Y CopyAll()
 nnoremap Y y$
+
+" copy everything, unwrapping it when necessary
+nnoremap <expr> <leader>Y CopyAll()
+nnoremap <leader>y :call CopyUnwrapped()<cr>
+vnoremap <leader>y :call CopyUnwrapped()<cr>
 
 " fold
 nnoremap <leader>f za
@@ -88,6 +94,12 @@ inoremap : :<C-g>u
 
 
 nnoremap <expr> <leader>, AddCommas()
+
+map <leader>hi :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
+    \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
+    \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
+    \ . ">"<CR>
+
 
 
 " From https://blog.petrzemek.net/2016/04/06/
