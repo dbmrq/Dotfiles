@@ -53,3 +53,5 @@ au FileType markdown,text,tex set fo+=12
 
 set background=dark
 
+set shortmess+=c
+
