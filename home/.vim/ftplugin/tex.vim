@@ -1,40 +1,53 @@
 source ~/.vim/ftplugin/plaintex.vim
 
-" au CursorHold <buffer> up
-
-" Add \item automatically
-" set formatoptions=tcroqln
-" set comments+=b:\\item
-
 set spell
 set spelllang=pt
 
-" TODO: Turn this into a text object
-nnoremap <localleader>doc /begin{document}<cr>v/end{document}<cr>
 
-" \ldots
-" if has("gui_running")
-"     inoremap <m-;> \ldots
-" else
-"     inoremap ; \ldots
-" endif
-" iabbrev ... <bs>\ldots
-" inoremap ... \ldots
+" Replace hardcoded quotes with \enquote
+command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 
+
+" Surround words {{{
+
+" \emph
 nnoremap <leader>em viw<esc>a}<esc>bi\emph{<esc>
 vnoremap <leader>em <esc>`>a}<esc>`<i\emph{<esc>%
 
-vnoremap <leader>` <esc>`>a''<esc>`<i``<esc>%
-nnoremap <leader>` viw<esc>a''<esc>bi``<esc>
+" other commands
+nnoremap <leader>cm viw<esc>a}<esc>bi\{<esc>i
+vnoremap <leader>cm <esc>`>a}<esc>`<i\{<esc>i
 
-command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
+"}}}
 
+
+" Show word count when saving {{{
+
+au BufWritePost <buffer> redraw | echo WrittenString() . ' | ' . WordCount()
+
+function! WrittenString()
+    return '"' . expand('%:h:t') . '/' . expand('%:t') .
+        \ '" ' . line('$') . ' lines written'
+endfunction
+
+function! WordCount()
+    return substitute(system('texcount -1 -sum '
+        \ . expand('%')), '[^0-9]', '', 'g') . ' words'
+endfunction
+
+" }}}
+
+
+" Install packages {{{
 
 function! InstallPackages()
     let winview = winsaveview()
     call inputsave()
     let cmd = ['sudo -S tlmgr install']
-    %call add(cmd, matchstr(getline('.'), '\\usepackage\(\[.*\]\)\?{\zs.*\ze\}'))
+    %call add(cmd, matchstr(getline('.'),
+                \ '\\usepackage\(\[.*\]\)\?{\zs.*\ze\}'))
+    %call add(cmd, matchstr(getline('.'),
+                \ '\\RequirePackage\(\[.*\]\)\?{\zs.*\ze\}'))
     echomsg join(cmd)
     let pass = inputsecret('Enter sudo password:') . "\n"
     echo system(join(cmd), pass)
@@ -43,4 +56,6 @@ function! InstallPackages()
 endfunction
 
 command! InstallPackages call InstallPackages()
+
+" }}}
 
