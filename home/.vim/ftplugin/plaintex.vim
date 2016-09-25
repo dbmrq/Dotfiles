@@ -1,8 +1,12 @@
+let maplocalleader = " "
+
 set tabstop=2
 set shiftwidth=2
 set expandtab
 
-command! CheckBreaks %s/^\([^%]\+\)\n/\1%\r/gc
+" Curly braces get confusing with TeX
+setlocal foldmarker=\ >>>,\ <<<
 
-let maplocalleader = " "
+" Add % to the end of lines
+command! CheckBreaks %s/^\([^%]\+\)\n/\1%\r/gc
 
