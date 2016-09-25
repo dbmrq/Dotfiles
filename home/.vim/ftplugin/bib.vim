@@ -4,7 +4,7 @@ setlocal commentstring=\%\ %s
 
 
 " Check for missing commas after each field
-command! CheckCommas %s/}\n\([^\n]\)/},\r\1/gc
+command! -range=% CheckCommas keepp <line1>,<line2>s/}\n\(\s\+\a\)/},\r\1/gc
 
 
 " Break lines and align equal signs {{{
