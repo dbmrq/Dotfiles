@@ -9,7 +9,6 @@ nnoremap <silent> <leader>aw :ArgWrap<cr>
 " Solarized
 
 colorscheme solarized
-let g:lightline = {'colorscheme': 'solarized',}
 
 
 " ditto
@@ -155,12 +154,15 @@ nmap <expr> cd ChangeDetectedSurrounding()
 
 set noshowmode
 
+let g:lightline = {'colorscheme': 'solarized',}
+
+
 augroup LightLineColorscheme
     autocmd!
-    autocmd ColorScheme * call s:lightline_update()
+    autocmd ColorScheme * call LightlineUpdate()
 augroup END
 
-function! s:lightline_update()
+function! LightlineUpdate()
     if !exists('g:loaded_lightline')
         return
     endif
@@ -279,10 +281,6 @@ let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
 let g:vimtex_format_enabled = 1
-let g:vimtex_fold_enabled = 1
-let g:vimtex_fold_sections = []
-let g:vimtex_fold_envs = 0
-" let g:latex_fold_preamble = 1
 
 
 " NeoComplete
