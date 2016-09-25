@@ -11,8 +11,8 @@ command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 " Surround words {{{
 
 " \emph
-nnoremap <leader>em viw<esc>a}<esc>bi\emph{<esc>
-vnoremap <leader>em <esc>`>a}<esc>`<i\emph{<esc>%
+nnoremap <leader>em ciw\emph{<c-r><c-o>"}
+vnoremap <leader>em c\emph{<c-r><c-o>"}
 
 " other commands
 nnoremap <leader>cm viw<esc>a}<esc>bi\{<esc>i
