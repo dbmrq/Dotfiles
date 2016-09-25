@@ -1,26 +1,25 @@
-#################
-#  Entry Types  #
-#################
+
+# Entry types {{{
 
 snippet @
 @$1{$2,
 	${3:author = {$4},}
 	${5:title = {$6},}
 	${7:date = {$8},}
-	$9
+	$0
 }
 endsnippet
 
-snippet "@?article" "article entry" r
+snippet "@?article" "article entry" br
 @article{$1,
 	author = {$2},
 	title = {$3},
-	date = {$5},
-	journaltitle = {$6},
-	${7:location = {$8},}
-	${9:volume = {$10},}
-	${11:number = {$12},}
-	${13:pages = {$14},}
+	date = {$4},
+	journaltitle = {$5},
+	${6:location = {$7},}
+	${8:volume = {$9},}
+	${10:number = {$11},}
+	${12:pages = {$13},}
 }
 endsnippet
 
@@ -28,29 +27,60 @@ snippet "@?book" "book entry" br
 @book{$1,
 	author = {$2},
 	title = {$3},
-	date = {$5},
-	${6:publisher = {$7},}
-	${8:location = {$9},}
+	date = {$4},
+	${5:publisher = {$6},}
+	${7:location = {$8},}
 }
 endsnippet
 
-snippet "@?mvbook" "mvbook entry" br
-@mvbook{$1,
+snippet "@?inbook" "inbook entry" br
+@inbook{$1,
 	author = {$2},
 	title = {$3},
-	date = {$5},
-	${6:volumes = {$7},}
+	date = {$4},
+	booktitle = {$5},
+	${6:bookauthor = {$7},}
 	${8:publisher = {$9},}
 	${10:location = {$11},}
 }
 endsnippet
 
+snippet "@?bookinbook" "bookinbook entry" br
+@bookinbook{$1,
+	author = {$2},
+	title = {$3},
+	date = {$4},
+	booktitle = {$5},
+	${6:publisher = {$7},}
+	${8:location = {$9},}
+}
+endsnippet
 
-#################
-#  Field Types  #
-#################
+snippet "@?collection" "collecion entry" br
+@collection{$1,
+	editor = {$2},
+	title = {$3},
+	date = {$4},
+	${5:publisher = {$6},}
+	${7:location = {$8},}
+}
+endsnippet
 
-# I'm not using regular expressions because snippets won't show in YCM
+snippet "@?incollection" "incollection entry" br
+@incollection{$1,
+	author = {$2},
+	title = {$3},
+	date = {$4},
+	booktitle = {$5},
+	${6:editor = {$7},}
+	${8:publisher = {$9},}
+	${10:location = {$11},}
+}
+
+# }}}
+
+
+# {{{
 
 snippet abstract
 abstract = {$1},
@@ -246,6 +276,10 @@ endsnippet
 
 snippet journalsubtitle
 journalsubtitle = {$1},
+endsnippet
+
+snippet journaltitle
+journaltitle = {$1},
 endsnippet
 
 snippet label
@@ -560,6 +594,30 @@ snippet listf
 listf = {$1},
 endsnippet
 
+snippet usera
+usera = {$1},
+endsnippet
+
+snippet userb
+userb = {$1},
+endsnippet
+
+snippet userc
+userc = {$1},
+endsnippet
+
+snippet userd
+userd = {$1},
+endsnippet
+
+snippet usere
+usere = {$1},
+endsnippet
+
+snippet userf
+userf = {$1},
+endsnippet
+
 snippet verba
 verba = {$1},
 endsnippet
@@ -603,4 +661,6 @@ endsnippet
 snippet school
 school = {$1},
 endsnippet
+
+# }}}
 
