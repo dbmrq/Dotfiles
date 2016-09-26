@@ -55,7 +55,7 @@ command! Plug PlugUpdate | PlugUpgrade | PlugClean! | PlugDiff
 
 
 source ~/.vim/settings.vim
-source ~/.vim/functions.vim
 source ~/.vim/mappings.vim
+source ~/.vim/functions.vim
 source ~/.vim/plugins.vim
 
