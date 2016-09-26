@@ -25,9 +25,14 @@ vnoremap <leader>cm <esc>`>a}<esc>`<i\{<esc>i
 
 au BufWritePost <buffer> redraw | echo WrittenString() . ' | ' . WordCount()
 
+function! FileSize()
+    return substitute(system('du -sh ' .
+                \ expand('%')), '^\s\(.*\)\s.*', '\1', 'g')
+endfunction
+
 function! WrittenString()
     return '"' . expand('%:h:t') . '/' . expand('%:t') .
-        \ '" ' . line('$') . ' lines written'
+        \ '" ' . line('$') . ' lines, ' . FileSize() . ' written'
 endfunction
 
 function! WordCount()
