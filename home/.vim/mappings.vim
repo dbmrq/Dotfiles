@@ -1,6 +1,7 @@
 let mapleader = " "
 
-" normal mode
+" Enter normal mode {{{
+
 autocmd InsertEnter * set timeoutlen=50
 autocmd InsertLeave * set timeoutlen=750
 inoremap jk <esc>
@@ -8,36 +9,16 @@ inoremap kj <esc>
 inoremap JK <esc>
 inoremap KJ <esc>
 
-" move
+" }}}
+
+" Movements {{{
+
 nnoremap H ^
 nnoremap L $
 vnoremap H ^
 vnoremap L $h
-
-" really go to the end
 noremap G G$
 
-" insert single character
-nnoremap <leader>s i_<Esc>r
-nnoremap <leader>S a_<Esc>r
-
-" go to last change
-nnoremap <leader>b `.
-" insert at last position
-nnoremap <leader>i `^i
-
-" edit and source vimrc
-nnoremap <leader>ev :vsplit $MYVIMRC<cr>
-nnoremap <expr> <leader>sv SourceVimRC()
-
-" select everything
-nnoremap <leader>a ggVG
-
-" switch windows
-nnoremap <leader>w <c-w><c-w>
-nnoremap <leader>W <c-w><c-w>
-
-" move faster
 nnoremap <leader>j 15j
 nnoremap <leader>k 15k
 nnoremap <leader>h 10h
@@ -46,45 +27,15 @@ vnoremap <leader>j 15j
 vnoremap <leader>k 15k
 vnoremap <leader>h 10h
 vnoremap <leader>l 10l
-" nnoremap <C-e> 3<C-e>
-" nnoremap <C-y> 3<C-y>
 
-" move in insert mode
 inoremap <c-l> <right>
 inoremap <c-h> <left>
 inoremap <c-o> <esc>o
 
-nnoremap Y y$
+" }}}
 
-" copy everything, unwrapping it when necessary
-nnoremap <expr> <leader>Y CopyAll()
-nnoremap <leader>y :call CopyUnwrapped()<cr>
-vnoremap <leader>y :call CopyUnwrapped()<cr>
+" Undo points {{{
 
-" fold
-nnoremap <leader>f za
-vnoremap <leader>f zf
-
-" make a second <CR> delete comments added automatically
-inoremap <expr> <CR> CROrUncomment()
-
-" windows
-nnoremap <expr> <leader>= SmartSizeUp()
-nnoremap <expr> <leader>- SmartSizeDown()
-nnoremap <expr> <leader>sp SmartSplit()
-
-" toggle background color
-nnoremap <leader>bg :call ToggleBG()<cr>
-command! ToggleBG call ToggleBG()
-
-" spelling
-nnoremap <leader>tsp :set spell!<cr>
-nnoremap <expr> <leader>sen ToggleSpellLang("en")
-nnoremap <expr> <leader>spt ToggleSpellLang("pt")
-" correct last mistake from insert mode
-inoremap <c-s> <esc>[s1z=A
-
-" Undo points
 inoremap . .<C-g>u
 inoremap , ,<C-g>u
 inoremap ; ;<C-g>u
@@ -92,30 +43,53 @@ inoremap ! !<C-g>u
 inoremap ? ?<C-g>u
 inoremap : :<C-g>u
 
+" }}}
 
-nnoremap <expr> <leader>, AddCommas()
+" Replace word under cursor or selection {{{
 
+nnoremap <Leader>cc :%s/\<<C-r><C-w>\>/<C-r><C-w>/g
+vnoremap <Leader>cc y:%s/<C-r>"/<C-r>"/g
+
+" }}}
+
+" Insert single character {{{
+nnoremap <leader>i i_<Esc>r
+nnoremap <leader>I a_<Esc>r
+" }}}
+
+" Edit vimrc {{{
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+" }}}
+
+" Switch windows {{{
+nnoremap <leader>w <c-w><c-w>
+nnoremap <leader>W <c-w><c-w>
+" }}}
+
+" Yank till end of line {{{
+nnoremap Y y$
+" }}}
+
+" Fold {{{
+nnoremap <leader>f za
+" }}}
+
+" Toggle spelling {{{
+nnoremap <leader>tsp :set spell!<cr>
+" }}}
+
+" Correct last mistake from insert mode {{{
+inoremap <c-s> <esc>[s1z=A
+" }}}
+
+" Show current syntag group {{{
 map <leader>hi :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
     \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
     \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
     \ . ">"<CR>
+" }}}
 
-
-
-" From https://blog.petrzemek.net/2016/04/06/
-"           things-about-vim-i-wish-i-knew-earlier/
-
-" Quickly select the text that was just pasted.
-" This allows you to, e.g., indent it after pasting.
+" Select text just pasted {{{
 noremap gV `[v`]
-
-" Allows you to easily replace the current word and all its occurrences.
-nnoremap <Leader>rc :%s/\<<C-r><C-w>\>/
-vnoremap <Leader>rc y:%s/<C-r>"/
-
-" Allows you to easily change the current word and all occurrences to
-" something else. The difference between this and the previous mapping is that
-" the mapping below pre-fills the current word for you to change.
-nnoremap <Leader>cc :%s/\<<C-r><C-w>\>/<C-r><C-w>/g
-vnoremap <Leader>cc y:%s/<C-r>"/<C-r>"/g
+" }}}
 
