@@ -5,6 +5,7 @@
 [core]
 	safecrlf = true
 	autocrlf = input
+	excludesfile = /Users/daniel/.gitignore
 
 [alias]
 	co = checkout
