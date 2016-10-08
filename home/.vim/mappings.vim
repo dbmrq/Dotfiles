@@ -19,18 +19,13 @@ vnoremap H ^
 vnoremap L $h
 noremap G G$
 
-nnoremap <leader>j 15j
-nnoremap <leader>k 15k
-nnoremap <leader>h 10h
-nnoremap <leader>l 10l
-vnoremap <leader>j 15j
-vnoremap <leader>k 15k
-vnoremap <leader>h 10h
-vnoremap <leader>l 10l
+nnoremap <leader>j L
+nnoremap <leader>k H
+vnoremap <leader>j L
+vnoremap <leader>k H
 
 inoremap <c-l> <right>
 inoremap <c-h> <left>
-inoremap <c-o> <esc>o
 
 " }}}
 
@@ -45,10 +40,21 @@ inoremap : :<C-g>u
 
 " }}}
 
-" Replace word under cursor or selection {{{
+" Tab completion and pop up menu {{{1
+inoremap <expr> <TAB>  pumvisible() ? "\<c-n>" : "\<TAB>"
+inoremap <expr> <S-TAB>  pumvisible() ? "\<c-p>" : "\<S-TAB>"
+inoremap <expr> <c-j>  pumvisible() ? "\<Down>" : "j"
+inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "k"
+" }}}1
 
-nnoremap <Leader>cc :%s/\<<C-r><C-w>\>/<C-r><C-w>/g
-vnoremap <Leader>cc y:%s/<C-r>"/<C-r>"/g
+" Substitute {{{
+
+" replace word under cursor
+nnoremap <Leader>cc :%s/\<<C-r><C-w>\>//g<left><left>
+" replace word under visual selection
+vnoremap <Leader>cc y:%s/<C-r>"//g<left><left>
+" replace last search pattern
+nnoremap <Leader>cl :%s/<C-r>///g<left><left>
 
 " }}}
 
@@ -66,8 +72,9 @@ nnoremap <leader>w <c-w><c-w>
 nnoremap <leader>W <c-w><c-w>
 " }}}
 
-" Yank till end of line {{{
+" Yank {{{
 nnoremap Y y$
+nnoremap <expr> <leader>Y :%y+<cr>
 " }}}
 
 " Fold {{{
@@ -75,7 +82,7 @@ nnoremap <leader>f za
 " }}}
 
 " Toggle spelling {{{
-nnoremap <leader>tsp :set spell!<cr>
+nnoremap <leader>s :set spell!<cr>:set spell?<cr>
 " }}}
 
 " Correct last mistake from insert mode {{{

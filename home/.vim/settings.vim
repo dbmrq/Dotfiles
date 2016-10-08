@@ -43,13 +43,15 @@ set shiftround
 
 " Folding {{{
 set foldmethod=marker
-set foldmarker=\ {{{,\ }}}2
+set foldmarker=\ {{{,\ }}}
 " }}}
 
 " Undo {{{
-set undodir=~/.vim/undo/
-set undofile
-set undolevels=1000
+if has('persistent_undo')
+    " set undodir=~/.vim/undo/
+    set undofile
+    set undolevels=5000
+endif
 " }}}
 
 " TeX {{{
@@ -78,6 +80,9 @@ set visualbell
 set noerrorbells
 
 set shortmess+=c
+
+set updatecount=20
+set autowrite
 
 " }}}
 

@@ -1,20 +1,66 @@
-" Mappings
 
-nnoremap <leader>ut :UndotreeToggle<cr>
+" vim-rsi {{{1
+let g:rsi_no_meta = 1
+" }}}1
+
+" " Schlepp {{{1
+
+" function! SchleppDetect(direction)
+"     let mode = mode()
+"     let command = ""
+"     if mode ==# 'v'
+"         let command .= "\<c-v>"
+"     endif
+"     let command .= "\<Plug>Schlepp" . a:direction
+"     if mode ==# 'V'
+"         let command .= "zRgv"
+"     endif
+"     return command
+" endfunction
+
+" vmap <silent> <expr> <Left> SchleppDetect("Left")
+" vmap <silent> <expr> <Right> SchleppDetect("Right")
+" vmap <silent> <expr> <Up> SchleppDetect("Up")
+" vmap <silent> <expr> <Down> SchleppDetect("Down")
+
+" " }}}1
+
+" golden-ratio {{{1
+let g:golden_ratio_autocommand = 0
+let g:golden_ratio_exclude_nonmodifiable = 1
+" }}}1
+
+" goyo {{{1
+
 nnoremap <leader>gy :Goyo<cr>
-nnoremap <silent> <leader>aw :ArgWrap<cr>
-" nnoremap <leader>tp :TogglePencil<cr>
 
+" }}}1
 
-" Solarized
+" undotree {{{1
+nnoremap <leader>ut :UndotreeToggle<cr>
+" }}}1
 
+" Solarized {{{1
 colorscheme solarized
+" }}}1
 
+" chalk {{{1
 
-" ditto
+vmap zf <Plug>Chalk
+nmap zf <Plug>Chalk
+nmap zF <Plug>ChalkRange
+nmap Zf <Plug>SingleChalk
+nmap ZF <Plug>SingleChalkUp
+nmap =z <Plug>ChalkUp
+nmap -z <Plug>ChalkDown
+vmap =z <Plug>ChalkUp
+vmap -z <Plug>ChalkDown
+
+" }}}1
+
+" ditto {{{1
 
 au FileType markdown,text,tex DittoOn
-" au FileType markdown,text,tex if &l:readonly == 0 | call ditto#dittoOn() | endif
 
 nmap <leader>di <Plug>ToggleDitto
 
@@ -25,30 +71,53 @@ nmap -d <Plug>DittoPrev
 nmap ]d <Plug>DittoMore
 nmap [d <Plug>DittoLess
 
+" }}}1
 
-" gitgutter
+" gitgutter {{{1
 
 let g:gitgutter_map_keys = 0
 
+" }}}1
 
-" ArgWrap
+" ArgWrap {{{1
+
+nnoremap <silent> <leader>aw :ArgWrap<cr>
 
 let g:argwrap_tail_comma = 1
 
+" }}}1
 
-" delimitMate
+" splitjoin {{{1
+
+" let g:splitjoin_split_mapping = 'K'
+" let g:splitjoin_join_mapping = 'J'
+
+" nmap J :SplitjoinJoin<cr>
+" nmap K :SplitjoinSplit<cr>
+
+" nnoremap <expr> J argwrap#validateRange(argwrap#findClosestRange()) ?
+"     \ ":ArgWrap<cr>" : ":SplitjoinJoin<cr>"
+
+" nnoremap <expr> K argwrap#validateRange(argwrap#findClosestRange()) ?
+"     \ ":ArgWrap<cr>" : ":SplitjoinSplit<cr>"
+
+" }}}1
+
+" delimitMate {{{1
 
 let delimitMate_expand_space = 1
 let delimitMate_expand_cr = 1
 
+" }}}1
 
-" vim-easy-align
+" vim-easy-align {{{1
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
+" }}}1
 
-"unimpaired.vim
+"unimpaired.vim {{{1
 
 " move lines up and down
 let s:uname = system("uname -s")
@@ -64,16 +133,18 @@ else
     vmap <m-j> ]egv
 endif
 
+" }}}1
 
-" Spellrotate
+" Spellrotate {{{1
 
 nmap <silent> =s <Plug>(SpellRotateForward)
 nmap <silent> -s <Plug>(SpellRotateBackward)
 vmap <silent> =s <Plug>(SpellRotateForwardV)
 vmap <silent> -s <Plug>(SpellRotateBackwardV)
 
+" }}}1
 
-" CtrlP
+" CtrlP {{{1
 
 " run :CtrlPMRU when vim is opened without any file
 function! NoFile()
@@ -92,8 +163,9 @@ let g:ctrlp_path_nolim = 1
 " let g:ctrlp_max_files = 0
 " let g:ctrlp_max_depth = 40
 
+" }}}1
 
-" vim-surround
+" vim-surround {{{1
 
 function! LookLeft(char)
     let column = 2
@@ -149,8 +221,9 @@ endfunction
 
 nmap <expr> cd ChangeDetectedSurrounding()
 
+" }}}1
 
-" lightline.vim
+" lightline.vim {{{1
 
 set noshowmode
 
@@ -180,8 +253,9 @@ function! LightlineUpdate()
     endtry
 endfunction
 
+" }}}1
 
-" UltiSnips
+" UltiSnips {{{1
 
 " Use <CR> to accept snippets
 let g:UltiSnipsExpandTrigger = "<nop>"
@@ -196,8 +270,11 @@ function! SnippetOrCR()
 endfunction
 inoremap <silent><expr> <CR> "<C-R>=SnippetOrCR()<CR>"
 
+" }}}1
 
-" Reedes
+" Reedes {{{1
+
+" nnoremap <leader>tp :TogglePencil<cr>
 
 " augroup reedes
 "   autocmd!
@@ -208,12 +285,25 @@ inoremap <silent><expr> <CR> "<C-R>=SnippetOrCR()<CR>"
 " let g:pencil#conceallevel = 0
 " let g:pencil#textwidth = &textwidth
 
+" }}}1
 
-" incsearch.vim
+" incsearch.vim {{{1
 
 map /  <Plug>(incsearch-forward)
 map ?  <Plug>(incsearch-backward)
 map g/ <Plug>(incsearch-stay)
+
+if !exists('g:hlsearch_set')
+    set hlsearch
+endif
+let g:hlsearch_set = 1
+let g:incsearch#auto_nohlsearch = 1
+map n  <Plug>(incsearch-nohl-n)zv:ShowSearchIndex<CR>
+map N  <Plug>(incsearch-nohl-N)zv:ShowSearchIndex<CR>
+map *  <Plug>(incsearch-nohl-*)
+map #  <Plug>(incsearch-nohl-#)
+map g* <Plug>(incsearch-nohl-g*)
+map g# <Plug>(incsearch-nohl-g#)
 
 let g:indexed_search_mappings = 0
 augroup incsearch-indexed
@@ -221,17 +311,16 @@ augroup incsearch-indexed
     autocmd User IncSearchLeave ShowSearchIndex
 augroup END
 
-nnoremap <silent>n nzv:ShowSearchIndex<CR>
-nnoremap <silent>N Nzv:ShowSearchIndex<CR>
+" }}}1
 
-
-" " vim-pandoc
+" " vim-pandoc {{{1
 
 " let g:pandoc#after#modules#enabled = ["ultisnips"]
 " let g:pandoc#syntax#conceal#use = 0
 
+" }}}1
 
-" vim-sneak
+" vim-sneak {{{1
 
 let g:sneak#use_ic_scs = 1
 hi clear SneakPluginTarget
@@ -252,38 +341,42 @@ xmap T <Plug>Sneak_T
 omap t <Plug>Sneak_t
 omap T <Plug>Sneak_T
 
+" }}}1
 
-" vim-expand-region
+" " vim-expand-region {{{1
 
-vmap v <Plug>(expand_region_expand)
-vmap <C-v> <Plug>(expand_region_shrink)
-call expand_region#custom_text_objects({
-    \ 'i(': 1, 'i)': 1, 'ib': 1, 'i{': 1, 'i}': 1, 'iB': 1,
-             \ 'i[': 1, 'i]': 1, 'i<': 1, 'i>': 1, 'it': 1,
-    \ 'A(': 1, 'A)': 1, 'Ab': 1, 'A{': 1, 'A}': 1, 'AB': 1,
-             \ 'A[': 1, 'A]': 1, 'A<': 1, 'A>': 1, 'At': 1,
-    \ "i'": 1, 'i"': 1, 'i`': 1, "A'": 1, 'A"': 1, 'A`': 1,
-    \ 'i,': 1, 'i;': 1, 'A,': 1, 'A;': 1, 'as': 1, 'is': 1,
-    \ 'ii': 1, 'ai': 1, 'i\': 1, 'a\': 1,
-    \ })
+" vmap v <Plug>(expand_region_expand)
+" vmap <C-v> <Plug>(expand_region_shrink)
+" call expand_region#custom_text_objects({
+"     \ 'i(': 1, 'i)': 1, 'ib': 1, 'i{': 1, 'i}': 1, 'iB': 1,
+"              \ 'i[': 1, 'i]': 1, 'i<': 1, 'i>': 1, 'it': 1,
+"     \ 'A(': 1, 'A)': 1, 'Ab': 1, 'A{': 1, 'A}': 1, 'AB': 1,
+"              \ 'A[': 1, 'A]': 1, 'A<': 1, 'A>': 1, 'At': 1,
+"     \ "i'": 1, 'i"': 1, 'i`': 1, "A'": 1, 'A"': 1, 'A`': 1,
+"     \ 'i,': 1, 'i;': 1, 'A,': 1, 'A;': 1, 'as': 1, 'is': 1,
+"     \ 'ii': 1, 'ai': 1, 'i\': 1, 'a\': 1,
+"     \ })
 
+" " }}}1
 
-" yankstack
+" yankstack {{{1
 
 let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y']
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
+" }}}1
 
-" Vimtex
+" Vimtex {{{1
 
 let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
 let g:vimtex_format_enabled = 1
 
+" }}}1
 
-" NeoComplete
+" NeoComplete {{{1
 
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
@@ -299,8 +392,6 @@ let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 inoremap <expr><C-g>     neocomplete#undo_completion()
 " inoremap <expr><C-l>     neocomplete#complete_common_string()
 
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
 " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
 " inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
@@ -314,8 +405,9 @@ autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
+" }}}1
 
-" neocomplete/Vimtex compatibility
+" neocomplete/Vimtex compatibility {{{1
 
 " let g:neocomplete#enable_refresh_always = 1
 
@@ -336,4 +428,12 @@ let g:neocomplete#sources#omni#input_patterns.tex =
 
 let last_spell_changedtick = -1
 let last_spell_count = 1
+
+" }}}1
+
+" local-indent {{{1
+
+au BufReadPre,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty LocalIndentGuide +hl
+
+" }}}1
 
