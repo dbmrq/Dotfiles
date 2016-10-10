@@ -5,80 +5,134 @@
 
 local normal = hs.hotkey.modal.new()
 
--- I don't remap <esc> because it's just too risky
+-- <c-[> - enter Normal mode {{{2
+-- I don't remap <esc> because it's too risky
 enterNormal = hs.hotkey.bind({"ctrl"}, "[", function()
     normal:enter()
     hs.alert.show('Normal mode')
 end)
+-- }}}2
 
 -- Movements {{{2
 
+-- h - move left {{{3
 function left() hs.eventtap.keyStroke({}, "Left") end
 normal:bind({}, 'h', left, nil, left)
+-- }}}3
+
+-- l - move right {{{3
 function right() hs.eventtap.keyStroke({}, "Right") end
 normal:bind({}, 'l', right, nil, right)
+-- }}}3
+
+-- k - move up {{{3
 function up() hs.eventtap.keyStroke({}, "Up") end
 normal:bind({}, 'k', up, nil, up)
+-- }}}3
+
+-- j - move down {{{3
 function down() hs.eventtap.keyStroke({}, "Down") end
 normal:bind({}, 'j', down, nil, down)
+-- }}}3
+
+-- w - move to next word {{{3
 function word() hs.eventtap.keyStroke({"alt"}, "Right") end
 normal:bind({}, 'w', word, nil, word)
+normal:bind({}, 'e', word, nil, word)
+-- }}}3
+
+-- b - move to previous word {{{3
 function back() hs.eventtap.keyStroke({"alt"}, "Left") end
 normal:bind({}, 'b', back, nil, back)
+-- }}}3
 
-
-normal:bind({}, '0', function()-- {{{3
+-- 0, H - move to beginning of line {{{3
+normal:bind({}, '0', function()
     hs.eventtap.keyStroke({"cmd"}, "Left")
-end)-- }}}3
+end)
 
-normal:bind({"shift"}, 'h', function()-- {{{3
+normal:bind({"shift"}, 'h', function()
     hs.eventtap.keyStroke({"cmd"}, "Left")
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({"shift"}, '4', function()-- {{{3
+-- $, L - move to end of line {{{3
+normal:bind({"shift"}, '4', function()
     hs.eventtap.keyStroke({"cmd"}, "Right")
-end)-- }}}3
+end)
 
-normal:bind({"shift"}, 'l', function()-- {{{3
+normal:bind({"shift"}, 'l', function()
     hs.eventtap.keyStroke({"cmd"}, "Right")
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({}, 'g', function()-- {{{3
+-- g - move to beginning of text {{{3
+normal:bind({}, 'g', function()
     hs.eventtap.keyStroke({"cmd"}, "Up")
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({"shift"}, 'g', function()-- {{{3
+-- G - move to end of text {{{3
+normal:bind({"shift"}, 'g', function()
     hs.eventtap.keyStroke({"cmd"}, "Down")
-end)-- }}}3
+end)
+-- }}}3
+
+-- z - center cursor {{{3
+normal:bind({}, 'z', function()
+    hs.eventtap.keyStroke({"ctrl"}, "L")
+end)
+-- }}}3
+
+-- <c-f> - page down {{{3
+normal:bind({"ctrl"}, "f", function()
+    hs.eventtap.keyStroke({}, "pagedown")
+end)
+-- }}}3
+
+-- <c-b> - page up {{{3
+normal:bind({"ctrl"}, "b", function()
+    hs.eventtap.keyStroke({}, "pageup")
+end)
+-- }}}3
 
 -- }}}2
 
 -- Insert {{{2
 
-normal:bind({}, 'i', function()-- {{{3
+-- i - insert at cursor {{{3
+normal:bind({}, 'i', function()
     normal:exit()
     hs.alert.show('Insert mode')
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({"shift"}, 'i', function()-- {{{3
+-- I - insert at beggining of line {{{3
+normal:bind({"shift"}, 'i', function()
     hs.eventtap.keyStroke({"cmd"}, "Left")
     normal:exit()
     hs.alert.show('Insert mode')
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({}, 'a', function()-- {{{3
+-- a - append after cursor {{{3
+normal:bind({}, 'a', function()
     hs.eventtap.keyStroke({}, "Right")
     normal:exit()
     hs.alert.show('Insert mode')
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({"shift"}, 'a', function()-- {{{3
+-- A - append to end of line {{{3
+normal:bind({"shift"}, 'a', function()
     hs.eventtap.keyStroke({"cmd"}, "Right")
     normal:exit()
     hs.alert.show('Insert mode')
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({}, 'o', nil, function()-- {{{3
+-- o - open new line below cursor {{{3
+normal:bind({}, 'o', nil, function()
     local app = hs.application.frontmostApplication()
     if app:name() == "Finder" then
         hs.eventtap.keyStroke({"cmd"}, "o")
@@ -88,9 +142,11 @@ normal:bind({}, 'o', nil, function()-- {{{3
         hs.eventtap.keyStroke({}, "Return")
         hs.alert.show('Insert mode')
     end
-end)-- }}}3
+end)
+-- }}}3
 
-normal:bind({"shift"}, 'o', nil, function()-- {{{3
+-- O - open new line above cursor {{{3
+normal:bind({"shift"}, 'o', nil, function()
     local app = hs.application.frontmostApplication()
     if app:name() == "Finder" then
         hs.eventtap.keyStroke({"cmd", "shift"}, "o")
@@ -101,35 +157,48 @@ normal:bind({"shift"}, 'o', nil, function()-- {{{3
         hs.eventtap.keyStroke({}, "Up")
         hs.alert.show('Insert mode')
     end
-end)-- }}}3
+end)
+-- }}}3
 
 -- }}}2
 
 -- Delete {{{2
 
+-- d - delete character before the cursor {{{3
 local function delete()
     hs.eventtap.keyStroke({}, "delete")
 end
 normal:bind({}, 'd', delete, nil, delete)
+-- }}}3
 
+-- x - delete character after the cursor {{{3
 local function fndelete()
     hs.eventtap.keyStroke({}, "Right")
     hs.eventtap.keyStroke({}, "delete")
 end
 normal:bind({}, 'x', fndelete, nil, fndelete)
+-- }}}3
+
+-- D - delete until end of line {{{3
+normal:bind({}, 'D', nil, function()
+    hs.eventtap.keyStroke({"ctrl"}, "K")
+end)
+-- }}}3
 
 -- }}}2
 
-normal:bind({"shift"}, ';', function()-- {{{2
+-- : - in Safari, focus address bar; everywhere else, call Alfred {{{2
+normal:bind({"shift"}, ';', function()
     local app = hs.application.frontmostApplication()
     if app:name() == "Safari" then
         hs.eventtap.keyStroke({"cmd"}, "l") -- go to address bar
     else
         hs.eventtap.keyStroke({"ctrl"}, "space") -- call Alfred
     end
-end)-- }}}2
+end)
+-- }}}2
 
--- Shortcat {{{2
+-- f, s - call Shortcat {{{2
 normal:bind({}, 'f', function()
     normal:exit()
     hs.alert.show('Insert mode')
@@ -143,23 +212,33 @@ normal:bind({}, 's', function()
 end)
 -- }}}2
 
+-- / - search {{{2
 normal:bind({}, '/', function() hs.eventtap.keyStroke({"cmd"}, "f") end)
+-- }}}2
 
-normal:bind({}, 'u', function()-- {{{2
+-- u - undo {{{2
+normal:bind({}, 'u', function()
     hs.eventtap.keyStroke({"cmd"}, "z")
-end)-- }}}2
+end)
+-- }}}2
 
-normal:bind({"ctrl"}, 'r', function()-- {{{2
+-- <c-r> - redo {{{2
+normal:bind({"ctrl"}, 'r', function()
     hs.eventtap.keyStroke({"cmd", "shift"}, "z")
-end)-- }}}2
+end)
+-- }}}2
 
-normal:bind({}, 'y', function()-- {{{2
+-- y - yank {{{2
+normal:bind({}, 'y', function()
     hs.eventtap.keyStroke({"cmd"}, "c")
-end)-- }}}2
+end)
+-- }}}2
 
-normal:bind({}, 'p', function()-- {{{2
+-- p - paste {{{2
+normal:bind({}, 'p', function()
     hs.eventtap.keyStroke({"cmd"}, "v")
-end)-- }}}2
+end)
+-- }}}2
 
 -- }}}1
 
@@ -167,44 +246,95 @@ end)-- }}}2
 
 local visual = hs.hotkey.modal.new()
 
-normal:bind({}, 'v', function() visual:enter() end)
+-- v - enter Visual mode {{{2
+normal:bind({}, 'v', function() normal:exit() visual:enter() end)
+function visual:entered() hs.alert.show('Visual mode') end
+-- }}}2
 
-visual:bind({"ctrl"}, '[', function()-- {{{2
+-- <c-[> - exit Visual mode {{{2
+visual:bind({"ctrl"}, '[', function()
     visual:exit()
+    normal:exit()
     hs.eventtap.keyStroke({}, "Right")
     hs.alert.show('Normal mode')
-end)-- }}}2
-
-function visual:entered() hs.alert.show('Visual mode') end
+end)
+-- }}}2
 
 -- Movements {{{2
 
+-- h - move left {{{3
 function vleft() hs.eventtap.keyStroke({"shift"}, "Left") end
 visual:bind({}, 'h', vleft, nil, vleft)
+-- }}}3
+
+-- l - move right {{{3
 function vright() hs.eventtap.keyStroke({"shift"}, "Right") end
 visual:bind({}, 'l', vright, nil, vright)
+-- }}}3
+
+-- k - move up {{{3
 function vup() hs.eventtap.keyStroke({"shift"}, "Up") end
 visual:bind({}, 'k', vup, nil, vup)
+-- }}}3
+
+-- j - move down {{{3
 function vdown() hs.eventtap.keyStroke({"shift"}, "Down") end
 visual:bind({}, 'j', vdown, nil, vdown)
+-- }}}3
 
-visual:bind({}, '0', function()-- {{{3
+-- w - move to next word {{{3
+function word() hs.eventtap.keyStroke({"alt", "shift"}, "Right") end
+visual:bind({}, 'w', word, nil, word)
+visual:bind({}, 'e', word, nil, word)
+-- }}}3
+
+-- b - move to previous word {{{3
+function back() hs.eventtap.keyStroke({"alt", "shift"}, "Left") end
+visual:bind({}, 'b', back, nil, back)
+-- }}}3
+
+-- 0, H - move to beginning of line {{{3
+visual:bind({}, '0', function()
     hs.eventtap.keyStroke({"cmd", "shift"}, "Left")
-end)-- }}}3
+end)
 
-visual:bind({"shift"}, 'h', function()-- {{{3
+visual:bind({"shift"}, 'h', function()
     hs.eventtap.keyStroke({"cmd", "shift"}, "Left")
-end)-- }}}3
+end)
+-- }}}3
 
-visual:bind({"shift"}, '4', function()-- {{{3
+-- $, L - move to end of line {{{3
+visual:bind({"shift"}, '4', function()
     hs.eventtap.keyStroke({"cmd", "shift"}, "Right")
-end)-- }}}3
+end)
 
-visual:bind({"shift"}, 'l', function()-- {{{3
+visual:bind({"shift"}, 'l', function()
     hs.eventtap.keyStroke({"cmd", "shift"}, "Right")
-end)-- }}}3
+end)
+-- }}}3
 
+-- }}}2
 
+-- y - yank {{{2
+visual:bind({}, 'y', function()
+    hs.eventtap.keyStroke({"cmd"}, "c")
+    hs.timer.doAfter(0.1, function()
+    visual:exit()
+    normal:enter()
+    hs.eventtap.keyStroke({}, "Right")
+    hs.alert.show('Normal mode')
+end)
+end)
+-- }}}2
+
+-- p - paste {{{2
+visual:bind({}, 'p', function()
+    hs.eventtap.keyStroke({"cmd"}, "v")
+    visual:exit()
+    normal:enter()
+    hs.eventtap.keyStroke({}, "Right")
+    hs.alert.show('Normal mode')
+end)
 -- }}}2
 
 -- }}}1

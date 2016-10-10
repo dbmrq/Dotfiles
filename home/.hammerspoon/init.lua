@@ -1,8 +1,8 @@
 
 super = {"ctrl", "alt", "cmd"}
 
-require "clipboard"
 require "nightshift"
+require "clipboard"
 require "winman"   -- Window management
 require "vim"      -- Vim style bindings
 require "readline" -- Readline style bindings
@@ -67,6 +67,10 @@ hs.window.filter.new('Safari')-- {{{3
 -- hs.hotkey.bind({}, '.', function()
 --     local element = hs.uielement.focusedElement():role()
 --     hs.alert.show(element)
+-- end)
+
+-- hs.hotkey.bind({"ctrl"}, '.', function()
+--     hs.screen.restoreGamma()
 -- end)
 
 -- -- }}}2
