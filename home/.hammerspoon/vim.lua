@@ -180,8 +180,10 @@ normal:bind({}, 'x', fndelete, nil, fndelete)
 -- }}}3
 
 -- D - delete until end of line {{{3
-normal:bind({}, 'D', nil, function()
-    hs.eventtap.keyStroke({"ctrl"}, "K")
+normal:bind({"shift"}, 'D', nil, function()
+    normal:exit()
+    hs.eventtap.keyStroke({"ctrl"}, "k")
+    normal:enter()
 end)
 -- }}}3
 
@@ -313,7 +315,24 @@ visual:bind({"shift"}, 'l', function()
 end)
 -- }}}3
 
+-- g - move to beginning of text {{{3
+visual:bind({}, 'g', function()
+    hs.eventtap.keyStroke({"shift", "cmd"}, "Up")
+end)
+-- }}}3
+
+-- G - move to end of text {{{3
+visual:bind({"shift"}, 'g', function()
+    hs.eventtap.keyStroke({"shift", "cmd"}, "Down")
+end)
+-- }}}3
+
 -- }}}2
+
+-- d, x - delete character before the cursor {{{3
+visual:bind({}, 'd', delete, nil, delete)
+visual:bind({}, 'x', delete, nil, delete)
+-- }}}3
 
 -- y - yank {{{2
 visual:bind({}, 'y', function()
