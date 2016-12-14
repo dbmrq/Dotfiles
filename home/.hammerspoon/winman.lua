@@ -236,6 +236,13 @@ hs.hotkey.bind(super, 'L', function()-- {{{3
     compensateMargins()
 end)-- }}}3
 
+hs.hotkey.bind(super, '.', function()-- {{{3
+    local win = hs.window.focusedWindow()
+    local screen = win:screen()
+    local newCell = hs.geometry(1, 0, grid.GRIDWIDTH - 2, grid.GRIDHEIGHT)
+    grid.set(win, newCell, screen)
+end)-- }}}3
+
 -- Show and hide a stripe of Desktop {{{3
 hs.hotkey.bind(super, 'O', function()
     local windows = hs.window.visibleWindows()
