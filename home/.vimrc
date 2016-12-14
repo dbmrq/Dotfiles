@@ -10,7 +10,6 @@ call plug#begin('~/.vim/bundle')
     Plug 'dbmrq/vim-chalk'
     Plug 'dbmrq/vim-dialect'
     Plug 'tpope/vim-sensible'
-    Plug 'tpope/vim-unimpaired'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-repeat'
@@ -41,7 +40,12 @@ call plug#begin('~/.vim/bundle')
     Plug 'Raimondi/delimitMate'
     Plug 'mbbill/undotree'
     Plug 'ctrlpvim/ctrlp.vim'
-    Plug 'Shougo/neocomplete.vim'
+    if has('nvim')
+        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+        " Plug 'maralla/completor.vim'
+        Plug 'Shougo/neocomplete.vim'
+    endif
     Plug 'lervag/vimtex'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'itchyny/lightline.vim'

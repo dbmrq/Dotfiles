@@ -1,6 +1,5 @@
 source ~/.vim/ftplugin/plaintex.vim
 
-
 " Install packages {{{
 
 function! InstallPackages()
@@ -22,24 +21,21 @@ command! InstallPackages call InstallPackages()
 
 " }}}
 
-
 if expand('%:e') != 'tex'
     finish
 endif
 
-
 " Surround words {{{
 
 " \emph
-nnoremap <leader>em ciw\emph{<c-r><c-o>"}
-vnoremap <leader>em c\emph{<c-r><c-o>"}
+nnoremap <leader>em ciw\emph{<c-r><c-o>"}<esc>
+vnoremap <leader>em c\emph{<c-r><c-o>"}<esc>
 
 " other commands
 nnoremap <leader>cm viw<esc>a}<esc>bi\{<esc>i
 vnoremap <leader>cm <esc>`>a}<esc>`<i\{<esc>i
 
 " }}}
-
 
 " Show word count when saving {{{
 
@@ -62,9 +58,37 @@ endfunction
 
 " }}}
 
-
-" Replace hardcoded quotes with \enquote
+" Replace hardcoded quotes with \enquote {{{1
 command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
+" }}}1
+
+" Better b and e for TeX {{{1
+nnoremap <silent> b B
+nnoremap <silent> B ?\U[.,;:]\(\s*\\|\n*\\|$*\)*\a?e<cr>:noh<cr>
+vnoremap <silent> b B
+vnoremap <silent> B ?\U[.,;:]\(\s*\\|\n*\\|$*\)*\a?e<cr><esc>:noh<cr>gv
+nnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr>:noh<cr>
+nnoremap <silent> E /\U[.,;:]\(\s\\|\n\\|$\)<cr>:noh<cr>
+vnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr><esc>:noh<cr>gv
+vnoremap <silent> E /\U[.,;:]\(\s\\|\n\\|$\)<cr><esc>:noh<cr>gv
+" }}}1
+
+" Change the closest comma, semicolon or colon int a period {{{1
+nnoremap <silent> <leader>. :call MakePeriod()<cr>
+
+function! MakePeriod()
+    call FindClosest('[,;:]', ' ')
+    if getline('.')[col('.') - 1] == ' '
+        execute "normal! r.a \<esc>"
+    else
+        normal! r.l
+    endif
+    normal! lgUl
+endfunction
+
+
+
+" }}}1
 
 set spell
 set spelllang=pt

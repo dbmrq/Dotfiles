@@ -14,7 +14,11 @@ set scrolloff=5
 set sidescrolloff=7
 set sidescroll=1
 
-set background=dark
+if $BACKGROUND == 'light'
+    set background=light
+else
+    set background=dark
+endif
 
 " }}}
 
@@ -83,6 +87,17 @@ set shortmess+=c
 
 set updatecount=20
 set autowrite
+
+set complete+=kspell
+
+" change directory to current file's
+autocmd BufEnter * silent! lcd %:p:h
+
+" open file with cursor at last position
+autocmd BufReadPost *
+    \ if line("'\"") >= 1 && line("'\"") <= line("$") |
+    \     exe "normal! g`\"" |
+    \ endif
 
 " }}}
 

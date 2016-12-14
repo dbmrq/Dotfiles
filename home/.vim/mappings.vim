@@ -15,14 +15,11 @@ inoremap KJ <esc>
 
 nnoremap H ^
 nnoremap L $
+onoremap H ^
+onoremap L $
 vnoremap H ^
 vnoremap L $h
 noremap G G$
-
-nnoremap <leader>j L
-nnoremap <leader>k H
-vnoremap <leader>j L
-vnoremap <leader>k H
 
 inoremap <c-l> <right>
 inoremap <c-h> <left>
@@ -47,16 +44,11 @@ inoremap <expr> <c-j>  pumvisible() ? "\<Down>" : "j"
 inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "k"
 " }}}1
 
-" Substitute {{{
+" replace last search pattern {{{1
 
-" replace word under cursor
-nnoremap <Leader>cc :%s/\<<C-r><C-w>\>//g<left><left>
-" replace word under visual selection
-vnoremap <Leader>cc y:%s/<C-r>"//g<left><left>
-" replace last search pattern
 nnoremap <Leader>cl :%s/<C-r>///g<left><left>
 
-" }}}
+" }}}1
 
 " Insert single character {{{
 nnoremap <leader>i i_<Esc>r

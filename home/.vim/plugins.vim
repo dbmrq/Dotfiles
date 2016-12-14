@@ -1,4 +1,12 @@
 
+" " targets.vim {{{1
+" let g:targets_aiAI = 'aIAi'
+" " }}}1
+
+" vim-polyglot {{{1
+let g:polyglot_disabled = ['latex']
+" }}}1
+
 " vim-rsi {{{1
 let g:rsi_no_meta = 1
 " }}}1
@@ -60,7 +68,7 @@ vmap -z <Plug>ChalkDown
 
 " ditto {{{1
 
-au FileType markdown,text,tex DittoOn
+" au FileType markdown,text,tex DittoOn
 
 nmap <leader>di <Plug>ToggleDitto
 
@@ -323,8 +331,9 @@ augroup END
 " vim-sneak {{{1
 
 let g:sneak#use_ic_scs = 1
-hi clear SneakPluginTarget
-hi link SneakPluginTarget Search
+" hi clear SneakPluginTarget
+" hi link SneakPluginTarget Search
+autocmd ColorScheme * hi! link Sneak Search
 
 "replace 'f' with 1-char Sneak
 nmap f <Plug>Sneak_f
@@ -376,58 +385,108 @@ let g:vimtex_format_enabled = 1
 
 " }}}1
 
-" NeoComplete {{{1
+" neocomplete/deoplete {{{1
 
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplete.
-let g:neocomplete#enable_at_startup = 1
-" Use smartcase.
-let g:neocomplete#enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 2
-let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+if has('nvim')
 
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplete#undo_completion()
-" inoremap <expr><C-l>     neocomplete#complete_common_string()
+    " Deoplete {{{2
 
-" <C-h>, <BS>: close popup and delete backword char.
-" inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-" inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-" Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+    let g:deoplete#enable_at_startup = 1
+    let g:deoplete#enable_smart_case = 1
+    let g:deoplete#sources#syntax#min_keyword_length = 2
+    let g:deoplete#lock_buffer_name_pattern = '\*ku\*'
 
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+    inoremap <expr><C-g>     deoplete#undo_completion()
 
-" }}}1
+    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
-" neocomplete/Vimtex compatibility {{{1
-
-" let g:neocomplete#enable_refresh_always = 1
-
-if !exists('g:neocomplete#sources#omni#input_patterns')
-    let g:neocomplete#sources#omni#input_patterns = {}
-endif
-let g:neocomplete#sources#omni#input_patterns.tex =
-        \ '\v\\%('
-        \ . '\a*cite\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-        \ . '|\a*ref%(\s*\{[^}]*|range\s*\{[^,}]*%(}\{)?)'
+    if !exists('g:deoplete#omni#input_patterns')
+        let g:deoplete#omni#input_patterns = {}
+    endif
+    let g:deoplete#omni#input_patterns.tex = '\\(?:'
+        \ .  '\w*cite\w*(?:\s*\[[^]]*\]){0,2}\s*{[^}]*'
+        \ . '|\w*ref(?:\s*\{[^}]*|range\s*\{[^,}]*(?:}{)?)'
         \ . '|hyperref\s*\[[^]]*'
-        \ . '|includegraphics\*?%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-        \ . '|%(include%(only)?|input)\s*\{[^}]*'
-        \ . '|\a*(gls|Gls|GLS)(pl)?\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-        \ . '|includepdf%(\s*\[[^]]*\])?\s*\{[^}]*'
-        \ . '|includestandalone%(\s*\[[^]]*\])?\s*\{[^}]*'
-        \ . ')'
+        \ . '|includegraphics\*?(?:\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+        \ . '|(?:include(?:only)?|input)\s*\{[^}]*'
+        \ . '|\w*(gls|Gls|GLS)(pl)?\w*(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+        \ . '|includepdf(\s*\[[^]]*\])?\s*\{[^}]*'
+        \ . '|includestandalone(\s*\[[^]]*\])?\s*\{[^}]*'
+        \ .')'
 
-let last_spell_changedtick = -1
-let last_spell_count = 1
+    " }}}2
+
+else
+
+" " completor {{{2
+
+" let g:completor_tex_omni_trigger = '\\\\(:?'
+"         \ .  '\w*cite\w*(?:\s*\[[^]]*\]){0,2}\s*{[^}]*'
+"         \ . '|\w*ref(?:\s*\{[^}]*|range\s*\{[^,}]*(?:}{)?)'
+"         \ . '|hyperref\s*\[[^]]*'
+"         \ . '|includegraphics\*?(?:\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+"         \ . '|(?:include(?:only)?|input)\s*\{[^}]*'
+"         \ . '|\w*(gls|Gls|GLS)(pl)?\w*(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+"         \ . '|includepdf(\s*\[[^]]*\])?\s*\{[^}]*'
+"         \ . '|includestandalone(\s*\[[^]]*\])?\s*\{[^}]*'
+"         \ .')$'
+
+" " }}}2
+
+    " NeoComplete {{{2
+
+    " Disable AutoComplPop.
+    let g:acp_enableAtStartup = 0
+    " Use neocomplete.
+    let g:neocomplete#enable_at_startup = 1
+    " Use smartcase.
+    let g:neocomplete#enable_smart_case = 1
+    " Set minimum syntax keyword length.
+    let g:neocomplete#sources#syntax#min_keyword_length = 2
+    let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+    " Plugin key-mappings.
+    inoremap <expr><C-g>     neocomplete#undo_completion()
+    " inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+    " <C-h>, <BS>: close popup and delete backword char.
+    " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+    " inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+    " Close popup by <Space>.
+    "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+    " Enable omni completion.
+    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+    if !exists('g:neocomplete#sources#omni#input_patterns')
+        let g:neocomplete#sources#omni#input_patterns = {}
+    endif
+    let g:neocomplete#sources#omni#input_patterns.tex =
+            \ '\v\\%('
+            \ . '\a*cite\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+            \ . '|\a*ref%(\s*\{[^}]*|range\s*\{[^,}]*%(}\{)?)'
+            \ . '|hyperref\s*\[[^]]*'
+            \ . '|includegraphics\*?%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+            \ . '|%(include%(only)?|input)\s*\{[^}]*'
+            \ . '|\a*(gls|Gls|GLS)(pl)?\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
+            \ . '|includepdf%(\s*\[[^]]*\])?\s*\{[^}]*'
+            \ . '|includestandalone%(\s*\[[^]]*\])?\s*\{[^}]*'
+            \ . ')'
+
+    " let last_spell_changedtick = -1
+    " let last_spell_count = 1
+
+    " }}}2
+
+endif
 
 " }}}1
 

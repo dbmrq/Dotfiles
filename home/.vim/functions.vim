@@ -81,7 +81,9 @@ function! s:toggleBG()
     else
         set background=dark
     endif
-    call s:lightlineUpdate()
+    if exists("g:loaded_lightline")
+        call LightlineUpdate()
+    endif
 endfunction
 
 nnoremap <leader>bg :call <SID>toggleBG()<cr>
@@ -118,6 +120,26 @@ nnoremap <expr> <leader>, <SID>addCommas()
 
 " }}}1
 
+" Set cursor to the closest specified character {{{1
+function! FindClosest(...)
+    let line = getline('.')
+    let col = col('.') - 1
+    for arg in a:000
+        let i = 0
+        while i < &l:textwidth
+            if line[col - i] =~ arg
+                call cursor(line, col - i + 1)
+                return
+            elseif line[col + i] =~ arg
+                call cursor(line, col + i + 1)
+                return
+            endif
+            let i += 1
+        endwhile
+    endfor
+endfunction
+" }}}1
+
 " Split lines at space {{{1
 
 function! s:split()
@@ -139,7 +161,7 @@ function! s:split()
     execute "normal! i\<cr>"
 endfunction
 
-nnoremap J :call <SID>split()<cr>
+nnoremap J :call FindClosest(' ')<cr>r<cr>
 nnoremap K J
 
 " }}}1
@@ -176,12 +198,83 @@ nnoremap <expr> <leader>t <SID>thesaurus()
 
 " }}}1
 
-function! s:ventilate()
-    normal gggqG
-    %s/\([.!?]\)\([\])"']*\)\s/\1\2\r/g
-    let pattern = '\v[.!?][])"'']*($|\s)'
-    execute 'g/' . pattern . '/execute "normal! V(gq"'
+" Paste while substituting target {{{1
+
+function! TargetPaste(type, ...)
+    let savedRegister = &l:clipboard == 'unnamed' ? @* : @"
+    if a:type == 'line'
+        normal! `[V`]p
+    else
+        normal! `[v`]p
+    endif
+    if &l:clipboard =~ 'unnamed'
+        let @* = savedRegister
+    else
+        let @" = savedRegister
+    endif
 endfunction
+
+nnoremap <leader>r :set opfunc=TargetPaste<CR>g@
+
+" }}}1
+
+" Add blank lines {{{1
+function! s:BlankUp(count) abort
+  put!=repeat(nr2char(10), a:count)
+  ']+1
+  silent! call repeat#set("\<Plug>BlankUp", a:count)
+endfunction
+
+function! s:BlankDown(count) abort
+  put =repeat(nr2char(10), a:count)
+  '[-1
+  silent! call repeat#set("\<Plug>BlankDown", a:count)
+endfunction
+
+nnoremap <silent> <Plug>BlankUp   :<C-U>call <SID>BlankUp(v:count1)<CR>
+nnoremap <silent> <Plug>BlankDown :<C-U>call <SID>BlankDown(v:count1)<CR>
+
+nmap <leader>k <Plug>BlankUp
+nmap <leader>j <Plug>BlankDown
+" }}}1
+
+" Replace text {{{1
+
+function! Replace(type, ...)
+    if a:0
+        normal! gv"my
+    elseif a:type == 'line'
+        normal! `[V`]"my
+    else
+        normal! `[v`]"my
+    endif
+    let selection = escape(@m, '\?')
+    let selection = substitute(selection, '\n', '\\n', 'g')
+    call inputsave()
+    let replacement = input('Replace "' . selection . '" with: ')
+    " let command = input('', "%s/\\V" . selection . "//gc")
+    call inputrestore()
+    execute "%s/\\V" . selection . "/" . replacement . "/gc"
+    " execute command
+endfunction
+
+nnoremap <leader>c :set opfunc=Replace<CR>g@
+vnoremap <leader>c :call Replace(visualmode(), 1)<CR>
+
+
+function! ReplaceLastChange()
+    let pattern = substitute(escape(@*, '\?'), '\n', '\\n', 'g')
+    let replacement = substitute(escape(@., '\?'), '\n', '\\r', 'g')
+    try
+        execute "%s/\\V" . pattern . "/" . replacement . "/gc"
+    catch /E486/
+        echo 'Pattern not found: "' . pattern . '"'
+    endtry
+endfunction
+
+nnoremap <leader>cc :call ReplaceLastChange()<cr>
+
+" }}}1
 
 " Source .vimrc {{{1
 
