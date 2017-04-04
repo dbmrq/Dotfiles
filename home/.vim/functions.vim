@@ -73,23 +73,23 @@ nnoremap <expr> <leader>sp <SID>smartSplit()
 
 " }}}1
 
-" Toggle background color {{{1
+" " Toggle background color {{{1
 
-function! s:toggleBG()
-    if &background ==# "dark"
-        set background=light
-    else
-        set background=dark
-    endif
-    if exists("g:loaded_lightline")
-        call LightlineUpdate()
-    endif
-endfunction
+" function! s:toggleBG()
+"     if &background ==# "dark"
+"         set background=light
+"     else
+"         set background=dark
+"     endif
+"     if exists("g:loaded_lightline")
+"         call LightlineUpdate()
+"     endif
+" endfunction
 
-nnoremap <leader>bg :call <SID>toggleBG()<cr>
-command! ToggleBG call <SID>toggleBG()
+" nnoremap <leader>bg :call <SID>toggleBG()<cr>
+" command! ToggleBG call <SID>toggleBG()
 
-" }}}1
+" " }}}1
 
 " Add and remove a spelllang {{{1
 

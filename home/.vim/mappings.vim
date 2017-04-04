@@ -59,9 +59,10 @@ nnoremap <leader>I a_<Esc>r
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 " }}}
 
-" Switch windows {{{
+" Switch windows and buffers {{{
 nnoremap <leader>w <c-w><c-w>
 nnoremap <leader>W <c-w><c-w>
+nnoremap <leader>b :b#<cr>
 " }}}
 
 " Yank {{{

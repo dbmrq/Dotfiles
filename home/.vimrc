@@ -19,7 +19,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'kana/vim-textobj-indent'
     Plug 'kana/vim-textobj-entire'
     Plug 'kana/vim-textobj-syntax'
-    Plug 'wellle/targets.vim'
+    Plug 'wellle/targets.vim', { 'branch': '162-separator-expand' }
     Plug 'justinmk/vim-sneak'
     Plug 'tommcdo/vim-exchange'
     Plug 'junegunn/goyo.vim'
@@ -31,7 +31,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'ntpeters/vim-better-whitespace'
     Plug 'tweekmonster/spellrotate.vim'
     " Plug 'zirrostig/vim-schlepp'
-    Plug 'tweekmonster/local-indent.vim'
+    " Plug 'tweekmonster/local-indent.vim'
     Plug 'maxbrunsfeld/vim-yankstack'
     Plug 'henrik/vim-indexed-search'
     Plug 'nelstrom/vim-visual-star-search'
@@ -39,7 +39,6 @@ call plug#begin('~/.vim/bundle')
     Plug 'airblade/vim-gitgutter'
     Plug 'Raimondi/delimitMate'
     Plug 'mbbill/undotree'
-    Plug 'ctrlpvim/ctrlp.vim'
     if has('nvim')
         Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     else
@@ -50,7 +49,10 @@ call plug#begin('~/.vim/bundle')
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'itchyny/lightline.vim'
     Plug 'sheerun/vim-polyglot'
+    " Plug 'w0rp/ale'
+    Plug 'yuttie/comfortable-motion.vim'
     Plug 'altercation/vim-colors-solarized'
+    Plug 'rhysd/vim-grammarous'
     " Plug 'terryma/vim-expand-region'
     " Plug 'chrisbra/NrrwRgn'
 

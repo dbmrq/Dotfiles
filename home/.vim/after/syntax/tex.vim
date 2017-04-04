@@ -31,3 +31,5 @@ execute 'syntax match texStatement /\v\\%(' . join([
 syntax match texStatement "\\apud" nextgroup=texRefOptions,texCites
 syntax match texStatement "\\textapud" nextgroup=texRefOptions,texCites
 
+syn keyword texTodo	contained IMPORTANT IMPORTANTE
+

@@ -152,27 +152,6 @@ vmap <silent> -s <Plug>(SpellRotateBackwardV)
 
 " }}}1
 
-" CtrlP {{{1
-
-" run :CtrlPMRU when vim is opened without any file
-function! NoFile()
-    if @% == ""
-        :CtrlPMRU
-    endif
-endfunction
-autocmd VimEnter * call NoFile()
-
-let g:ctrlp_map = ''
-nnoremap <c-p> :CtrlP 
-
-let g:ctrlp_working_path_mode = 'c'
-let g:ctrlp_path_nolim = 1
-" let g:ctrlp_show_hidden = 1
-" let g:ctrlp_max_files = 0
-" let g:ctrlp_max_depth = 40
-
-" }}}1
-
 " vim-surround {{{1
 
 function! LookLeft(char)
@@ -381,7 +360,12 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
-let g:vimtex_format_enabled = 1
+" let g:vimtex_format_enabled = 1
+
+let g:vimtex_latexmk_continuous = 0
+let g:vimtex_latexmk_background = 1
+
+autocmd User VimtexEventInitPost exe 'cd' b:vimtex.root
 
 " }}}1
 
@@ -490,9 +474,9 @@ endif
 
 " }}}1
 
-" local-indent {{{1
+" " local-indent {{{1
 
-au BufReadPre,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty LocalIndentGuide +hl
+" au BufReadPre,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty LocalIndentGuide +hl
 
-" }}}1
+" " }}}1
 

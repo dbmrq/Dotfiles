@@ -11,3 +11,5 @@ item
 citetitle
 addbibresource
 term
+como
+newcommand

@@ -35,6 +35,9 @@ vnoremap <leader>em c\emph{<c-r><c-o>"}<esc>
 nnoremap <leader>cm viw<esc>a}<esc>bi\{<esc>i
 vnoremap <leader>cm <esc>`>a}<esc>`<i\{<esc>i
 
+" delete surrounding command
+nnoremap daC F\df{f}x
+
 " }}}
 
 " Show word count when saving {{{

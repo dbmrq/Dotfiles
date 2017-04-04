@@ -27,9 +27,9 @@ endif
 set wrap
 set linebreak
 set textwidth=78
-if executable("par")
-    set formatprg=par\ -w78
-endif
+" if executable("par")
+"     set formatprg=par\ -w78
+" endif
 if &l:formatoptions =~ "t"
     let &colorcolumn="79,".join(range(101,999),",")
 else
@@ -61,7 +61,7 @@ endif
 " TeX {{{
 
 let g:tex_flavor = "latex"
-au BufReadPre,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
+au BufReadPost,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
 
 au FileType markdown,text,tex set fo+=12
 
@@ -91,13 +91,50 @@ set autowrite
 set complete+=kspell
 
 " change directory to current file's
-autocmd BufEnter * silent! lcd %:p:h
+autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h
 
 " open file with cursor at last position
 autocmd BufReadPost *
     \ if line("'\"") >= 1 && line("'\"") <= line("$") |
     \     exe "normal! g`\"" |
     \ endif
+
+" use ag instead of grep
+if executable("ag")
+    set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column
+    set grepformat=%f:%l:%c:%m,%f:%l:%m
+endif
+
+augroup autoquickfix
+    autocmd!
+    autocmd QuickFixCmdPost [^l]* cwindow
+    autocmd QuickFixCmdPost    l* lwindow
+augroup END
+
+" MRU
+function! NoFile()
+    if @% == ""
+        belowright 12new +setl\ buftype=nofile
+        set nowrap
+        set conceallevel=2
+        call matchadd('Conceal',
+                    \ '^\zs.*\ze\/.*\/.*\/', 10, 99, {'conceal': '…'})
+        0put =v:oldfiles
+        execute 'g/^/m0'
+        execute 'normal! G'
+        nnoremap <buffer> <CR> :call OpenMRUFile()<CR>
+    endif
+endfunction
+
+function! OpenMRUFile()
+    let l:file = getline('.')
+    q
+    execute 'e' l:file
+endfunction
+
+autocmd VimEnter * call NoFile()
+
+
 
 " }}}
 
