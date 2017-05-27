@@ -1,0 +1,17 @@
+argumenta,defende,sustenta,propõe,mantém,afirma,aponta,nota,observa,coloca,lembra,ressalta,assinala,destaca,salienta,enfatiza,reforça,alerta,adverte,sugere,indica,reflete,pondera,continua,prossegue,complementa,completa,esclarece,explica,conclui,constata,assevera,ilustra,rebate
+
+exame,análise,abordagem,discussão,raciocínio,pesquisa,investigação,explicação,ilustração,exposição,interpretação,apresentação,demonstração,compreensão,reflexão
+
+obra,trabalho,livro,texto,escrito,título
+
+compreender,entender,conceber,conhecer,estudar,analisar,perceber,reconhecer,observar,investigar,examinar,recorrer,ter em mente,por em questão,olhar,meditar,clarificar,refletir,considerar,voltar-se,atentar,ter em conta,dar conta de,alcançar,dominar,ter ciência,saber,precisar,aclarar,elucidar,desvendar,sondar,lograr,traquejar,dar cabo,abordar
+
+ideia,noção,conceito,definição,interpretação,compreensão,teoria,doutrina,filosofia,ciência,disciplina,área,sistema,matéria
+
+fato,situação,circunstância,conjuntura,posição,condição,resultado,conjunção,predicamento
+
+posição,opinião,partido,parecer,modo de ver,ponto de vista,persuasão,disposição,postura,conclusão,juízo,crença,conceito,pensamento,convicção,atitude
+
+delinear,esboçar,desenvolver,tecer,sugerir,traçar
+
+argumento,ponto,raciocínio,conclusão,proposição,posição,tese,postura,atitude,afirmação

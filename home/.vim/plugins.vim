@@ -360,10 +360,15 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
-" let g:vimtex_format_enabled = 1
 
-let g:vimtex_latexmk_continuous = 0
-let g:vimtex_latexmk_background = 1
+let g:vimtex_quickfix_latexlog = {'fix_paths':0}
+
+let g:vimtex_compiler_latexmk = {
+    \ 'backend' : 'process',
+    \ 'background' : 1,
+    \ 'continuous' : 0,
+    \ 'callback' : 0,
+    \}
 
 autocmd User VimtexEventInitPost exe 'cd' b:vimtex.root
 
@@ -479,4 +484,21 @@ endif
 " au BufReadPre,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty LocalIndentGuide +hl
 
 " " }}}1
+
+" vim-textobj-user {{{1
+call textobj#user#plugin('aroundpar', {
+\   '-': {
+\     'select-a-function': 'AroundParA',
+\     'select-a': 'Ap',
+\   },
+\ })
+
+function! AroundParA()
+  normal! {
+  let head_pos = getpos('.')
+  normal! }
+  let tail_pos = getpos('.')
+  return ['v', head_pos, tail_pos]
+endfunction
+" }}}1
 

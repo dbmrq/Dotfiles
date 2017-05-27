@@ -90,6 +90,9 @@ set autowrite
 
 set complete+=kspell
 
+
+set nojoinspaces
+
 " change directory to current file's
 autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h
 
@@ -105,11 +108,11 @@ if executable("ag")
     set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
-augroup autoquickfix
-    autocmd!
-    autocmd QuickFixCmdPost [^l]* cwindow
-    autocmd QuickFixCmdPost    l* lwindow
-augroup END
+" augroup autoquickfix
+"     autocmd!
+"     autocmd QuickFixCmdPost [^l]* cwindow
+"     autocmd QuickFixCmdPost    l* lwindow
+" augroup END
 
 " MRU
 function! NoFile()
@@ -122,6 +125,15 @@ function! NoFile()
         0put =v:oldfiles
         execute 'g/^/m0'
         execute 'normal! G'
+        " for c in range(char2nr('0'), char2nr('9')) +
+        "             \ range(char2nr('a'), char2nr('z')) +
+        "             \ range(char2nr('A'), char2nr('Z'))
+        "     execute 'nnoremap <buffer> ' . nr2char(c) . ' /' . nr2char(c)
+        " endfor
+        " nnoremap <buffer> <c-j> j
+        " nnoremap <buffer> <c-k> k
+        " nnoremap <buffer> <c-h> h
+        " nnoremap <buffer> <c-l> l
         nnoremap <buffer> <CR> :call OpenMRUFile()<CR>
     endif
 endfunction

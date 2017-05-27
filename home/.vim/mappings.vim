@@ -82,7 +82,7 @@ nnoremap <leader>s :set spell!<cr>:set spell?<cr>
 inoremap <c-s> <esc>[s1z=A
 " }}}
 
-" Show current syntag group {{{
+" Show current syntax group {{{
 map <leader>hi :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
     \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
     \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
@@ -92,4 +92,13 @@ map <leader>hi :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
 " Select text just pasted {{{
 noremap gV `[v`]
 " }}}
+
+" Add blank lines above and below current paragraphs {{{1
+nnoremap <leader>a mn{O<esc>}o<esc>`n
+vnoremap <leader>a <esc>`<O<esc>`>o<esc>gv
+
+" Also add fold
+nmap <leader>A {O<esc>}o<esc>{V}<Plug>Chalk<esc>a
+
+" }}}1
 

@@ -36,7 +36,7 @@ nnoremap <leader>cm viw<esc>a}<esc>bi\{<esc>i
 vnoremap <leader>cm <esc>`>a}<esc>`<i\{<esc>i
 
 " delete surrounding command
-nnoremap daC F\df{f}x
+nmap daC F\df{f}x
 
 " }}}
 
@@ -67,13 +67,13 @@ command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 
 " Better b and e for TeX {{{1
 nnoremap <silent> b B
-nnoremap <silent> B ?\U[.,;:]\(\s*\\|\n*\\|$*\)*\a?e<cr>:noh<cr>
+nnoremap <silent> B ?\U[.,;:?!{(\[]\(\s*\\|\d*\\|\n*\\|$*\)*\a?e<cr>:noh<cr>
 vnoremap <silent> b B
-vnoremap <silent> B ?\U[.,;:]\(\s*\\|\n*\\|$*\)*\a?e<cr><esc>:noh<cr>gv
+vnoremap <silent> B ?\U[.,;:?!{(\[]\(\s*\\|\d*\\|\n*\\|$*\)*\a?e<cr><esc>:noh<cr>gv
 nnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr>:noh<cr>
-nnoremap <silent> E /\U[.,;:]\(\s\\|\n\\|$\)<cr>:noh<cr>
+nnoremap <silent> E /\U[.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)<cr>:noh<cr>
 vnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr><esc>:noh<cr>gv
-vnoremap <silent> E /\U[.,;:]\(\s\\|\n\\|$\)<cr><esc>:noh<cr>gv
+vnoremap <silent> E /\U[.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)<cr><esc>:noh<cr>gv
 " }}}1
 
 " Change the closest comma, semicolon or colon int a period {{{1

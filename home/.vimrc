@@ -19,6 +19,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'kana/vim-textobj-indent'
     Plug 'kana/vim-textobj-entire'
     Plug 'kana/vim-textobj-syntax'
+    Plug 'kana/vim-textobj-fold'
     Plug 'wellle/targets.vim', { 'branch': '162-separator-expand' }
     Plug 'justinmk/vim-sneak'
     Plug 'tommcdo/vim-exchange'
