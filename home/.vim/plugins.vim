@@ -216,7 +216,6 @@ set noshowmode
 
 let g:lightline = {'colorscheme': 'solarized',}
 
-
 augroup LightLineColorscheme
     autocmd!
     autocmd ColorScheme * call LightlineUpdate()
@@ -372,6 +371,11 @@ let g:vimtex_compiler_latexmk = {
 
 autocmd User VimtexEventInitPost exe 'cd' b:vimtex.root
 
+let g:vimtex_index_split_pos = "full"
+let g:vimtex_toc_fold = 1
+let g:vimtex_toc_fold_level_start = 2
+let g:vimtex_index_show_help = 0
+
 " }}}1
 
 " neocomplete/deoplete {{{1
@@ -501,4 +505,14 @@ function! AroundParA()
   return ['v', head_pos, tail_pos]
 endfunction
 " }}}1
+
+" Howdy {{{
+
+let g:howdy_ignore = [
+        \ 'runtime\/doc\/.*.txt',
+        \ 'Table of contents (vimtex)',
+        \ '.*\/.git\/.*',
+    \ ]
+
+" }}}
 

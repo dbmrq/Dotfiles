@@ -21,9 +21,6 @@ vnoremap H ^
 vnoremap L $h
 noremap G G$
 
-inoremap <c-l> <right>
-inoremap <c-h> <left>
-
 " }}}
 
 " Undo points {{{
@@ -60,14 +57,14 @@ nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 " }}}
 
 " Switch windows and buffers {{{
-nnoremap <leader>w <c-w><c-w>
-nnoremap <leader>W <c-w><c-w>
+nnoremap <leader>ww <c-w><c-w>
+" nnoremap <leader>W <c-w><c-w>
 nnoremap <leader>b :b#<cr>
 " }}}
 
 " Yank {{{
 nnoremap Y y$
-nnoremap <expr> <leader>Y :%y+<cr>
+" nnoremap <leader>Y :%y+<cr>
 " }}}
 
 " Fold {{{
@@ -99,6 +96,33 @@ vnoremap <leader>a <esc>`<O<esc>`>o<esc>gv
 
 " Also add fold
 nmap <leader>A {O<esc>}o<esc>{V}<Plug>Chalk<esc>a
+
+" }}}1
+
+" Sudo save {{{
+command! W w !sudo tee % > /dev/null
+" }}}
+
+" Buffers {{{1
+
+noremap <Right> :bnext<cr>
+noremap <Left> :bprevious<cr>
+noremap <Up> :bfirst<cr>
+noremap <Down> :blast<cr>
+
+nnoremap <silent> <expr> <leader>q Quit() . "\<CR>"
+nnoremap <silent> <expr> <leader>Q Quit() . "!\<CR>"
+nnoremap <silent> <expr> <leader>x ":w\<CR>" . Quit() . "\<CR>"
+
+if exists('*Quit')
+    finish
+endif
+
+function! Quit()
+    if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
+        return ':bd' " if there's more than one buffer, bdelete
+    else | return ':q' | endif
+endfunction
 
 " }}}1
 

@@ -27,6 +27,9 @@ endif
 set wrap
 set linebreak
 set textwidth=78
+
+au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
+
 " if executable("par")
 "     set formatprg=par\ -w78
 " endif
@@ -84,12 +87,14 @@ set visualbell
 set noerrorbells
 
 set shortmess+=c
+set shortmess+=A
 
 set updatecount=20
 set autowrite
 
 set complete+=kspell
 
+set switchbuf+=useopen,usetab
 
 set nojoinspaces
 
@@ -113,40 +118,6 @@ endif
 "     autocmd QuickFixCmdPost [^l]* cwindow
 "     autocmd QuickFixCmdPost    l* lwindow
 " augroup END
-
-" MRU
-function! NoFile()
-    if @% == ""
-        belowright 12new +setl\ buftype=nofile
-        set nowrap
-        set conceallevel=2
-        call matchadd('Conceal',
-                    \ '^\zs.*\ze\/.*\/.*\/', 10, 99, {'conceal': '…'})
-        0put =v:oldfiles
-        execute 'g/^/m0'
-        execute 'normal! G'
-        " for c in range(char2nr('0'), char2nr('9')) +
-        "             \ range(char2nr('a'), char2nr('z')) +
-        "             \ range(char2nr('A'), char2nr('Z'))
-        "     execute 'nnoremap <buffer> ' . nr2char(c) . ' /' . nr2char(c)
-        " endfor
-        " nnoremap <buffer> <c-j> j
-        " nnoremap <buffer> <c-k> k
-        " nnoremap <buffer> <c-h> h
-        " nnoremap <buffer> <c-l> l
-        nnoremap <buffer> <CR> :call OpenMRUFile()<CR>
-    endif
-endfunction
-
-function! OpenMRUFile()
-    let l:file = getline('.')
-    q
-    execute 'e' l:file
-endfunction
-
-autocmd VimEnter * call NoFile()
-
-
 
 " }}}
 

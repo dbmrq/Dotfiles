@@ -9,6 +9,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'dbmrq/vim-ditto'
     Plug 'dbmrq/vim-chalk'
     Plug 'dbmrq/vim-dialect'
+    Plug 'dbmrq/vim-howdy'
     Plug 'tpope/vim-sensible'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-commentary'
