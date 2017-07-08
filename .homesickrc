@@ -3,3 +3,4 @@
 system("git config --global core.excludesfile ~/.gitignore")
 
 system("vim +Plug +qall")
+
