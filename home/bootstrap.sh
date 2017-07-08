@@ -154,6 +154,11 @@ brew cask install hammerspoon
 
 brew cask install google-chrome
 brew cask install firefox
+brew cask install vlc
+brew cask install transmission
+brew cask install the-unarchiver
+brew cask install calibre
+brew cask install appcleaner
 
 brew cleanup
 
