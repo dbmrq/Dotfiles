@@ -155,7 +155,6 @@ echo "Installing Homesick..."
 gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink dotfiles
-homesick rc dotfiles
 
 # }}}1
 
@@ -174,6 +173,8 @@ open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.
 open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
 
 # }}}1
+
+homesick rc dotfiles
 
 echo "Remember to check Homebrew's results for aditional instructions!"
 
