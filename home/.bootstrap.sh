@@ -1,0 +1,1 @@
+/Users/daniel/.homesick/repos/dotfiles/home/bootstrap.sh
