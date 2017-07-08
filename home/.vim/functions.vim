@@ -61,13 +61,13 @@ endfunction
 nnoremap <expr> <leader>- <SID>smartSizeDown()
 
 function! s:smartSplit()
-  let l:height=winheight(0)
-  let l:width=winwidth(0)
-  if (l:height*2 > l:width)
-     return ":split\<cr>"
-  else
-      return ":vsplit\<cr>"
-  endif
+    let l:height=winheight(0)
+    let l:width=winwidth(0)
+    if l:width > 2 * &tw + 4 || l:width > l:height * 3
+        return ":vsplit\<cr>"
+    else
+        return ":split\<cr>"
+    endif
 endfunction
 nnoremap <expr> <leader>sp <SID>smartSplit()
 

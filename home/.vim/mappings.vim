@@ -76,7 +76,7 @@ nnoremap <leader>s :set spell!<cr>:set spell?<cr>
 " }}}
 
 " Correct last mistake from insert mode {{{
-inoremap <c-s> <esc>[s1z=A
+inoremap <c-s> <esc>D[s1z=$mNp`Nla
 " }}}
 
 " Show current syntax group {{{

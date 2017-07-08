@@ -12,6 +12,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'dbmrq/vim-howdy'
     Plug 'tpope/vim-sensible'
     Plug 'tpope/vim-surround'
+    " Plug 'tpope/vim-endwise'
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-repeat'
     Plug 'tpope/vim-rsi'
@@ -32,31 +33,25 @@ call plug#begin('~/.vim/bundle')
     Plug 'Konfekt/FastFold'
     Plug 'ntpeters/vim-better-whitespace'
     Plug 'tweekmonster/spellrotate.vim'
-    " Plug 'zirrostig/vim-schlepp'
-    " Plug 'tweekmonster/local-indent.vim'
     Plug 'maxbrunsfeld/vim-yankstack'
     Plug 'henrik/vim-indexed-search'
     Plug 'nelstrom/vim-visual-star-search'
     Plug 'haya14busa/incsearch.vim'
-    Plug 'airblade/vim-gitgutter'
+    " Plug 'airblade/vim-gitgutter'
     Plug 'Raimondi/delimitMate'
     Plug 'mbbill/undotree'
     if has('nvim')
         Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     else
-        " Plug 'maralla/completor.vim'
         Plug 'Shougo/neocomplete.vim'
     endif
     Plug 'lervag/vimtex'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-    Plug 'itchyny/lightline.vim'
     Plug 'sheerun/vim-polyglot'
-    " Plug 'w0rp/ale'
     Plug 'yuttie/comfortable-motion.vim'
-    Plug 'altercation/vim-colors-solarized'
     Plug 'rhysd/vim-grammarous'
-    " Plug 'terryma/vim-expand-region'
-    " Plug 'chrisbra/NrrwRgn'
+    Plug 'altercation/vim-colors-solarized'
+    Plug 'atelierbram/Base2Tone-vim'
 
 call plug#end()
 

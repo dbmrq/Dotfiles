@@ -1,4 +1,6 @@
 
+runtime! plugin/sensible.vim
+
 " Appearance {{{
 
 syntax enable
@@ -13,6 +15,29 @@ set showcmd
 set scrolloff=5
 set sidescrolloff=7
 set sidescroll=1
+
+set ruler
+set laststatus=0
+set showmode
+
+au ColorScheme * hi! link StatusLine FoldColumn
+au ColorScheme * hi! link StatusLineNC LineNr
+au ColorScheme * hi! link VertSplit LineNr
+set fillchars=
+
+set stl=
+set stl+=%=%t%{&mod?'\ +':''}\ %p%%
+set stl+=%{&readonly&&&ft!='help'?'\ [RO]':''}
+set stl+=%{&ft=='help'?'\ [Help]':''}
+set stl+=%{&ff!='unix'?'\ ['.&ff.']':''}
+set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
+set stl+=\ 
+
+set rulerformat=
+set rulerformat+=%30(%=%t%{&mod?'\ +':''}\ %p%%%)
+set rulerformat+=%{&readonly?'\ [RO]':''}
+set rulerformat+=%{&ff!='unix'?'\ ['.&ff.']':''}
+set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
 
 if $BACKGROUND == 'light'
     set background=light
@@ -120,4 +145,5 @@ endif
 " augroup END
 
 " }}}
+
 

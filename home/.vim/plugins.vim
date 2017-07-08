@@ -210,36 +210,36 @@ nmap <expr> cd ChangeDetectedSurrounding()
 
 " }}}1
 
-" lightline.vim {{{1
+" " lightline.vim {{{1
 
-set noshowmode
+" set noshowmode
 
-let g:lightline = {'colorscheme': 'solarized',}
+" let g:lightline = {'colorscheme': 'solarized',}
 
-augroup LightLineColorscheme
-    autocmd!
-    autocmd ColorScheme * call LightlineUpdate()
-augroup END
+" augroup LightLineColorscheme
+"     autocmd!
+"     autocmd ColorScheme * call LightlineUpdate()
+" augroup END
 
-function! LightlineUpdate()
-    if !exists('g:loaded_lightline')
-        return
-    endif
-    try
-        if g:colors_name =~# 'wombat\|solarized\|landscape\
-                            \ |jellybeans\|seoul256\|Tomorrow'
-            let g:lightline.colorscheme =
-                \ substitute(substitute(g:colors_name, '-', '_', 'g'),
-                \ '256.*', '', '')
-            call lightline#init()
-            call lightline#colorscheme()
-            call lightline#update()
-        endif
-    catch
-    endtry
-endfunction
+" function! LightlineUpdate()
+"     if !exists('g:loaded_lightline')
+"         return
+"     endif
+"     try
+"         if g:colors_name =~# 'wombat\|solarized\|landscape\
+"                             \ |jellybeans\|seoul256\|Tomorrow'
+"             let g:lightline.colorscheme =
+"                 \ substitute(substitute(g:colors_name, '-', '_', 'g'),
+"                 \ '256.*', '', '')
+"             call lightline#init()
+"             call lightline#colorscheme()
+"             call lightline#update()
+"         endif
+"     catch
+"     endtry
+" endfunction
 
-" }}}1
+" " }}}1
 
 " UltiSnips {{{1
 
