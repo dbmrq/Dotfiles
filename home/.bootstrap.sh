@@ -182,5 +182,11 @@ vim +Plug +qall
 
 # }}}1
 
+# Add gitignore {{{1
+
+git config --global core.excludesfile '~/.gitignore'
+
+# }}}1
+
 echo "Remember to check Homebrew's results for aditional instructions!"
 
