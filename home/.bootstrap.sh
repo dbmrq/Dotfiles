@@ -174,7 +174,13 @@ open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light
 
 # }}}1
 
-homesick rc dotfiles
+# Vim plugins {{{1
+
+echo "Installilng Vim plugins..."
+
+vim +Plug +qall
+
+# }}}1
 
 echo "Remember to check Homebrew's results for aditional instructions!"
 

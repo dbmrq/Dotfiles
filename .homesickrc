@@ -1,6 +1,0 @@
-#!/usr/bin/env ruby
-
-system("git config --global core.excludesfile ~/.gitignore")
-
-system("vim +Plug +qall")
-
