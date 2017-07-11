@@ -121,7 +121,7 @@ brew install trash
 brew install fasd
 brew install zsh
 brew install curl --with-openssl
-brew install vim --with-override-system-vi --with-python --with-cscope --with-lua --with-luajit
+brew install macvim --with-override-system-vi --with-python --with-cscope --with-lua --with-luajit --HEAD
 
 brew tap caskroom/cask
 brew cask install java

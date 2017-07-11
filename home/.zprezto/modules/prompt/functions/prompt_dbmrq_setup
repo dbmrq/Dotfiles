@@ -1,5 +1,9 @@
 # My small tweaks to Prezto's "minimal" theme
 #
+# In my version, the prompt changes when in normal/insert mode and when
+# running with privileges. The path shows in red when not writable.
+#
+#
 # A monochrome theme that displays basic information.
 #
 # Authors:
@@ -11,45 +15,53 @@
 #
 
 function +vi-git_status {
-  # Check for untracked files or updated submodules since vcs_info does not.
-  if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
-    hook_com[unstaged]='%F{red}●%f'
-  fi
+    # Check for untracked files or updated submodules since vcs_info does not.
+    if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
+        hook_com[unstaged]='%F{red}●%f'
+    fi
 }
 
-function prompt_minimal_precmd {
-  vcs_info
+function prompt_dbmrq_precmd {
+
+    # Show path in read if directory isn't writable
+    if [[ -w $PWD ]]; then
+        path_color=""
+    else
+        path_color="%F{red}"
+    fi
+
+    vcs_info
 }
 
-function prompt_minimal_setup {
-  setopt LOCAL_OPTIONS
-  unsetopt XTRACE KSH_ARRAYS
-  prompt_opts=(cr percent subst)
+function prompt_dbmrq_setup {
+    setopt LOCAL_OPTIONS
+    unsetopt XTRACE KSH_ARRAYS
+    prompt_opts=(cr percent subst)
 
-  # Load required functions.
-  autoload -Uz add-zsh-hook
-  autoload -Uz vcs_info
+    # Load required functions.
+    autoload -Uz add-zsh-hook
+    autoload -Uz vcs_info
 
-  # Add hook for calling vcs_info before each command.
-  add-zsh-hook precmd prompt_minimal_precmd
+    # Add hook for calling vcs_info before each command.
+    add-zsh-hook precmd prompt_dbmrq_precmd
 
-  # Set vcs_info parameters.
-  zstyle ':vcs_info:*' enable bzr git hg svn
-  zstyle ':vcs_info:*' check-for-changes true
-  zstyle ':vcs_info:*' stagedstr '%F{green}●%f'
-  zstyle ':vcs_info:*' unstagedstr '%F{yellow}●%f'
-  zstyle ':vcs_info:*' formats ' [%b%c%u]'
-  zstyle ':vcs_info:*' actionformats " [%b%c%u|%F{cyan}%a%f]"
-  zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b|%F{cyan}%r%f'
-  zstyle ':vcs_info:git*+set-message:*' hooks git_status
+    # Set vcs_info parameters.
+    zstyle ':vcs_info:*' enable bzr git hg svn
+    zstyle ':vcs_info:*' check-for-changes true
+    zstyle ':vcs_info:*' stagedstr '%F{green}●%f'
+    zstyle ':vcs_info:*' unstagedstr '%F{yellow}●%f'
+    zstyle ':vcs_info:*' formats ' [%b%c%u]'
+    zstyle ':vcs_info:*' actionformats " [%b%c%u|%F{cyan}%a%f]"
+    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b|%F{cyan}%r%f'
+    zstyle ':vcs_info:git*+set-message:*' hooks git_status
 
-  # Set editor-info parameters.
-  zstyle ':prezto:module:editor:info:keymap:primary' format ">"
-  zstyle ':prezto:module:editor:info:keymap:alternate' format "<"
+    # Set editor-info parameters.
+    zstyle ':prezto:module:editor:info:keymap:primary' format "%(!.>>.>)"
+    zstyle ':prezto:module:editor:info:keymap:alternate' format "%(!.>>.<)"
 
-  # Define prompts.
-  PROMPT='%2~${vcs_info_msg_0_} ${editor_info[keymap]} '
-  RPROMPT=''
+    # Define prompts.
+    PROMPT='${path_color}%2~%f${vcs_info_msg_0_} ${editor_info[keymap]} '
+    RPROMPT=''
 }
 
-prompt_minimal_setup "$@"
+prompt_dbmrq_setup "$@"
