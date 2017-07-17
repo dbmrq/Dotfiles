@@ -185,7 +185,7 @@ hs.hotkey.bind(super, 'H', function()-- {{{3
         compensateMargins()
         return
     end
-    if cell.w <= 1 then
+    if cell.w <= 2 then
         grow = true
     elseif cell.w >= grid.GRIDWIDTH then
         grow = false
@@ -210,7 +210,7 @@ hs.hotkey.bind(super, 'L', function()-- {{{3
         compensateMargins()
         return
     end
-    if cell.w <= 1 then
+    if cell.w <= 2 then
         grow = true
     elseif cell.w >= grid.GRIDWIDTH then
         grow = false
