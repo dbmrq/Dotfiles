@@ -3,7 +3,7 @@
 
 local grid = require "hs.grid"
 grid.setMargins('20,20')
-grid.setGrid('6x4')
+grid.setGrid('6x6')
 
 -- Helper functions {{{1
 
@@ -102,23 +102,71 @@ hs.hotkey.bind(super, ';', grid.maximizeWindow)
 
 -- Move windows {{{2
 
-hs.hotkey.bind(super, 'Left', function()-- {{{3
-    grid.pushWindowLeft()
+hs.hotkey.bind(super, 'Up', function()-- {{{3
+    local win = hs.window.focusedWindow()
+    local cell = grid.get(win)
+    if cell.y == 0 then
+        return
+    end
+    if cell.h == 3 then
+        grid.pushWindowUp()
+        grid.pushWindowUp()
+        grid.pushWindowUp()
+    else
+        grid.pushWindowUp()
+        grid.pushWindowUp()
+    end
     compensateMargins()
 end)-- }}}3
 
 hs.hotkey.bind(super, 'Down', function()-- {{{3
-    grid.pushWindowDown()
+    local win = hs.window.focusedWindow()
+    local cell = grid.get(win)
+    if cell.y + cell.h >= grid.GRIDHEIGHT then
+        return
+    end
+    if cell.h == 3 then
+        grid.pushWindowDown()
+        grid.pushWindowDown()
+        grid.pushWindowDown()
+    else
+        grid.pushWindowDown()
+        grid.pushWindowDown()
+    end
     compensateMargins()
 end)-- }}}3
 
-hs.hotkey.bind(super, 'Up', function()-- {{{3
-    grid.pushWindowUp()
+hs.hotkey.bind(super, 'Left', function()-- {{{3
+    local win = hs.window.focusedWindow()
+    local cell = grid.get(win)
+    if cell.x == 0 then
+        return
+    end
+    if cell.w == 3 then
+        grid.pushWindowLeft()
+        grid.pushWindowLeft()
+        grid.pushWindowLeft()
+    else
+        grid.pushWindowLeft()
+        grid.pushWindowLeft()
+    end
     compensateMargins()
 end)-- }}}3
 
 hs.hotkey.bind(super, 'Right', function()-- {{{3
-    grid.pushWindowRight()
+    local win = hs.window.focusedWindow()
+    local cell = grid.get(win)
+    if cell.x + cell.w >= grid.GRIDWIDTH then
+        return
+    end
+    if cell.w == 3 then
+        grid.pushWindowRight()
+        grid.pushWindowRight()
+        grid.pushWindowRight()
+    else
+        grid.pushWindowRight()
+        grid.pushWindowRight()
+    end
     compensateMargins()
 end)-- }}}3
 
@@ -135,14 +183,20 @@ hs.hotkey.bind(super, 'J', function()-- {{{3
         compensateMargins()
         return
     end
-    if cell.h <= 1 then
+    if cell.h <= 2 then
         grow = true
     elseif cell.h >= grid.GRIDHEIGHT then
         grow = false
     end
     resizeFinderH(cell)
-    if grow then
+    if grow and cell.h >= 4 then
         grid.resizeWindowTaller()
+        grid.resizeWindowTaller()
+    elseif grow then
+        grid.resizeWindowTaller()
+    elseif cell.h >= 6 then
+        grid.resizeWindowShorter()
+        grid.resizeWindowShorter()
     else
         grid.resizeWindowShorter()
     end
@@ -160,14 +214,20 @@ hs.hotkey.bind(super, 'K', function()-- {{{3
         compensateMargins()
         return
     end
-    if cell.h <= 1 then
+    if cell.h <= 2 then
         grow = true
     elseif cell.h >= grid.GRIDHEIGHT then
         grow = false
     end
     resizeFinderH(cell)
-    if grow then
+    if grow and cell.h >= 4 then
         grid.resizeWindowTaller()
+        grid.resizeWindowTaller()
+    elseif grow then
+        grid.resizeWindowTaller()
+    elseif cell.h >= 6 then
+        grid.resizeWindowShorter()
+        grid.resizeWindowShorter()
     else
         grid.resizeWindowShorter()
     end
@@ -191,8 +251,14 @@ hs.hotkey.bind(super, 'H', function()-- {{{3
         grow = false
     end
     resizeFinderW(cell)
-    if grow then
+    if grow and cell.w >= 4 then
         grid.resizeWindowWider()
+        grid.resizeWindowWider()
+    elseif grow then
+        grid.resizeWindowWider()
+    elseif cell.w >= 6 then
+        grid.resizeWindowThinner()
+        grid.resizeWindowThinner()
     else
         grid.resizeWindowThinner()
     end
@@ -216,8 +282,14 @@ hs.hotkey.bind(super, 'L', function()-- {{{3
         grow = false
     end
     resizeFinderW(cell)
-    if grow then
+    if grow and cell.w >= 4 then
         grid.resizeWindowWider()
+        grid.resizeWindowWider()
+    elseif grow then
+        grid.resizeWindowWider()
+    elseif cell.w >= 6 then
+        grid.resizeWindowThinner()
+        grid.resizeWindowThinner()
     else
         grid.resizeWindowThinner()
     end
