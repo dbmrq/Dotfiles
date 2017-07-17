@@ -51,7 +51,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'yuttie/comfortable-motion.vim'
     Plug 'rhysd/vim-grammarous'
     Plug 'altercation/vim-colors-solarized'
-    Plug 'atelierbram/Base2Tone-vim'
+    Plug 'rhysd/committia.vim'
 
 call plug#end()
 

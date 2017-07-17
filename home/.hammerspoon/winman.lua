@@ -3,35 +3,33 @@
 
 local grid = require "hs.grid"
 grid.setMargins('20,20')
-grid.setGrid('4x4')
+grid.setGrid('6x4')
 
 -- Helper functions {{{1
 
 -- Keep windows anchored at the bottom {{{2
 local function snapToBottom(win, cell, screen)
-    local newCell =
-        hs.geometry(cell.x, grid.GRIDHEIGHT - cell.h, cell.w, cell.h)
+    local newCell = hs.geometry(cell.x, grid.GRIDHEIGHT - cell.h,
+                                cell.w, cell.h)
     grid.set(win, newCell, screen)
 end-- }}}2
 
 -- Keep windows anchored at the top {{{2
 local function snapToTop(win, cell, screen)
-    local newCell =
-        hs.geometry(cell.x, 0, cell.w, cell.h)
+    local newCell = hs.geometry(cell.x, 0, cell.w, cell.h)
     grid.set(win, newCell, screen)
 end-- }}}2
 
 -- Keep windows anchored to the left {{{2
 local function snapLeft(win, cell, screen)
-    local newCell =
-        hs.geometry(0, cell.y, cell.w, cell.h)
+    local newCell = hs.geometry(0, cell.y, cell.w, cell.h)
     grid.set(win, newCell, screen)
 end-- }}}2
 
 -- Keep windows anchored to the right {{{2
 local function snapRight(win, cell, screen)
-    local newCell =
-        hs.geometry(grid.GRIDWIDTH - cell.w, cell.y, cell.w, cell.h)
+    local newCell = hs.geometry(grid.GRIDWIDTH - cell.w,
+                                cell.y, cell.w, cell.h)
     grid.set(win, newCell, screen)
 end-- }}}2
 
@@ -65,21 +63,13 @@ local function compensateMargins()
 end-- }}}2
 
 -- Hide Finder's sidebar when the window is too narrow {{{2
--- hideSidebar = hs.timer.delayed.new(1, function()
---     app:selectMenuItem({"Visualizar", "Ocultar Barra Lateral"})
--- end)
--- showSidebar = hs.timer.delayed.new(1, function()
---     app:selectMenuItem({"Visualizar", "Mostrar Barra Lateral"})
--- end)
 function resizeFinderW(cell)
     local app = hs.application.frontmostApplication()
     if app:name() == "Finder" then
         if cell.w == 2 and not grow then
-            -- hideSideBar:start()
             app:selectMenuItem({"Visualizar", "Ocultar Barra Lateral"})
             -- app:selectMenuItem({"View", "Hide Sidebar"}) -- In english
         else
-            -- showSideBar:start()
             app:selectMenuItem({"Visualizar", "Mostrar Barra Lateral"})
             -- app:selectMenuItem({"View", "Show Sidebar"}) -- In english
         end
@@ -251,21 +241,18 @@ hs.hotkey.bind(super, 'O', function()
         local window = windows[i]
         local frame = window:frame()
         local desktop = hs.window.desktop():frame()
-        if frame.x + frame.w > desktop.w - 120 and
-            frame ~= desktop then
-                frame.w = desktop.w - frame.x - 120
-                window:setFrame(frame)
-                finished = true
+        if frame.x + frame.w > desktop.w - 120 and frame ~= desktop then
+            frame.w = desktop.w - frame.x - 120
+            window:setFrame(frame)
+            finished = true
         end
     end
     if finished then return end
     for i in pairs(windows) do
         local window = windows[i]
         local frame = window:frame()
-        print(frame)
         local desktop = hs.window.desktop():frame()
         if frame.x + frame.w == desktop.w - 120 then
-            print('lele')
             frame.w = frame.w + 100
             window:setFrame(frame)
         end

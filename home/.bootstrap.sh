@@ -18,54 +18,51 @@ sudo softwareupdate -i -a
 
 # Preferences {{{1
 
-# inspired by https://mths.be/macos
+# based on https://mths.be/macos
 
 echo "Setting preferences..."
 
-# Trackpad {{{2
+# # Trackpad {{{2
 
-# Trackpad: enable tap to click for this user and for the login screen
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+# # Trackpad: enable tap to click for this user and for the login screen
+# defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+# defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+# defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-# }}}2
+# # }}}2
 
-# Screenshots {{{2
+# # Screenshots {{{2
 
-# Save screenshots to the desktop
-defaults write com.apple.screencapture location -string "${HOME}/Desktop"
+# # Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
+# defaults write com.apple.screencapture type -string "png"
 
-# Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
-defaults write com.apple.screencapture type -string "png"
+# # Disable shadow in screenshots
+# defaults write com.apple.screencapture disable-shadow -bool true
 
-# Disable shadow in screenshots
-defaults write com.apple.screencapture disable-shadow -bool true
+# # }}}2
 
-# }}}2
+# # Finder {{{2
 
-# Finder {{{2
+# # Finder: disable window animations and Get Info animations
+# # defaults write com.apple.finder DisableAllAnimations -bool true
 
-# Finder: disable window animations and Get Info animations
-# defaults write com.apple.finder DisableAllAnimations -bool true
+# # Keep folders on top when sorting by name
+# # defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
-# Keep folders on top when sorting by name
-# defaults write com.apple.finder _FXSortFoldersFirst -bool true
+# # When performing a search, search the current folder by default
+# defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
-# When performing a search, search the current folder by default
-defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
+# # Use column view in all Finder windows by default
+# # Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`, 'Nlsv'
+# defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
-# Use column view in all Finder windows by default
-# Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`, 'Nlsv'
-defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
+# # Show the ~/Library folder
+# chflags nohidden ~/Library
 
-# Show the ~/Library folder
-chflags nohidden ~/Library
+# # Show the /Volumes folder
+# # sudo chflags nohidden /Volumes
 
-# Show the /Volumes folder
-# sudo chflags nohidden /Volumes
-
-# }}}2
+# # }}}2
 
 # Misc {{{2
 
@@ -73,25 +70,25 @@ chflags nohidden ~/Library
 sudo nvram SystemAudioVolume=" "
 
 # Restart automatically if the computer freezes
-sudo systemsetup -setrestartfreeze on
+# sudo systemsetup -setrestartfreeze on
 
 # Disable Dashboard
 defaults write com.apple.dashboard mcx-disabled -bool true
 
 # Prevent Time Machine from prompting to use new hard drives as backup volume
-defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+# defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 
 # Automatically quit printer app once the print jobs complete
-defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+# defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
 # Disable the “Are you sure you want to open this application?” dialog
-defaults write com.apple.LaunchServices LSQuarantine -bool false
+# defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Disable the crash reporter
-defaults write com.apple.CrashReporter DialogType -string "none"
+# defaults write com.apple.CrashReporter DialogType -string "none"
 
 # Wipe all (default) app icons from the Dock
-defaults write com.apple.dock persistent-apps -array
+# defaults write com.apple.dock persistent-apps -array
 
 # }}}2
 
@@ -152,6 +149,8 @@ git clone https://github.com/sorin-ionescu/prezto.git ~/.zprezto
 
 echo "Installing Homesick..."
 
+mkdir ~/.vim/backup ~/.vim/swp ~/.vim/undo
+
 gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink dotfiles
@@ -188,5 +187,5 @@ git config --global core.excludesfile '~/.gitignore'
 
 # }}}1
 
-echo "Remember to check Homebrew's results for aditional instructions!"
+echo "Remember to check Homebrew's results!"
 

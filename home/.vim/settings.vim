@@ -79,12 +79,21 @@ set foldmarker=\ {{{,\ }}}
 " }}}
 
 " Undo {{{
+
 if has('persistent_undo')
-    " set undodir=~/.vim/undo/
     set undofile
     set undolevels=5000
 endif
+
 " }}}
+
+" Directories {{{1
+
+set undodir=~/.vim/undo/,.
+set backupdir=~/.vim/backup/,.,~/tmp,~/
+set directory=~/.vim/swp/,.,~/tmp,/var/tmp,/tmp
+
+" }}}1
 
 " TeX {{{
 

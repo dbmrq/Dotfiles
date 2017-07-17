@@ -376,3 +376,56 @@ hs.window.filter.new('Terminal')-- {{{1
         enterNormal:enable()
     end)-- }}}1
 
+-- -- Safari {{{1
+
+-- safariAddressBar = hs.hotkey.bind({"shift"}, ';', function()---- {{{2
+--     local app = hs.application.frontmostApplication():name()
+--     local element = hs.uielement.focusedElement():role()
+--     if app == "Safari" and not string.find(element, "Text") then
+--         hs.eventtap.keyStroke({"cmd"}, "l")
+--     else
+--         hs.eventtap.keyStrokes(':')
+--     end
+-- end)-- }}}2
+
+-- safariSearch = hs.hotkey.bind({}, '/', function()---- {{{2
+--     local app = hs.application.frontmostApplication():name()
+--     local element = hs.uielement.focusedElement():role()
+--     if app == "Safari" and not string.find(element, "Text") then
+--         hs.eventtap.keyStroke({"cmd"}, "f")
+--     else
+--         hs.eventtap.keyStrokes('/')
+--     end
+-- end)-- }}}2
+
+-- safariFocusPage = hs.hotkey.bind({'ctrl'}, 'c', function()---- {{{2
+--     local app = hs.application.frontmostApplication():name()
+--     if app == "Safari" then
+--         hs.eventtap.keyStroke({}, "escape")
+--         hs.eventtap.keyStroke({"shift"}, "tab")
+--         local element = hs.uielement.focusedElement():role()
+--         local i = 0
+--         while string.find(element, "Button") and i <= 10 do
+--             hs.eventtap.keyStroke({}, "escape")
+--             hs.eventtap.keyStroke({"shift"}, "tab")
+--             print(element)
+--             element = hs.uielement.focusedElement():role()
+--             i = i + 1
+--         end
+--     end
+-- end)-- }}}2
+
+-- hs.window.filter.new('Safari')-- {{{2
+--     :subscribe(hs.window.filter.windowFocused,function()
+--         safariAddressBar:enable()
+--         safariSearch:enable()
+--         safariFocusPage:enable()
+--     end)
+--     :subscribe(hs.window.filter.windowUnfocused,function()
+--         safariAddressBar:disable()
+--         safariSearch:disable()
+--         safariFocusPage:disable()
+--     end)-- }}}2
+
+-- -- }}}1
+

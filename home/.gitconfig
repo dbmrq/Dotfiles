@@ -13,6 +13,9 @@
 	st = status
 	br = branch
 	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    hist10 = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short --max-count=10
+    hist20 = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short --max-count=20
+    hist30 = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short --max-count=30
 	type = cat-file -t
 	dump = cat-file -p
 
@@ -34,7 +37,7 @@
     user = danielbmarques
 
 [filter "lfs"]
+	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-	clean = git-lfs clean -- %f
