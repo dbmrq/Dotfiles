@@ -14,5 +14,5 @@ brew cleanup
 
 echo ""
 echo "`date`: Running brew cask reinstall"
-brew cask reinstall `brew cask outdated`
+brew cask outdated | xargs brew cask reinstall
 
