@@ -7,7 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>~/.brewupdate.sh</string>
+        <string>/Users/dbmrq/.brewupdate.sh</string>
     </array>
 
     <key>StartInterval</key>
