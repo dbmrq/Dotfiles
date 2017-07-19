@@ -38,7 +38,7 @@ inoremap : :<C-g>u
 inoremap <expr> <TAB>  pumvisible() ? "\<c-n>" : "\<TAB>"
 inoremap <expr> <S-TAB>  pumvisible() ? "\<c-p>" : "\<S-TAB>"
 inoremap <expr> <c-j>  pumvisible() ? "\<Down>" : "j"
-inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "k"
+inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "<Esc>lDA"
 " }}}1
 
 " replace last search pattern {{{1
