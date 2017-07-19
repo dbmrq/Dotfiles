@@ -8,6 +8,10 @@ require "readline" -- Readline style bindings
 
 -- Reload config {{{1
 
+hs.hotkey.bind(super, 'R', function()
+  hs.reload()
+end)
+
 function reloadConfig(files)---- {{{2
     doReload = false
     for _,file in pairs(files) do
