@@ -108,17 +108,20 @@ echo "Installing Homebrew and formulae..."
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
+brew install vim
 brew install git
 brew install lua
+brew install tree
 brew install ruby
 brew install luajit
 brew install cscope
+brew install pandoc
 brew install carthage
 brew install trash
 brew install fasd
 brew install zsh
 brew install curl --with-openssl
-brew install macvim --with-override-system-vi --with-python --with-cscope --with-lua --with-luajit --HEAD
+brew install macvim --with-override-system-vim --with-lua --with-luajit --HEAD
 
 brew tap caskroom/cask
 brew cask install java
