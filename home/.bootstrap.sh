@@ -108,7 +108,6 @@ echo "Installing Homebrew and formulae..."
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-brew install vim
 brew install git
 brew install lua
 brew install tree
@@ -116,12 +115,13 @@ brew install ruby
 brew install luajit
 brew install cscope
 brew install pandoc
+brew install thefuck
 brew install carthage
 brew install trash
 brew install fasd
 brew install zsh
 brew install curl --with-openssl
-brew install macvim --with-override-system-vim --with-lua --with-luajit --HEAD
+brew install macvim --with-override-system-vim --with-luajit --HEAD
 
 brew tap caskroom/cask
 brew cask install java
@@ -133,8 +133,6 @@ brew cask install appcleaner
 brew cask install the-unarchiver
 brew cask install calibre
 brew cask install vlc
-
-brew linkapps
 
 brew cleanup
 
@@ -181,6 +179,14 @@ open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light
 echo "Installilng Vim plugins..."
 
 vim +Plug +qall
+
+# }}}1
+
+# Install MacVim opener {{{1
+
+git clone https://github.com/dbmrq/MacVim-Opener.git ~/Desktop/MacVim
+mv ~/Desktop/MacVim/MacVim.app /Applications/MacVim.app
+trash ~/Desktop/MacVim
 
 # }}}1
 

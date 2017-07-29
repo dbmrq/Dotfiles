@@ -31,3 +31,6 @@ alias lni="${aliases[ln]:-ln} -i"
 alias mvi="${aliases[mv]:-mv} -i"
 alias rmi="${aliases[rm]:-rm} -i"
 
+# thefuck alias
+eval $(thefuck --alias)
+
