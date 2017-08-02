@@ -8,6 +8,7 @@ inoremap jk <esc>
 inoremap kj <esc>
 inoremap JK <esc>
 inoremap KJ <esc>
+vnoremap <CR> <esc>
 
 " }}}
 
@@ -41,7 +42,7 @@ inoremap <expr> <c-j>  pumvisible() ? "\<Down>" : "j"
 inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "<Esc>lDA"
 " }}}1
 
-" replace last search pattern {{{1
+" Replace last search pattern {{{1
 
 nnoremap <Leader>cl :%s/<C-r>///g<left><left>
 
@@ -102,6 +103,13 @@ nmap <leader>A {O<esc>}o<esc>{V}<Plug>Chalk<esc>a
 " Sudo save {{{
 command! W w !sudo tee % > /dev/null
 " }}}
+
+" Open current file's directory {{{1
+command! Finder silent exe '!open ' . expand("%:p:h")
+command! Terminal silent exe '! osascript -e "tell application \"Terminal\" to activate" -e
+            \ "tell application \"Terminal\" to do script \"cd ' .
+            \ expand("%:p:h") . '\""'
+" }}}1
 
 " Buffers {{{1
 

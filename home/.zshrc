@@ -26,9 +26,10 @@ alias chmodall='find . -type f -print0 | xargs -0 chmod 0644 && \
 alias rmxattr='xattr -rc * .*'
 alias rmdsstore="find . -name '*.DS_Store' -type f -delete"
 
-alias cleanzip="find . -type f -print0 | xargs -0 chmod 0644 && \
-    find . -type d -print0 | xargs -0 chmod 0755 && \
-    xattr -rc * .* && \
+alias cleanzip="find . -type d -print0 | xargs -0 chmod 0755 && \
+    find . -type f -print0 | xargs -0 chmod 0644 && \
+    xattr -rc *; \
+    xattr -rc .*; \
     find . -name '*.DS_Store' -type f -delete && \
     find . -name '__MACOSX' -type f -delete && \
     zip -r ../archive.zip ."

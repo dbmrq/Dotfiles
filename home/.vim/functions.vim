@@ -41,21 +41,21 @@ inoremap <expr> <CR> CROrUncomment()
 " Split and resize windows {{{1
 
 function! s:smartSizeUp()
-    if winheight(0) + &cmdheight + 1 != &lines
-          " current window is part of a horizontal split
-        return "5\<c-w>+"
-    elseif winwidth(0) != &columns
-        return "5\<c-w>>"
+    if winwidth(0) == &columns
+        " if there are no vertical splits
+        return ":res +5\<CR>"
+    else
+        return ":vertical res +5\<CR>"
     endif
 endfunction
 nnoremap <expr> <leader>= <SID>smartSizeUp()
 
 function! s:smartSizeDown()
-    if winheight(0) + &cmdheight + 1 != &lines
-          " current window is part of a horizontal split
-        return "5\<c-w>-"
-    elseif winwidth(0) != &columns
-        return "5\<c-w><"
+    if winwidth(0) == &columns
+        " if there are no vertical splits
+        return ":res -5\<CR>"
+    else
+        return ":vertical res -5\<CR>"
     endif
 endfunction
 nnoremap <expr> <leader>- <SID>smartSizeDown()
