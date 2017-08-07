@@ -34,7 +34,7 @@ set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
 set stl+=\ 
 
 set rulerformat=
-set rulerformat+=%30(%=%t%{&mod?'\ +':''}\ %p%%%)
+set rulerformat+=%20(%=%t%{&mod?'\ +':''}\ %p%%%)
 set rulerformat+=%{&readonly?'\ [RO]':''}
 set rulerformat+=%{&ff!='unix'?'\ ['.&ff.']':''}
 set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}

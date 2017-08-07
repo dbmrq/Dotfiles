@@ -106,8 +106,9 @@ command! W w !sudo tee % > /dev/null
 
 " Open current file's directory {{{1
 command! Finder silent exe '!open ' . expand("%:p:h")
-command! Terminal silent exe '! osascript -e "tell application \"Terminal\" to activate" -e
-            \ "tell application \"Terminal\" to do script \"cd ' .
+command! Terminal silent exe '! osascript
+            \ -e "tell application \"Terminal\" to activate"
+            \ -e "tell application \"Terminal\" to do script \"cd ' .
             \ expand("%:p:h") . '\""'
 " }}}1
 
@@ -132,5 +133,9 @@ function! Quit()
     else | return ':q' | endif
 endfunction
 
+" }}}1
+
+" Macros {{{1
+nnoremap Q @@
 " }}}1
 

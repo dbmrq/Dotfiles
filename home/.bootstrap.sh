@@ -115,6 +115,8 @@ brew install ruby
 brew install luajit
 brew install cscope
 brew install pandoc
+brew install python
+brew install python3
 brew install thefuck
 brew install carthage
 brew install trash
@@ -122,6 +124,7 @@ brew install fasd
 brew install zsh
 brew install curl --with-openssl
 brew install macvim --with-override-system-vim --with-luajit --HEAD
+osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
 
 brew tap caskroom/cask
 brew cask install java
@@ -179,14 +182,6 @@ open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light
 echo "Installilng Vim plugins..."
 
 vim +Plug +qall
-
-# }}}1
-
-# Install MacVim opener {{{1
-
-git clone https://github.com/dbmrq/MacVim-Opener.git ~/Desktop/MacVim
-mv ~/Desktop/MacVim/MacVim.app /Applications/MacVim.app
-trash ~/Desktop/MacVim
 
 # }}}1
 

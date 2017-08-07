@@ -1,8 +1,6 @@
-for cmd in ['term', 'opus', 'foreign']
-    execute 'syntax region texItalStyle matchgroup=texTypeStyle'
-        \ 'start="\\' . cmd . '\s*{" end="}"'
-        \ 'contains=@NoSpell,@texItalGroup'
-endfor
+
+syntax match texInputFile /\\addbibresource\%(\[.\{-}\]\)\=\s*{.\{-}}/
+      \ contains=texStatement,texInputCurlies,texInputFileOpt
 
 execute 'syntax match texStatement /\v\\%(' . join([
     \   '[Cc]iteauthor\*?',
@@ -32,6 +30,12 @@ syntax match texStatement "\\apud" nextgroup=texRefOptions,texCites
 syntax match texStatement "\\textapud" nextgroup=texRefOptions,texCites
 syntax region texRefZone matchgroup=texStatement
             \ start="\\cf{" end="}\|%stopzone\>" contains=@texRefGroup
+
+for cmd in ['term', 'opus', 'foreign']
+    execute 'syntax region texItalStyle matchgroup=texTypeStyle'
+        \ 'start="\\' . cmd . '\s*{" end="}"'
+        \ 'contains=@NoSpell,@texItalGroup'
+endfor
 
 syn keyword texTodo	contained IMPORTANT IMPORTANTE
 

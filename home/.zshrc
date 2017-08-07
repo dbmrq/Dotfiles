@@ -34,6 +34,8 @@ alias cleanzip="find . -type d -print0 | xargs -0 chmod 0755 && \
     find . -name '__MACOSX' -type f -delete && \
     zip -r ../archive.zip ."
 
+alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs'
+
 # thefuck alias
 eval $(thefuck --alias)
 
