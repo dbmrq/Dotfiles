@@ -27,7 +27,7 @@ function prompt_dbmrq_precmd {
     if [[ -w $PWD ]]; then
         path_color=""
     else
-        path_color="%F{red}"
+        path_color="%F{9}"
     fi
 
     vcs_info
@@ -60,7 +60,7 @@ function prompt_dbmrq_setup {
     zstyle ':prezto:module:editor:info:keymap:alternate' format "%(!.>>.<)"
 
     # Define prompts.
-    PROMPT='${path_color}%2~%f${vcs_info_msg_0_} ${editor_info[keymap]} '
+    PROMPT='${SSH_TTY:+"%F{3}%m:%f "}${path_color}%2~%f${vcs_info_msg_0_} ${editor_info[keymap]} '
     RPROMPT=''
 }
 
