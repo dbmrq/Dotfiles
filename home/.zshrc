@@ -35,6 +35,12 @@ alias rmi="${aliases[rm]:-rm} -i"
 
 eval $(thefuck --alias)
 
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+alias brewu='~/.brewupdate.sh'
 
 alias dt="cd ~/Desktop"
 alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs'
