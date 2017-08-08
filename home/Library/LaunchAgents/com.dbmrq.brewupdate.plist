@@ -2,27 +2,40 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>Label</key>
-    <string>com.dbmrq.brewupdate.plist</string>
-
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Users/dbmrq/.brewupdate.sh</string>
-    </array>
-
-    <key>StartInterval</key>
-    <integer>604800</integer>
-
-    <key>Nice</key>
-    <integer>1</integer>
-
-    <key>RunAtLoad</key>
-    <true/>
-
-    <key>StandardErrorPath</key>
-    <string>/tmp/com.dbmrq.brewupdate.err</string>
-
-    <key>StandardOutPath</key>
-    <string>/tmp/com.dbmrq.brewupdate.out</string>
+	<key>Disabled</key>
+	<true/>
+	<key>Label</key>
+	<string>com.dbmrq.brewupdate.plist</string>
+	<key>Nice</key>
+	<integer>1</integer>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/dbmrq/.brewupdate.sh</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/tmp/com.dbmrq.brewupdate.err</string>
+	<key>StandardOutPath</key>
+	<string>/tmp/com.dbmrq.brewupdate.out</string>
+	<key>StartCalendarInterval</key>
+	<array>
+		<dict>
+			<key>Hour</key>
+			<integer>20</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+			<key>Weekday</key>
+			<integer>4</integer>
+		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>20</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+			<key>Weekday</key>
+			<integer>1</integer>
+		</dict>
+	</array>
 </dict>
 </plist>
