@@ -42,6 +42,8 @@ alias .....="cd ../../../.."
 
 alias brewu='~/.brewupdate.sh'
 
+alias mkdir='mkdir -pv'
+
 alias dt="cd ~/Desktop"
 alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs'
 
