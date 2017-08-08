@@ -156,6 +156,12 @@ gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink dotfiles
 
+sudo chmod +x ~/.tlmgr.sh
+sudo chown root ~/.brewupdate.sh
+sudo chmod 4755 ~/.brewupdate.sh
+sudo chown root ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
+sudo lauchctl load ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
+
 # }}}1
 
 # Change Shell {{{1
@@ -187,6 +193,7 @@ vim +Plug +qall
 git config --global core.excludesfile '~/.gitignore'
 
 # }}}1
+
 
 echo "Remember to check Homebrew's results!"
 
