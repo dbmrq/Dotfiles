@@ -91,6 +91,10 @@ defaults write com.apple.dashboard mcx-disabled -bool true
 
 # }}}1
 
+# Install SF Mono {{{1
+cp -v /Applications/Utilities/Terminal.app/Contents/Resources/Fonts/SFMono-* ~/Library/Fonts
+# }}}1
+
 # Xcode {{{1
 
 echo "Installing xcode-select..."
@@ -133,6 +137,7 @@ brew cask install appcleaner
 brew cask install the-unarchiver
 brew cask install calibre
 brew cask install vlc
+brew cask install basictex
 
 brew cleanup
 
@@ -170,13 +175,9 @@ sudo dscl . -create /Users/$USER UserShell /usr/local/bin/zsh
 
 # }}}1
 
-# Terminal colorscheme {{{1
+# Add gitignore {{{1
 
-echo "Adding Terminal color schemes..."
-
-open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.terminal
-
-open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
+git config --global core.excludesfile '~/.gitignore'
 
 # }}}1
 
@@ -188,12 +189,25 @@ vim +Plug +qall
 
 # }}}1
 
-# Add gitignore {{{1
+# TeX packages {{{1
 
-git config --global core.excludesfile '~/.gitignore'
+sudo tlmgr update --self --all
+
+sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
+collection-langother collection-latexextra collection-pictures logreq \
+biblatex biber biblatex-abnt abntex2
 
 # }}}1
 
+# Terminal colorscheme {{{1
+
+echo "Adding Terminal color schemes..."
+
+open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.terminal
+
+open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
+
+# }}}1
 
 echo "Remember to check Homebrew's results!"
 
