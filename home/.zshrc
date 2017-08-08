@@ -20,6 +20,25 @@ setopt rmstarwait
 
 # Aliases {{{1
 
+# Fix Prezto's BS {{{2
+
+alias cp='nocorrect cp'
+alias ln='nocorrect ln'
+alias mv='nocorrect mv'
+alias rm='nocorrect rm'
+alias cpi="${aliases[cp]:-cp} -i"
+alias lni="${aliases[ln]:-ln} -i"
+alias mvi="${aliases[mv]:-mv} -i"
+alias rmi="${aliases[rm]:-rm} -i"
+
+#  }}}2
+
+eval $(thefuck --alias)
+
+
+alias dt="cd ~/Desktop"
+alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs'
+
 alias chmodall='find . -type f -print0 | xargs -0 chmod 0644 && \
     find . -type d -print0 | xargs -0 chmod 0755'
 
@@ -33,24 +52,6 @@ alias cleanzip="find . -type d -print0 | xargs -0 chmod 0755 && \
     find . -name '*.DS_Store' -type f -delete && \
     find . -name '__MACOSX' -type f -delete && \
     zip -r ../archive.zip ."
-
-alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs'
-
-# thefuck alias
-eval $(thefuck --alias)
-
-# Fix Prezto's BS {{{2
-
-alias cp='nocorrect cp'
-alias ln='nocorrect ln'
-alias mv='nocorrect mv'
-alias rm='nocorrect rm'
-alias cpi="${aliases[cp]:-cp} -i"
-alias lni="${aliases[ln]:-ln} -i"
-alias mvi="${aliases[mv]:-mv} -i"
-alias rmi="${aliases[rm]:-rm} -i"
-
-#  }}}2
 
 #  }}}1
 
