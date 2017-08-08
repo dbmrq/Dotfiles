@@ -3,3 +3,4 @@ Library/Services
 .zprezto/modules/prompt/functions
 Library/Colors
 Library/LaunchAgents
+.ssh
