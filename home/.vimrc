@@ -48,10 +48,8 @@ call plug#begin('~/.vim/bundle')
     Plug 'lervag/vimtex'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'sheerun/vim-polyglot'
-    Plug 'yuttie/comfortable-motion.vim'
-    Plug 'rhysd/vim-grammarous'
+    " Plug 'rhysd/vim-grammarous'
     Plug 'altercation/vim-colors-solarized'
-    Plug 'rhysd/committia.vim'
 
 call plug#end()
 

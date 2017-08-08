@@ -150,9 +150,9 @@ git clone https://github.com/sorin-ionescu/prezto.git ~/.zprezto
 
 echo "Installing Homesick..."
 
-mkdir ~/.vim/backup ~/.vim/swp ~/.vim/undo
+mkdir -p ~/.vim/backup ~/.vim/swp ~/.vim/undo
 
-gem install homesick
+sudo gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink dotfiles
 
@@ -160,7 +160,7 @@ sudo chmod +x ~/.tlmgr.sh
 sudo chown root ~/.brewupdate.sh
 sudo chmod 4755 ~/.brewupdate.sh
 sudo chown root ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
-sudo lauchctl load ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
+sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
 
 # }}}1
 
@@ -174,9 +174,9 @@ sudo dscl . -create /Users/$USER UserShell /usr/local/bin/zsh
 
 echo "Adding Terminal color schemes..."
 
-open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.terminal
+open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.terminal
 
-open /Users/daniel/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
+open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
 
 # }}}1
 
