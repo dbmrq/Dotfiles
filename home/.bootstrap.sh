@@ -142,7 +142,7 @@ brew cleanup
 
 echo "Installing Prezto..."
 
-git clone https://github.com/sorin-ionescu/prezto.git ~/.zprezto
+git clone --recursive -j8 https://github.com/sorin-ionescu/prezto.git ~/.zprezto
 
 # }}}1
 
