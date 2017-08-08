@@ -139,7 +139,13 @@ brew cask install calibre
 brew cask install vlc
 brew cask install basictex
 
+sudo chown -R $(whoami):admin /usr/local
+sudo chmod -R g+rwx /usr/local
+# Unfortunately this seems to be necessary for now, since we can't run `brew`
+# as root and otherwise `brew prune` won't be able to do its thing.
+
 brew cleanup
+brew prune
 
 # }}}1
 

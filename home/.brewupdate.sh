@@ -24,3 +24,5 @@ echo ""
 echo "`date`: Running brew doctor"
 brew doctor
 
+osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
+
