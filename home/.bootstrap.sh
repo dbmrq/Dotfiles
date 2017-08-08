@@ -111,8 +111,11 @@ echo "Installing Homebrew and formulae..."
 
 brew install git
 brew install lua
+brew install zsh
 brew install tree
 brew install ruby
+brew install fasd
+brew install trash
 brew install luajit
 brew install cscope
 brew install pandoc
@@ -120,32 +123,29 @@ brew install python
 brew install python3
 brew install thefuck
 brew install carthage
-brew install trash
-brew install fasd
-brew install zsh
+brew install terminal-notifier
 brew install curl --with-openssl
 brew install macvim --with-override-system-vim --with-luajit --HEAD
 osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
 
 brew tap caskroom/cask
-brew cask install java
-brew cask install hammerspoon
-brew cask install google-chrome
-brew cask install firefox
-brew cask install transmission
-brew cask install appcleaner
-brew cask install the-unarchiver
-brew cask install calibre
 brew cask install vlc
+brew cask install java
+brew cask install calibre
+brew cask install firefox
 brew cask install basictex
+brew cask install appcleaner
+brew cask install hammerspoon
+brew cask install transmission
+brew cask install google-chrome
+brew cask install the-unarchiver
 
 sudo chown -R $(whoami):admin /usr/local
 sudo chmod -R g+rwx /usr/local
-# Unfortunately this seems to be necessary for now, since we can't run `brew`
-# as root and otherwise `brew prune` won't be able to do its thing.
+# This is necessary so that `brew prune` can do its thing.
 
-brew cleanup
 brew prune
+brew cleanup
 
 # }}}1
 
@@ -167,10 +167,9 @@ sudo gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink dotfiles
 
-sudo chmod +x ~/.tlmgr.sh
-sudo chown root ~/.brewupdate.sh
-sudo chmod 4755 ~/.brewupdate.sh
-sudo chown root ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
+sudo chown root:admin ~/.brewupdate.sh
+sudo chmod 4775 ~/.brewupdate.sh
+sudo chown root:admin ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
 sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
 
 # }}}1
