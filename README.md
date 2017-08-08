@@ -12,7 +12,7 @@ They're managed using
 
 To bootstrap a new Mac, run:
 
-    curl --remote-name https://raw.githubusercontent.com/dbmrq/dotfiles/master/home/.bootstrap.sh && ./.bootstrap.sh
+    curl --remote-name https://raw.githubusercontent.com/dbmrq/dotfiles/master/home/.bootstrap.sh && chmod +x .bootstrap.sh && ./.bootstrap.sh
 
 That'll download and run the `.bootstrap.sh` script, which will take care of
 the rest.
