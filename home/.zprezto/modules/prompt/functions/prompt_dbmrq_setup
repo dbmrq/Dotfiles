@@ -1,10 +1,9 @@
-# My small tweaks to Prezto's "minimal" theme
+# @dbmrq tweaks to Prezto's "minimal" theme.
 #
 # In my version, the prompt changes when in normal/insert mode and when
-# running with privileges. The path shows in red when not writable.
+# running with privileges. The path shows in red when not writable and the
+# hostname shows in yellow when running through SSH.
 #
-#
-# A monochrome theme that displays basic information.
 #
 # Authors:
 #   Brian Tse <briankftse@gmail.com>
