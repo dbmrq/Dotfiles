@@ -27,9 +27,15 @@ brew doctor
 echo ""
 echo "Fixing /Applications/ alias"
 
+
+dockutil --remove 'MacVim' --allhomes
+dockutil --add /usr/local/opt/macvim/MacVim.app --position 2
+
+
 rm /Applications/MacVim
 
 osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
+
 
 terminal-notifier -title '.brewupdate.sh' -message 'Homebrew updated!' -appIcon https://brew.sh/img/homebrew-256x256.png
 

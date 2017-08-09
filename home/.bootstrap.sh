@@ -158,6 +158,7 @@ brew install pandoc
 brew install python
 brew install python3
 brew install thefuck
+brew install dockutil
 brew install carthage
 brew install terminal-notifier
 brew install curl --with-openssl
