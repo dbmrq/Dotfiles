@@ -9,7 +9,16 @@ while true; do sudo -n true; sleep 60; \
 
 # Software update {{{1
 
+echo ""
+echo "Updating macOS..."
+echo ""
+
 sudo softwareupdate -i -a
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
 # }}}1
 
@@ -17,7 +26,9 @@ sudo softwareupdate -i -a
 
 # based on https://mths.be/macos
 
+echo ""
 echo "Setting preferences..."
+echo ""
 
 # # Trackpad {{{2
 
@@ -89,23 +100,48 @@ defaults write com.apple.dashboard mcx-disabled -bool true
 
 # }}}2
 
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
 # }}}1
 
 # Install SF Mono {{{1
+
+echo ""
+echo "Copying SF Mono"
+echo ""
+
 cp -v /Applications/Utilities/Terminal.app/Contents/Resources/Fonts/SFMono-* ~/Library/Fonts
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
 # }}}1
 
 # Xcode {{{1
 
-echo "Installing xcode-select..."
+echo ""
+echo "Installing Xcode developer tools..."
+echo ""
 
 xcode-select --install
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
 # }}}1
 
 # Homebrew {{{1
 
+echo ""
 echo "Installing Homebrew and formulae..."
+echo ""
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
@@ -147,19 +183,33 @@ sudo chmod -R g+rwx /usr/local
 brew prune
 brew cleanup
 
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
 # }}}1
 
 # Prezto {{{1
 
+echo ""
 echo "Installing Prezto..."
+echo ""
 
 git clone --recursive -j8 https://github.com/sorin-ionescu/prezto.git ~/.zprezto
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
 # }}}1
 
 # Homesick {{{1
 
-echo "Installing Homesick..."
+echo ""
+echo "Installing Homesick and dotfiles..."
+echo ""
 
 mkdir -p ~/.vim/backup ~/.vim/swp ~/.vim/undo
 
@@ -172,29 +222,70 @@ sudo chmod 4775 ~/.brewupdate.sh
 sudo chown root:admin ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
 sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
 
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
 # }}}1
 
 # Change Shell {{{1
 
+echo ""
+echo "Changing default shell..."
+echo ""
+
 sudo dscl . -create /Users/$USER UserShell /usr/local/bin/zsh
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
 # }}}1
 
 # Add gitignore {{{1
 
+echo ""
+echo "Adding global gitignore..."
+echo ""
+
 git config --global core.excludesfile '~/.gitignore'
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
 # }}}1
 
 # Vim plugins {{{1
 
+echo ""
 echo "Installilng Vim plugins..."
+echo ""
+
+mkdir -pv ~/Code/Vim
+
+git clone https://github.com/dbmrq/vim-ditto ~/Code/Vim/vim-ditto
+git clone https://github.com/dbmrq/vim-chalk ~/Code/Vim/vim-chalk
+git clone https://github.com/dbmrq/vim-dialect ~/Code/Vim/vim-dialect
+git clone https://github.com/dbmrq/vim-howdy ~/Code/Vim/vim-howdy
 
 vim +Plug +qall
 
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
 # }}}1
 
-# TeX packages {{{1
+# TeX {{{1
+
+echo ""
+echo "Installing tex packages"
+echo ""
 
 sudo tlmgr update --self --all
 
@@ -202,15 +293,39 @@ sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
 collection-langother collection-latexextra collection-pictures logreq \
 biblatex biber biblatex-abnt abntex2
 
+mkdir -pv ~/Code/LaTeX/Bibliography
+mkdir -pv ~/Code/LaTeX/Classes
+mkdir -pv ~/Code/LaTeX/Packages
+
+ln -s ~/Code/LaTeX/Classes ~/Library/texmf/tex/latex/classes
+ln -s ~/Code/LaTeX/Packages ~/Library/texmf/tex/latex/packages
+ln -s ~/Code/LaTeX/Bibliography ~/Library/texmf/bibtex/bib
+
+git clone https://github.com/dbmrq/dbmrq.cls ~/Code/LaTeX/Classes/dbmrq
+git clone https://github.com/dbmrq/tex-sensible ~/Code/LaTeX/Packages/sensible
+git clone https://github.com/abntex/biblatex-abnt ~/Code/LaTeX/Packages/biblatex-abnt
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
 # }}}1
 
 # Terminal colorscheme {{{1
 
+echo ""
 echo "Adding Terminal color schemes..."
+echo ""
 
 open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.terminal
 
 open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
 # }}}1
 

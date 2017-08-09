@@ -27,7 +27,7 @@ brew doctor
 echo ""
 echo "Fixing /Applications/ alias"
 
-rm /Applications/MacVim.app
+rm /Applications/MacVim
 
 osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
 

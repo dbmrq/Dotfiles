@@ -1,3 +1,6 @@
+
+" Plug {{{1
+
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -6,10 +9,6 @@ endif
 
 call plug#begin('~/.vim/bundle')
 
-    Plug 'dbmrq/vim-ditto'
-    Plug 'dbmrq/vim-chalk'
-    Plug 'dbmrq/vim-dialect'
-    Plug 'dbmrq/vim-howdy'
     Plug 'tpope/vim-sensible'
     Plug 'tpope/vim-surround'
     " Plug 'tpope/vim-endwise'
@@ -51,10 +50,16 @@ call plug#begin('~/.vim/bundle')
     " Plug 'rhysd/vim-grammarous'
     Plug 'altercation/vim-colors-solarized'
 
+    Plug '~/Code/Vim/vim-ditto'
+    Plug '~/Code/Vim/vim-chalk'
+    Plug '~/Code/Vim/vim-dialect'
+    Plug '~/Code/Vim/vim-howdy'
+
 call plug#end()
 
-command! Plug PlugUpdate | PlugUpgrade | PlugClean! | PlugDiff
+command! Plug PlugUpdate | PlugUpgrade
 
+" }}}1
 
 source ~/.vim/settings.vim
 source ~/.vim/mappings.vim
