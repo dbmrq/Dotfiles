@@ -76,7 +76,8 @@ vnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\
 vnoremap <silent> E /\U[.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)<cr><esc>:noh<cr>gv
 " }}}1
 
-" Change the closest comma, semicolon or colon int a period {{{1
+" Change the closest comma, semicolon or colon into a period {{{1
+
 nnoremap <silent> <leader>. :call MakePeriod()<cr>
 
 function! MakePeriod()
@@ -88,8 +89,6 @@ function! MakePeriod()
     endif
     normal! lgUl
 endfunction
-
-
 
 " }}}1
 

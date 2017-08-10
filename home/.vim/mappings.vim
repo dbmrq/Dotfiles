@@ -135,6 +135,10 @@ endfunction
 
 " }}}1
 
+" Close the quickfix window {{{1
+:autocmd BufReadPost quickfix nnoremap <buffer> q :q<CR>
+" }}}1
+
 " Macros {{{1
 nnoremap Q @@
 " }}}1

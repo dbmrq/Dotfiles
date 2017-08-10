@@ -364,17 +364,19 @@ let g:vimtex_quickfix_latexlog = {'fix_paths':0}
 
 let g:vimtex_compiler_latexmk = {
     \ 'backend' : 'process',
-    \ 'background' : 1,
     \ 'continuous' : 0,
-    \ 'callback' : 0,
+    \ 'background' : 1,
     \}
 
 autocmd User VimtexEventInitPost exe 'cd' b:vimtex.root
+autocmd User VimtexEventInitPost command! CD exe 'cd' b:vimtex.root
 
 let g:vimtex_index_split_pos = "full"
 let g:vimtex_toc_fold = 1
 let g:vimtex_toc_fold_level_start = 2
 let g:vimtex_index_show_help = 0
+let g:vimtex_view_automatic = 0
+" let g:vimtex_quickfix_open_on_warning = 0
 
 " }}}1
 
