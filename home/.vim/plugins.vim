@@ -363,13 +363,16 @@ let g:vimtex_indent_bib_enabled = 0
 let g:vimtex_quickfix_latexlog = {'fix_paths':0}
 
 let g:vimtex_compiler_latexmk = {
-    \ 'backend' : 'process',
+    \ 'backend' : 'jobs',
     \ 'continuous' : 0,
-    \ 'background' : 1,
     \}
 
 autocmd User VimtexEventInitPost exe 'cd' b:vimtex.root
 autocmd User VimtexEventInitPost command! CD exe 'cd' b:vimtex.root
+autocmd User VimtexEventInitPost
+            \ command! -nargs=1 G silent exe 'cd' b:vimtex.root |
+            \ silent vimgrep /<args>/g **/*.tex |
+            \ cw
 
 let g:vimtex_index_split_pos = "full"
 let g:vimtex_toc_fold = 1

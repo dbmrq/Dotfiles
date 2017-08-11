@@ -34,7 +34,7 @@ set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
 set stl+=\ 
 
 set rulerformat=
-set rulerformat+=%20(%=%t%{&mod?'\ +':''}\ %p%%%)
+set rulerformat+=%25(%=%t%{&mod?'\ +':''}\ %p%%%)
 set rulerformat+=%{&readonly?'\ [RO]':''}
 set rulerformat+=%{&ff!='unix'?'\ ['.&ff.']':''}
 set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
@@ -146,6 +146,8 @@ if executable("ag")
     set grepprg=ag\ --nogroup\ --nocolor\ --ignore-case\ --column
     set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
+
+autocmd BufReadPost quickfix set nowrap
 
 " augroup autoquickfix
 "     autocmd!
