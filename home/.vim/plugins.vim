@@ -367,8 +367,9 @@ let g:vimtex_compiler_latexmk = {
     \ 'continuous' : 0,
     \}
 
-autocmd User VimtexEventInitPost exe 'cd' b:vimtex.root
-autocmd User VimtexEventInitPost command! CD exe 'cd' b:vimtex.root
+autocmd User VimtexEventInitPost exe 'cd' fnameescape(b:vimtex.root)
+autocmd User VimtexEventInitPost
+            \ command! CD exe 'cd' fnameescape(b:vimtex.root)
 autocmd User VimtexEventInitPost
             \ command! -nargs=1 G silent exe 'cd' b:vimtex.root |
             \ silent vimgrep /<args>/g **/*.tex |

@@ -92,10 +92,6 @@ endfunction
 
 " }}}1
 
-" Grep **/*.tex {{{1
-command! -nargs=1 G silent vimgrep /<args>/g **/*.tex | cw
-" }}}1
-
 
 set spell
 set spelllang=pt

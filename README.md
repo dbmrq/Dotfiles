@@ -25,8 +25,7 @@ The most interesting stuff here is probably
 and [my `.vimrc`](https://github.com/dbmrq/dotfiles/blob/master/home/.vimrc),
 which is split into the
 [`settings.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/settings.vim),
-[`mappings.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/mappings.vim),
-[`functions.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/functions.vim)
+[`mappings.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/mappings.vim)
 and
 [`plugins.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/plugins.vim)
 files. There's also some cool stuff at

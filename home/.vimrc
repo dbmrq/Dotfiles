@@ -63,6 +63,5 @@ command! Plug PlugUpdate | PlugUpgrade
 
 source ~/.vim/settings.vim
 source ~/.vim/mappings.vim
-source ~/.vim/functions.vim
 source ~/.vim/plugins.vim
 

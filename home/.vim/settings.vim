@@ -33,8 +33,13 @@ set stl+=%{&ff!='unix'?'\ ['.&ff.']':''}
 set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
 set stl+=\ 
 
+function! PercentThrough()
+    return ' ' . line('.') * 100 / line('$') . '%'
+endfunction
+
 set rulerformat=
-set rulerformat+=%25(%=%t%{&mod?'\ +':''}\ %p%%%)
+set rulerformat+=%25(%=%t%{&mod?'\ +':''}%)
+set rulerformat+=%{winheight(0)<line('$')?PercentThrough():''}
 set rulerformat+=%{&readonly?'\ [RO]':''}
 set rulerformat+=%{&ff!='unix'?'\ ['.&ff.']':''}
 set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
