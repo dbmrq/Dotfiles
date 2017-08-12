@@ -1,7 +1,63 @@
 
-" " targets.vim {{{1
-" let g:targets_aiAI = 'aIAi'
-" " }}}1
+
+" Plug {{{1
+
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall | source $MYVIMRC
+endif
+
+call plug#begin('~/.vim/bundle')
+
+    Plug 'tpope/vim-sensible'
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-commentary'
+    Plug 'tpope/vim-repeat'
+    Plug 'tpope/vim-rsi'
+    Plug 'kana/vim-textobj-user'
+    Plug 'kana/vim-textobj-line'
+    Plug 'kana/vim-textobj-indent'
+    Plug 'kana/vim-textobj-entire'
+    Plug 'kana/vim-textobj-syntax'
+    Plug 'kana/vim-textobj-fold'
+    Plug 'justinmk/vim-sneak'
+    Plug 'tommcdo/vim-exchange'
+    Plug 'junegunn/vim-easy-align'
+    Plug 'AndrewRadev/splitjoin.vim'
+    Plug 'FooSoft/vim-argwrap'
+    Plug 'ntpeters/vim-better-whitespace'
+    Plug 'tweekmonster/spellrotate.vim'
+    Plug 'maxbrunsfeld/vim-yankstack'
+    Plug 'henrik/vim-indexed-search'
+    Plug 'nelstrom/vim-visual-star-search'
+    Plug 'haya14busa/incsearch.vim'
+    Plug 'Raimondi/delimitMate'
+    Plug 'mbbill/undotree'
+    Plug 'lervag/vimtex'
+    Plug 'sheerun/vim-polyglot'
+    Plug 'altercation/vim-colors-solarized'
+    Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+    Plug 'wellle/targets.vim', { 'branch': '162-separator-expand' }
+    Plug 'junegunn/goyo.vim', { 'for': ['markdown', 'text', 'tex'] }
+
+    if has('nvim')
+        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    else
+        Plug 'Shougo/neocomplete.vim'
+    endif
+
+    Plug '~/Code/Vim/vim-ditto'
+    Plug '~/Code/Vim/vim-chalk'
+    Plug '~/Code/Vim/vim-dialect'
+    Plug '~/Code/Vim/vim-howdy'
+
+call plug#end()
+
+command! Plug PlugUpdate | PlugUpgrade
+
+" }}}1
+
 
 " vim-polyglot {{{1
 let g:polyglot_disabled = ['latex']
@@ -10,28 +66,6 @@ let g:polyglot_disabled = ['latex']
 " vim-rsi {{{1
 let g:rsi_no_meta = 1
 " }}}1
-
-" " Schlepp {{{1
-
-" function! SchleppDetect(direction)
-"     let mode = mode()
-"     let command = ""
-"     if mode ==# 'v'
-"         let command .= "\<c-v>"
-"     endif
-"     let command .= "\<Plug>Schlepp" . a:direction
-"     if mode ==# 'V'
-"         let command .= "zRgv"
-"     endif
-"     return command
-" endfunction
-
-" vmap <silent> <expr> <Left> SchleppDetect("Left")
-" vmap <silent> <expr> <Right> SchleppDetect("Right")
-" vmap <silent> <expr> <Up> SchleppDetect("Up")
-" vmap <silent> <expr> <Down> SchleppDetect("Down")
-
-" " }}}1
 
 " golden-ratio {{{1
 let g:golden_ratio_autocommand = 0
@@ -210,37 +244,6 @@ nmap <expr> cd ChangeDetectedSurrounding()
 
 " }}}1
 
-" " lightline.vim {{{1
-
-" set noshowmode
-
-" let g:lightline = {'colorscheme': 'solarized',}
-
-" augroup LightLineColorscheme
-"     autocmd!
-"     autocmd ColorScheme * call LightlineUpdate()
-" augroup END
-
-" function! LightlineUpdate()
-"     if !exists('g:loaded_lightline')
-"         return
-"     endif
-"     try
-"         if g:colors_name =~# 'wombat\|solarized\|landscape\
-"                             \ |jellybeans\|seoul256\|Tomorrow'
-"             let g:lightline.colorscheme =
-"                 \ substitute(substitute(g:colors_name, '-', '_', 'g'),
-"                 \ '256.*', '', '')
-"             call lightline#init()
-"             call lightline#colorscheme()
-"             call lightline#update()
-"         endif
-"     catch
-"     endtry
-" endfunction
-
-" " }}}1
-
 " UltiSnips {{{1
 
 " Use <CR> to accept snippets
@@ -255,21 +258,6 @@ function! SnippetOrCR()
     endif
 endfunction
 inoremap <silent><expr> <CR> "<C-R>=SnippetOrCR()<CR>"
-
-" }}}1
-
-" Reedes {{{1
-
-" nnoremap <leader>tp :TogglePencil<cr>
-
-" augroup reedes
-"   autocmd!
-"   autocmd FileType markdown,mkd,text,tex call pencil#init()
-"                                      \ | call textobj#sentence#init()
-" augroup END
-
-" let g:pencil#conceallevel = 0
-" let g:pencil#textwidth = &textwidth
 
 " }}}1
 
@@ -299,13 +287,6 @@ augroup END
 
 " }}}1
 
-" " vim-pandoc {{{1
-
-" let g:pandoc#after#modules#enabled = ["ultisnips"]
-" let g:pandoc#syntax#conceal#use = 0
-
-" }}}1
-
 " vim-sneak {{{1
 
 let g:sneak#use_ic_scs = 1
@@ -329,22 +310,6 @@ omap t <Plug>Sneak_t
 omap T <Plug>Sneak_T
 
 " }}}1
-
-" " vim-expand-region {{{1
-
-" vmap v <Plug>(expand_region_expand)
-" vmap <C-v> <Plug>(expand_region_shrink)
-" call expand_region#custom_text_objects({
-"     \ 'i(': 1, 'i)': 1, 'ib': 1, 'i{': 1, 'i}': 1, 'iB': 1,
-"              \ 'i[': 1, 'i]': 1, 'i<': 1, 'i>': 1, 'it': 1,
-"     \ 'A(': 1, 'A)': 1, 'Ab': 1, 'A{': 1, 'A}': 1, 'AB': 1,
-"              \ 'A[': 1, 'A]': 1, 'A<': 1, 'A>': 1, 'At': 1,
-"     \ "i'": 1, 'i"': 1, 'i`': 1, "A'": 1, 'A"': 1, 'A`': 1,
-"     \ 'i,': 1, 'i;': 1, 'A,': 1, 'A;': 1, 'as': 1, 'is': 1,
-"     \ 'ii': 1, 'ai': 1, 'i\': 1, 'a\': 1,
-"     \ })
-
-" " }}}1
 
 " yankstack {{{1
 
@@ -488,12 +453,6 @@ else
 endif
 
 " }}}1
-
-" " local-indent {{{1
-
-" au BufReadPre,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty LocalIndentGuide +hl
-
-" " }}}1
 
 " vim-textobj-user {{{1
 call textobj#user#plugin('aroundpar', {
