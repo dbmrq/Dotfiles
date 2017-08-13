@@ -26,6 +26,7 @@ execute 'syntax match texStatement /\v\\%(' . join([
     \   '[Aa]utocites'], '|') . ')/'
     \ 'nextgroup=texRefOptions,texCites'
 
+syntax match texStatement "\\singlecite" nextgroup=texRefOptions,texCites
 syntax match texStatement "\\apud" nextgroup=texRefOptions,texCites
 syntax match texStatement "\\textapud" nextgroup=texRefOptions,texCites
 syntax region texRefZone matchgroup=texStatement

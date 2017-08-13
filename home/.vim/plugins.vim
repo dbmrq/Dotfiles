@@ -321,17 +321,6 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
 " Vimtex {{{1
 
-let g:vimtex_text_obj_enabled = 1
-let g:vimtex_imaps_enabled = 0
-let g:vimtex_indent_bib_enabled = 0
-
-let g:vimtex_quickfix_latexlog = {'fix_paths':0}
-
-let g:vimtex_compiler_latexmk = {
-    \ 'backend' : 'jobs',
-    \ 'continuous' : 0,
-    \}
-
 autocmd User VimtexEventInitPost exe 'cd' fnameescape(b:vimtex.root)
 autocmd User VimtexEventInitPost
             \ command! CD exe 'cd' fnameescape(b:vimtex.root)
@@ -340,12 +329,42 @@ autocmd User VimtexEventInitPost
             \ silent vimgrep /<args>/g **/*.tex |
             \ cw
 
+let g:vimtex_text_obj_enabled = 1
+let g:vimtex_imaps_enabled = 0
+let g:vimtex_indent_bib_enabled = 0
 let g:vimtex_index_split_pos = "full"
 let g:vimtex_toc_fold = 1
 let g:vimtex_toc_fold_level_start = 2
 let g:vimtex_index_show_help = 0
 let g:vimtex_view_automatic = 0
 " let g:vimtex_quickfix_open_on_warning = 0
+
+let g:vimtex_quickfix_latexlog = {'fix_paths':0}
+
+let g:vimtex_compiler_latexmk = {
+    \ 'backend' : 'jobs',
+    \ 'continuous' : 0,
+    \}
+
+let g:VimtexImportante = {
+      \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
+      \ 'in_preamble' : 1,
+      \}
+
+function! g:VimtexImportante.get_entry(context) abort dict
+  return {
+        \ 'title'  : 'IMPORTANTE: ' .
+            \ matchstr(a:context.file, '\(\/.*\).*\/\zs\a.*\.\a\a\a') .
+            \ ' - line ' . a:context.lnum,
+        \ 'number' : '[!]',
+        \ 'file'   : a:context.file,
+        \ 'line'   : a:context.lnum,
+        \ 'level'  : a:context.max_level,
+        \ 'rank'   : a:context.lnum_total,
+        \ }
+endfunction
+
+let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
 
 " }}}1
 

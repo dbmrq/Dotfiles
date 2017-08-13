@@ -26,7 +26,8 @@ au ColorScheme * hi! link VertSplit LineNr
 set fillchars=
 
 set stl=
-set stl+=%=%t%{&mod?'\ +':''}\ %p%%
+set stl+=%=%t%{&mod?'\ +':''}
+set stl+=%{winheight(0)<line('$')?PercentThrough():''}
 set stl+=%{&readonly&&&ft!='help'?'\ [RO]':''}
 set stl+=%{&ft=='help'?'\ [Help]':''}
 set stl+=%{&ff!='unix'?'\ ['.&ff.']':''}

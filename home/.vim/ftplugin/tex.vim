@@ -50,8 +50,7 @@ function! FileSize()
 endfunction
 
 function! WrittenString()
-    return '"' . expand('%:h:t') . '/' . expand('%:t') .
-        \ '" ' . line('$') . ' lines, ' . FileSize() . ' written'
+    return '"' . expand('%:t') . '" ' . FileSize()
 endfunction
 
 function! WordCount()

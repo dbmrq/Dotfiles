@@ -404,6 +404,20 @@ nnoremap <leader>cc :call ReplaceLastChange()<cr>
 
 " }}}1
 
+" Symbols {{{1
+
+" Can't do this because it screws up with some accented characters
+" let s:uname = system("uname -s")
+" if !has("gui_running") && s:uname =~ "Darwin"
+"     inoremap s §
+"     inoremap p ¶
+" else
+"     inoremap <m-s> §
+"     inoremap <m-p> ¶
+" endif
+
+" }}}1
+
 " Edit vimrc {{{
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 " }}}
