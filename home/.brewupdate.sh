@@ -37,5 +37,5 @@ rm /Applications/MacVim
 osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
 
 
-terminal-notifier -title '.brewupdate.sh' -message 'Homebrew updated!' -appIcon https://brew.sh/img/homebrew-256x256.png
+/usr/local/bin/terminal-notifier -title '.brewupdate.sh' -message 'Homebrew updated!' -appIcon https://brew.sh/img/homebrew-256x256.png
 
