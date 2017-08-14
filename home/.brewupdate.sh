@@ -2,34 +2,34 @@
 
 echo ""
 echo "`date`: Running brew update"
-brew update
+/usr/local/bin/brew update
 
 echo ""
 echo "`date`: Running brew upgrade"
-brew upgrade
+/usr/local/bin/brew upgrade
 
 echo ""
 echo "`date`: Running brew prune"
-brew prune
+/usr/local/bin/brew prune
 
 echo ""
 echo "`date`: Running brew cleanup"
-brew cleanup
+/usr/local/bin/brew cleanup
 
 echo ""
 echo "`date`: Running brew cask reinstall for outdated casks"
-brew cask outdated | xargs brew cask reinstall
+/usr/local/bin/brew cask outdated | xargs /usr/local/bin/brew cask reinstall
 
 echo ""
 echo "`date`: Running brew doctor"
-brew doctor
+/usr/local/bin/brew doctor
 
 echo ""
 echo "Fixing /Applications/ alias"
 
 
-dockutil --remove 'MacVim' --allhomes
-dockutil --add /usr/local/opt/macvim/MacVim.app --position 2
+/usr/local/bin/dockutil --remove 'MacVim' --allhomes
+/usr/local/bin/dockutil --add /usr/local/opt/macvim/MacVim.app --position 2
 
 
 rm /Applications/MacVim
