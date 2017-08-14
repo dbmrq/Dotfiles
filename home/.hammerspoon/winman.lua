@@ -5,6 +5,8 @@ local grid = require "hs.grid"
 grid.setMargins('20,20')
 grid.setGrid('6x6')
 
+-- hs.window.animationDuration = 0
+
 -- Helper functions {{{1
 
 -- Keep windows anchored at the bottom {{{2
@@ -34,8 +36,8 @@ local function snapRight(win, cell, screen)
 end-- }}}2
 
 -- Compensate for the double margin between windows {{{2
-local function compensateMargins()
-    local win = hs.window.focusedWindow()
+local function compensateMargins(window)
+    local win = window or hs.window.focusedWindow()
     local cell = grid.get(win)
     local frame = win:frame()
     if cell.h < grid.GRIDHEIGHT and cell.h % 1 == 0 then
@@ -300,7 +302,7 @@ hs.hotkey.bind(super, 'L', function()-- {{{3
     compensateMargins()
 end)-- }}}3
 
-hs.hotkey.bind(super, '.', function()-- {{{3
+hs.hotkey.bind(super, 'M', function()-- {{{3
     local win = hs.window.focusedWindow()
     local screen = win:screen()
     local newCell = hs.geometry(1, 0, grid.GRIDWIDTH - 2, grid.GRIDHEIGHT)
@@ -332,6 +334,19 @@ hs.hotkey.bind(super, 'O', function()
         end
     end
 end)-- }}}3
+
+-- }}}2
+
+-- Snap {{{2
+
+hs.hotkey.bind(super, '.', function()
+    local windows = hs.window.visibleWindows()
+    for i in pairs(windows) do
+        local window = windows[i]
+        grid.snap(window)
+        compensateMargins(window)
+    end
+end)
 
 -- }}}2
 
