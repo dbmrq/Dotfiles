@@ -366,6 +366,12 @@ endfunction
 
 let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
 
+let g:vimtex_toc_hotkeys = {
+    \ 'enabled' : 1,
+    \ 'keys' : 'asdfjkleurei',
+    \ 'leader' : '<space>',
+    \}
+
 " }}}1
 
 " neocomplete/deoplete {{{1
