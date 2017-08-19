@@ -27,6 +27,7 @@ set fillchars=
 
 set stl=
 set stl+=%=%t%{&mod?'\ +':''}
+set stl+=%{winheight(0)<line('$')?'\ ':''}
 set stl+=%{winheight(0)<line('$')?PercentThrough():''}
 set stl+=%{&readonly&&&ft!='help'?'\ [RO]':''}
 set stl+=%{&ft=='help'?'\ [Help]':''}
@@ -35,11 +36,12 @@ set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
 set stl+=\ 
 
 function! PercentThrough()
-    return ' ' . line('.') * 100 / line('$') . '%'
+    return line('.') * 100 / line('$') . '%'
 endfunction
 
 set rulerformat=
 set rulerformat+=%25(%=%t%{&mod?'\ +':''}%)
+set rulerformat+=%{winheight(0)<line('$')?'\ ':''}
 set rulerformat+=%{winheight(0)<line('$')?PercentThrough():''}
 set rulerformat+=%{&readonly?'\ [RO]':''}
 set rulerformat+=%{&ff!='unix'?'\ ['.&ff.']':''}
@@ -61,9 +63,10 @@ set textwidth=78
 
 au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 
-" if executable("par")
-"     set formatprg=par\ -w78
-" endif
+if executable("par")
+    set formatprg=par\ -w78
+endif
+
 if &l:formatoptions =~ "t"
     let &colorcolumn="79,".join(range(101,999),",")
 else

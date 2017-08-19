@@ -122,7 +122,7 @@ echo "---"
 
 # }}}1
 
-# Xcode {{{1
+# Xcode developer tools {{{1
 
 echo ""
 echo "Installing Xcode developer tools..."
@@ -148,6 +148,7 @@ echo ""
 brew install git
 brew install lua
 brew install zsh
+brew install mas
 brew install tree
 brew install ruby
 brew install fasd
@@ -218,10 +219,10 @@ sudo gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink dotfiles
 
-sudo chown root:admin ~/.brewupdate.sh
-sudo chmod 4775 ~/.brewupdate.sh
-sudo chown root:admin ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
-sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.brewupdate.plist
+sudo chown root:admin ~/.update.sh
+sudo chmod 4775 ~/.update.sh
+sudo chown root:admin ~/Library/LaunchAgents/com.dbmrq.update.plist
+sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.update.plist
 
 echo ""
 echo "Done."
@@ -310,6 +311,19 @@ echo ""
 echo "Done."
 echo ""
 echo "---"
+
+# }}}1
+
+# MAS {{{1
+
+mas signin --dialog ""
+
+# Xcode
+mas install 497799835
+# Pages
+mas install 409201541
+#Numbers
+mas install 409203825
 
 # }}}1
 

@@ -5,19 +5,19 @@
 	<key>Disabled</key>
 	<true/>
 	<key>Label</key>
-	<string>com.dbmrq.brewupdate.plist</string>
+	<string>com.dbmrq.update.plist</string>
 	<key>Nice</key>
 	<integer>1</integer>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/dbmrq/.brewupdate.sh</string>
+		<string>/Users/dbmrq/.update.sh</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>StandardErrorPath</key>
-	<string>/tmp/com.dbmrq.brewupdate.err</string>
+	<string>/tmp/com.dbmrq.update.err</string>
 	<key>StandardOutPath</key>
-	<string>/tmp/com.dbmrq.brewupdate.out</string>
+	<string>/tmp/com.dbmrq.update.out</string>
 	<key>StartCalendarInterval</key>
 	<array>
 		<dict>
@@ -25,16 +25,6 @@
 			<integer>20</integer>
 			<key>Minute</key>
 			<integer>0</integer>
-			<key>Weekday</key>
-			<integer>4</integer>
-		</dict>
-		<dict>
-			<key>Hour</key>
-			<integer>20</integer>
-			<key>Minute</key>
-			<integer>0</integer>
-			<key>Weekday</key>
-			<integer>1</integer>
 		</dict>
 	</array>
 </dict>
