@@ -1,4 +1,4 @@
-# @dbmrq tweaks to Prezto's "minimal" theme.
+# @dbmrq's tweaks to Prezto's "minimal" theme.
 #
 # In my version, the prompt changes when in normal/insert mode and when
 # running with privileges. The path shows in red when not writable and the
