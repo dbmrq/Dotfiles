@@ -217,7 +217,7 @@ mkdir -p ~/.vim/backup ~/.vim/swp ~/.vim/undo
 
 sudo gem install homesick
 homesick clone dbmrq/dotfiles
-homesick symlink dotfiles
+homesick symlink --quiet --force dotfiles
 
 sudo chown root:admin ~/.update.sh
 sudo chmod 4775 ~/.update.sh
@@ -333,9 +333,11 @@ echo ""
 echo "Adding Terminal color schemes..."
 echo ""
 
-open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Dark.terminal
+git clone https://github.com/dbmrq/terminal-solarized ~/Code/Misc/terminal-solarized
 
-open ~/.homesick/repos/dotfiles/home/Library/Colors/Solarized\ Light.terminal
+open ~/Code/Misc/terminal-solarized/Solarized\ Dark.terminal
+
+open ~/Code/Misc/terminal-solarized/Solarized\ Light.terminal
 
 echo ""
 echo "Done."
@@ -345,4 +347,7 @@ echo "---"
 # }}}1
 
 echo "Remember to check Homebrew's results!"
+
+
+# vim: set tw=0
 
