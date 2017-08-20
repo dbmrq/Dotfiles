@@ -10,7 +10,7 @@ endif
 
 call plug#begin('~/.vim/bundle')
 
-    Plug 'tpope/vim-sensible'
+    " Plug 'tpope/vim-sensible'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-repeat'

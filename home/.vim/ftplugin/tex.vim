@@ -65,14 +65,22 @@ command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 " }}}1
 
 " Better b and e for TeX {{{1
+
 nnoremap <silent> b B
-nnoremap <silent> B ?\U[.,;:?!{(\[]\(\s*\\|\d*\\|\n*\\|$*\)*\a?e<cr>:noh<cr>
 vnoremap <silent> b B
-vnoremap <silent> B ?\U[.,;:?!{(\[]\(\s*\\|\d*\\|\n*\\|$*\)*\a?e<cr><esc>:noh<cr>gv
-nnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr>:noh<cr>
-nnoremap <silent> E /\U[.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)<cr>:noh<cr>
-vnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr><esc>:noh<cr>gv
-vnoremap <silent> E /\U[.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)<cr><esc>:noh<cr>gv
+
+nnoremap <silent> B ?\U\([.,;:?!{(\[]\\|-\s\)\(\s*\\|\d*\\|\n*\\|$*\)*\a?e<cr>:noh<cr>
+vnoremap <silent> B ?\U\([.,;:?!{(\[]\\|-\s\)\(\s*\\|\d*\\|\n*\\|$*\)*\a?e<cr><esc>:noh<cr>gv
+
+nnoremap <silent> e E
+vnoremap <silent> e E
+
+nnoremap <silent> E /\U\([.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)\\|\s-\)<cr>:noh<cr>
+vnoremap <silent> E /\U\([.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)\\|\s-\)<cr><esc>:noh<cr>gv
+
+" nnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr>:noh<cr>
+" vnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr><esc>:noh<cr>gv
+
 " }}}1
 
 " Change the closest comma, semicolon or colon into a period {{{1

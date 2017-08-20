@@ -12,9 +12,9 @@ set number
 
 set showcmd
 
-set scrolloff=5
-set sidescrolloff=7
-set sidescroll=1
+" This is in an autocmd because I don't want scrolloff on `nofile` buffers,
+" like Howdy's MRU start screen.
+au BufRead *.* setl scrolloff=5 sidescrolloff=7 sidescroll=1
 
 set ruler
 set laststatus=0
