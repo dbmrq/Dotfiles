@@ -10,12 +10,15 @@ They're managed using
 
 ---
 
-To bootstrap a new Mac, run:
+Note to self: to bootstrap a new Mac, run
 
     curl --remote-name https://raw.githubusercontent.com/dbmrq/dotfiles/master/home/.bootstrap.sh && chmod +x .bootstrap.sh && ./.bootstrap.sh
 
 That'll download and run the `.bootstrap.sh` script, which will take care of
 the rest.
+
+If you're not me, you should probably check out the contents of that file before
+doing that. There's a lot of stuff that wouldn't make sense for other people.
 
 ---
 
