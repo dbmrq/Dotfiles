@@ -219,11 +219,6 @@ sudo gem install homesick
 homesick clone dbmrq/dotfiles
 homesick symlink --quiet --force dotfiles
 
-sudo chown root:admin ~/.update.sh
-sudo chmod 4775 ~/.update.sh
-sudo chown root:admin ~/Library/LaunchAgents/com.dbmrq.update.plist
-sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.update.plist
-
 echo ""
 echo "Done."
 echo ""
@@ -346,8 +341,23 @@ echo "---"
 
 # }}}1
 
+# .update.sh {{{1
+
+git clone https://gist.github.com/a755dde62bf109cb5c0d32bec800fa7a.git ~/Desktop/update
+
+mv ~/Desktop/update/com.dbmrq.update.plist ~/Library/LaunchAgents/com.dbmrq.update.plist
+
+trash ~/Desktop/update
+
+sudo chown root:admin ~/.update.sh
+sudo chmod 4775 ~/.update.sh
+sudo chown root:admin ~/Library/LaunchAgents/com.dbmrq.update.plist
+sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.update.plist
+
+# }}}1
+
 echo "Remember to check Homebrew's results!"
 
 
-# vim: set tw=0
+# vim: set tw=0:
 
