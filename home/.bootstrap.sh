@@ -170,6 +170,7 @@ brew tap caskroom/cask
 brew cask install vlc
 brew cask install java
 brew cask install calibre
+brew cask install opensim
 brew cask install firefox
 brew cask install basictex
 brew cask install appcleaner
@@ -264,10 +265,10 @@ echo ""
 
 mkdir -pv ~/Code/Vim
 
-git clone https://github.com/dbmrq/vim-ditto ~/Code/Vim/vim-ditto
-git clone https://github.com/dbmrq/vim-chalk ~/Code/Vim/vim-chalk
-git clone https://github.com/dbmrq/vim-dialect ~/Code/Vim/vim-dialect
-git clone https://github.com/dbmrq/vim-howdy ~/Code/Vim/vim-howdy
+git clone https://github.com/dbmrq/vim-ditto.git ~/Code/Vim/vim-ditto
+git clone https://github.com/dbmrq/vim-chalk.git ~/Code/Vim/vim-chalk
+git clone https://github.com/dbmrq/vim-dialect.git ~/Code/Vim/vim-dialect
+git clone https://github.com/dbmrq/vim-howdy.git ~/Code/Vim/vim-howdy
 
 vim +Plug +qall
 
@@ -298,9 +299,9 @@ ln -s ~/Code/LaTeX/Classes ~/Library/texmf/tex/latex/classes
 ln -s ~/Code/LaTeX/Packages ~/Library/texmf/tex/latex/packages
 ln -s ~/Code/LaTeX/Bibliography ~/Library/texmf/bibtex/bib
 
-git clone https://github.com/dbmrq/dbmrq.cls ~/Code/LaTeX/Classes/dbmrq
-git clone https://github.com/dbmrq/tex-sensible ~/Code/LaTeX/Packages/sensible
-git clone https://github.com/abntex/biblatex-abnt ~/Code/LaTeX/Packages/biblatex-abnt
+git clone https://github.com/dbmrq/tex-dbmrq.git ~/Code/LaTeX/Classes/dbmrq
+git clone https://github.com/dbmrq/tex-sensible.git ~/Code/LaTeX/Packages/sensible
+git clone https://github.com/abntex/biblatex-abnt.git ~/Code/LaTeX/Packages/biblatex-abnt
 
 echo ""
 echo "Done."
@@ -328,7 +329,7 @@ echo ""
 echo "Adding Terminal color schemes..."
 echo ""
 
-git clone https://github.com/dbmrq/terminal-solarized ~/Code/Misc/terminal-solarized
+git clone https://github.com/dbmrq/terminal-solarized.git ~/Code/Misc/terminal-solarized
 
 open ~/Code/Misc/terminal-solarized/Solarized\ Dark.terminal
 
