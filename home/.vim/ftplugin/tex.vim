@@ -64,7 +64,7 @@ endfunction
 command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 " }}}1
 
-" Better b and e for TeX {{{1
+" Better b, e and w for TeX {{{1
 
 nnoremap <silent> b B
 vnoremap <silent> b B
@@ -80,6 +80,12 @@ vnoremap <silent> E /\U\([.,;:?!})\]]\(\s\\|\d\\|\n\\|$\)\\|\s-\)<cr><esc>:noh<c
 
 " nnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr>:noh<cr>
 " vnoremap <silent> e /\U\(\a\\|[[=a=]]\\|[[=e=]]\\|[[=i=]]\\|[[=o=]]\\|[[=u=]]\)\ze\(\s\\|\.\\|,\\|;\\|:\\|-\\|)\\|}\\|]\\|$\)/e<cr><esc>:noh<cr>gv
+
+nnoremap <silent> w W
+vnoremap <silent> w W
+
+nnoremap <silent> W /\U\([.,;:?!})\]]\n*%\?\(\s\\|\d\\|\n\\|$\)\\|\s-\)\a/e<cr>:noh<cr>
+vnoremap <silent> W /\U\([.,;:?!})\]]\n*%\?\(\s\\|\d\\|\n\\|$\)\\|\s-\)\a/e<cr><esc>:noh<cr>gv
 
 " }}}1
 

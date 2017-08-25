@@ -16,6 +16,8 @@ set showcmd
 " like Howdy's MRU start screen.
 au BufRead *.* setl scrolloff=5 sidescrolloff=7 sidescroll=1
 
+" status line and ruler {{{2
+
 set ruler
 set laststatus=0
 set showmode
@@ -25,14 +27,22 @@ au ColorScheme * hi! link StatusLineNC LineNr
 au ColorScheme * hi! link VertSplit LineNr
 set fillchars=
 
+" For some reason the conditional spaces have to be added on their own or they
+" won't show.
+
 set stl=
-set stl+=%=%t%{&mod?'\ +':''}
+set stl+=%=%t%{&mod?'\ ':''}
+set stl+=%=%t%{&mod?'+':''}
 set stl+=%{winheight(0)<line('$')?'\ ':''}
 set stl+=%{winheight(0)<line('$')?PercentThrough():''}
-set stl+=%{&readonly&&&ft!='help'?'\ [RO]':''}
-set stl+=%{&ft=='help'?'\ [Help]':''}
-set stl+=%{&ff!='unix'?'\ ['.&ff.']':''}
-set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
+set stl+=%{&readonly&&&ft!='help'?'\ ':''}
+set stl+=%{&readonly&&&ft!='help'?'[RO]':''}
+set stl+=%{&ft=='help'?'\ ':''}
+set stl+=%{&ft=='help'?'[Help]':''}
+set stl+=%{&ff!='unix'?'\ ':''}
+set stl+=%{&ff!='unix'?'['.&ff.']':''}
+set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ':''}
+set stl+=%{(&fenc!='utf-8'&&&fenc!='')?'['.&fenc.']':''}
 set stl+=\ 
 
 function! PercentThrough()
@@ -40,12 +50,18 @@ function! PercentThrough()
 endfunction
 
 set rulerformat=
-set rulerformat+=%25(%=%t%{&mod?'\ +':''}%)
+set rulerformat+=%25(%=%t%{&mod?'\ ':''}%)
+set rulerformat+=%25(%=%t%{&mod?'+':''}%)
 set rulerformat+=%{winheight(0)<line('$')?'\ ':''}
 set rulerformat+=%{winheight(0)<line('$')?PercentThrough():''}
-set rulerformat+=%{&readonly?'\ [RO]':''}
-set rulerformat+=%{&ff!='unix'?'\ ['.&ff.']':''}
-set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ['.&fenc.']':''}
+set rulerformat+=%{&readonly?'\ ':''}
+set rulerformat+=%{&readonly?'[RO]':''}
+set rulerformat+=%{&ff!='unix'?'\ ':''}
+set rulerformat+=%{&ff!='unix'?'['.&ff.']':''}
+set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ':''}
+set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'['.&fenc.']':''}
+
+" }}}2
 
 if $BACKGROUND == 'light'
     set background=light
@@ -63,9 +79,9 @@ set textwidth=78
 
 au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 
-if executable("par")
-    set formatprg=par\ -w78
-endif
+" if executable("par")
+"     set formatprg=par\ -w78
+" endif
 
 if &l:formatoptions =~ "t"
     let &colorcolumn="79,".join(range(101,999),",")
@@ -140,6 +156,8 @@ set complete+=kspell
 set switchbuf+=useopen,usetab
 
 set nojoinspaces
+
+set encoding=utf-8
 
 " change directory to current file's
 autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h
