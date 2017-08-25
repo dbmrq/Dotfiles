@@ -1,4 +1,16 @@
-.DS_Store
 *.un~
 *.swp
 *.sw?
+*.spl
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.fdb_latexmk
+.texpadtmp
+.DS_Store
