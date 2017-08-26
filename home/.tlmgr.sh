@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# TeX {{{1
+
+echo ""
+echo "Installing tex packages"
+echo ""
+
+sudo tlmgr update --self --all
+
+sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
+collection-langother collection-latexextra collection-pictures logreq \
+biblatex biber biblatex-abnt abntex2
+
+mkdir -pv ~/Code/LaTeX/Bibliography
+mkdir -pv ~/Code/LaTeX/Classes
+mkdir -pv ~/Code/LaTeX/Packages
+
+ln -s ~/Library/texmf/tex/latex/classes ~/Code/LaTeX/Classes
+ln -s ~/Library/texmf/tex/latex/packages ~/Code/LaTeX/Packages
+ln -s ~/Library/texmf/bibtex/bib ~/Code/LaTeX/Bibliography
+
+git clone https://github.com/dbmrq/tex-dbmrq.git ~/Code/LaTeX/Classes/dbmrq
+git clone https://github.com/dbmrq/tex-sensible.git ~/Code/LaTeX/Packages/sensible
+git clone https://github.com/abntex/biblatex-abnt.git ~/Code/LaTeX/Packages/biblatex-abnt
+
+echo ""
+echo "Done."
+echo ""
+echo "---"
+
+# }}}1
+
