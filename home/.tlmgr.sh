@@ -15,10 +15,12 @@ biblatex biber biblatex-abnt abntex2
 mkdir -pv ~/Code/LaTeX/Bibliography
 mkdir -pv ~/Code/LaTeX/Classes
 mkdir -pv ~/Code/LaTeX/Packages
+mkdir -pv ~/Library/texmf/tex/latex
+mkdir -pv ~/Library/texmf/tex/bibtex
 
-ln -s ~/Library/texmf/tex/latex/classes ~/Code/LaTeX/Classes
-ln -s ~/Library/texmf/tex/latex/packages ~/Code/LaTeX/Packages
-ln -s ~/Library/texmf/bibtex/bib ~/Code/LaTeX/Bibliography
+ln -s ~/Code/LaTeX/Classes ~/Library/texmf/tex/latex/classes
+ln -s ~/Code/LaTeX/Packages ~/Library/texmf/tex/latex/packages
+ln -s ~/Code/LaTeX/Bibliography ~/Library/texmf/bibtex/bib
 
 git clone https://github.com/dbmrq/tex-dbmrq.git ~/Code/LaTeX/Classes/dbmrq
 git clone https://github.com/dbmrq/tex-sensible.git ~/Code/LaTeX/Packages/sensible
