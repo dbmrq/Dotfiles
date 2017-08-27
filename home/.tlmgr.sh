@@ -20,7 +20,7 @@ mkdir -pv ~/Library/texmf/tex/bibtex
 
 ln -s ~/Code/LaTeX/Classes ~/Library/texmf/tex/latex/classes
 ln -s ~/Code/LaTeX/Packages ~/Library/texmf/tex/latex/packages
-ln -s ~/Code/LaTeX/Bibliography ~/Library/texmf/bibtex/bib
+ln -s ~/Code/LaTeX/Bibliography ~/Library/texmf/tex/bibtex/bib
 
 git clone https://github.com/dbmrq/tex-dbmrq.git ~/Code/LaTeX/Classes/dbmrq
 git clone https://github.com/dbmrq/tex-sensible.git ~/Code/LaTeX/Packages/sensible
