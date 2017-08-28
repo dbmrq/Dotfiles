@@ -50,8 +50,8 @@ function! PercentThrough()
 endfunction
 
 set rulerformat=
-set rulerformat+=%25(%=%t%{&mod?'\ ':''}%)
-set rulerformat+=%25(%=%t%{&mod?'+':''}%)
+" set rulerformat+=%25(%=%t%{&mod?'\ ':''}%)
+set rulerformat+=%25(%=%t%{&mod?'\ +':''}%)
 set rulerformat+=%{winheight(0)<line('$')?'\ ':''}
 set rulerformat+=%{winheight(0)<line('$')?PercentThrough():''}
 set rulerformat+=%{&readonly?'\ ':''}
