@@ -81,8 +81,8 @@ echo ""
 echo ""
 echo "`date`: Running gem update"
 echo ""
-/usr/local/bin/gem update —system
-/usr/local/bin/gem update
+sudo /usr/local/bin/gem update —system
+sudo /usr/local/bin/gem update
 
 # }}}1
 

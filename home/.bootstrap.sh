@@ -81,7 +81,7 @@ sudo nvram SystemAudioVolume=" "
 # sudo systemsetup -setrestartfreeze on
 
 # Disable Dashboard
-defaults write com.apple.dashboard mcx-disabled -bool true
+# defaults write com.apple.dashboard mcx-disabled -bool true
 
 # Prevent Time Machine from prompting to use new hard drives as backup volume
 # defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -173,6 +173,7 @@ brew cask install calibre
 brew cask install opensim
 brew cask install firefox
 brew cask install basictex
+brew cask install flashlight
 brew cask install appcleaner
 brew cask install hammerspoon
 brew cask install transmission
