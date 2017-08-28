@@ -333,6 +333,19 @@ sudo launchctl load ~/Library/LaunchAgents/com.dbmrq.update.plist
 
 # }}}1
 
+# Services {{{1
+
+git clone https://github.com/dbmrq/workflow-translate.git ~/Desktop/tmp
+mv ~/Desktop/tmp/Google\ Translate.workflow ~/Library/Services/Google\ Translate.workflow
+mv ~/Desktop/tmp/Google\ Translate\ Selection.workflow ~/Library/Services/Google\ Translate\ Selection.workflow
+trash ~/Desktop/tmp
+
+git clone https://github.com/dbmrq/workflow-latexmk.git ~/Desktop/tmp
+mv ~/Desktop/tmp/latexmk.workflow ~/Library/Services/latexmk.workflow
+trash ~/Desktop/tmp
+
+# }}}1
+
 echo "Remember to check Homebrew's results!"
 
 
