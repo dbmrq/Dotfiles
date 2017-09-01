@@ -26,19 +26,30 @@ function reloadConfig(files)---- {{{2
     end
 end-- }}}2
 
-function uptime()---- {{{2
-    local days =
-        hs.execute("uptime | grep -o '\\d\\+\\sdays' | grep -o '\\d\\+'")
+function uptime()-- uptime in seconds {{{2
+
+    local days = hs.execute("uptime | \
+        grep -o '\\d\\+\\sdays' | grep -o '\\d\\+'")
+
+    local seconds = hs.execute("uptime | \
+        grep -o '\\d\\+\\ssecs' | grep -o '\\d\\+'")
 
     if tonumber(days) then
         local minutes = hs.execute("uptime | awk '{print $5}' | \
-            sed -e 's/[^0-9:].*//' | sed 's/:/*60+/g' | bc")
-        return tonumber(days) * 24 * 60 + tonumber(minutes)
+                sed -e 's/[^0-9:].*//' | sed 's/:/*60+/g' | bc")
+        local minutes = tonumber(minutes) or 0
+        local seconds = tonumber(seconds) or 0
+        local days = tonumber(days) or 0
+        return (days * 24 * 60 + minutes) * 60 + seconds
+    elseif tonumber(seconds) then
+        return tonumber(seconds)
     else
         local minutes = hs.execute("uptime | awk '{print $3}' | \
             sed -e 's/[^0-9:].*//' | sed 's/:/*60+/g' | bc")
-        return tonumber(minutes)
+        local minutes = tonumber(minutes) or 0
+        return minutes * 60
     end
+
 end-- }}}2
 
 hs.pathwatcher.new(os.getenv("HOME") ..
@@ -46,7 +57,7 @@ hs.pathwatcher.new(os.getenv("HOME") ..
 hs.pathwatcher.new(os.getenv("HOME") ..
     ".homesick/repos/dotfiles/home/.hammerspoon/", reloadConfig):start()
 
-if uptime() > 5 then
+if uptime() > 300 then
     -- I don't want the alert when I turn on the computer
     hs.alert.show("Hammerspoon loaded")
 end
