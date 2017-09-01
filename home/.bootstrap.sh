@@ -111,18 +111,19 @@ brew install git
 brew install lua
 brew install zsh
 brew install mas
-brew install tree
 brew install ruby
 brew install fasd
 brew install trash
+# brew install tldr
+# brew install tree
 brew install luajit
 brew install cscope
 brew install pandoc
 brew install python
 brew install python3
-brew install thefuck
 brew install dockutil
 brew install carthage
+# brew install thefuck
 brew install terminal-notifier
 brew install curl --with-openssl
 
@@ -133,7 +134,6 @@ brew cask install calibre
 brew cask install opensim
 brew cask install firefox
 brew cask install basictex
-brew cask install flashlight
 brew cask install appcleaner
 brew cask install hammerspoon
 brew cask install transmission
