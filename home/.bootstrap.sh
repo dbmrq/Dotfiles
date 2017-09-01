@@ -139,6 +139,7 @@ brew cask install hammerspoon
 brew cask install transmission
 brew cask install google-chrome
 brew cask install the-unarchiver
+brew cask install qlcolorcode qlstephen qlmarkdown quicklook-csv qlimagesize
 
 sudo chown -R $(whoami):admin /usr/local
 sudo chmod -R g+rwx /usr/local
