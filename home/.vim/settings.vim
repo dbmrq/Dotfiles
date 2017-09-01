@@ -76,6 +76,7 @@ endif
 set wrap
 set linebreak
 set textwidth=78
+set whichwrap+=h,l
 
 au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 

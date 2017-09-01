@@ -26,11 +26,30 @@ function reloadConfig(files)---- {{{2
     end
 end-- }}}2
 
+function uptime()---- {{{2
+    local days =
+        hs.execute("uptime | grep -o '\\d\\+\\sdays' | grep -o '\\d\\+'")
+
+    if tonumber(days) then
+        local minutes = hs.execute("uptime | awk '{print $5}' | \
+            sed -e 's/[^0-9:].*//' | sed 's/:/*60+/g' | bc")
+        return tonumber(days) * 24 * 60 + tonumber(minutes)
+    else
+        local minutes = hs.execute("uptime | awk '{print $3}' | \
+            sed -e 's/[^0-9:].*//' | sed 's/:/*60+/g' | bc")
+        return tonumber(minutes)
+    end
+end-- }}}2
+
 hs.pathwatcher.new(os.getenv("HOME") ..
     "/.hammerspoon/", reloadConfig):start()
 hs.pathwatcher.new(os.getenv("HOME") ..
     ".homesick/repos/dotfiles/home/.hammerspoon/", reloadConfig):start()
-hs.alert.show("Hammerspoon loaded")
+
+if uptime() > 5 then
+    -- I don't want the alert when I turn on the computer
+    hs.alert.show("Hammerspoon loaded")
+end
 
 -- }}}1
 
