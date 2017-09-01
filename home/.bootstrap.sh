@@ -116,6 +116,7 @@ brew install fasd
 brew install trash
 # brew install tldr
 # brew install tree
+brew install lua@5.3
 brew install luajit
 brew install cscope
 brew install pandoc
@@ -305,6 +306,12 @@ trash ~/Desktop/tmp
 git clone https://github.com/dbmrq/workflow-latexmk.git ~/Desktop/tmp
 mv ~/Desktop/tmp/latexmk.workflow ~/Library/Services/latexmk.workflow
 trash ~/Desktop/tmp
+
+# }}}1
+
+# Misc {{{1
+
+/usr/local/bin/luarocks-5.3 install luasocket
 
 # }}}1
 

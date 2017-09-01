@@ -53,3 +53,36 @@ end
 
 -- }}}1
 
+-- Slow Cmd-Q so you don't quit apps accidentally {{{1
+
+socket = require "socket"
+pressedQTime = 0
+
+hs.hotkey.bind(
+    'cmd',
+    'Q',
+    function()
+        if socket then
+            pressedQTime = socket.gettime()
+        else
+            pressedQTime = os.time()
+        end
+    end,
+    nil,
+    function()
+        if socket then
+            if pressedQTime > 0 and socket.gettime() - pressedQTime > 0.2 then
+                pressedQTime = 0
+                hs.application.frontmostApplication():kill()
+            end
+        else
+            if pressedQTime > 0 and os.time() - pressedQTime > 1 then
+                pressedQTime = 0
+                hs.application.frontmostApplication():kill()
+            end
+        end
+    end
+)
+
+-- }}}1
+
