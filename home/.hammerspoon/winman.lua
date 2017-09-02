@@ -1,4 +1,6 @@
 
+-- http://github.com/dbmrq/dotfiles/
+
 -- Window management
 
 local grid = require "hs.grid"

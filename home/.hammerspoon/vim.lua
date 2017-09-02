@@ -1,4 +1,6 @@
 
+-- http://github.com/dbmrq/dotfiles/
+
 -- Vim style modal bindings
 
 -- Normal mode {{{1
