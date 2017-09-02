@@ -1,6 +1,7 @@
 
 super = {"ctrl", "alt", "cmd"}
 
+require "slowq"    -- Avoid accidental cmd-Q
 require "winman"   -- Window management
 require "readline" -- Readline style bindings
 -- require "vim"      -- Vim style bindings
@@ -26,7 +27,7 @@ function reloadConfig(files)---- {{{2
     end
 end-- }}}2
 
-function uptime()-- uptime in seconds {{{2
+function uptime()---- {{{2
 
     local days = hs.execute("uptime | \
         grep -o '\\d\\+\\sdays' | grep -o '\\d\\+'")
@@ -58,42 +59,9 @@ hs.pathwatcher.new(os.getenv("HOME") ..
     ".homesick/repos/dotfiles/home/.hammerspoon/", reloadConfig):start()
 
 if uptime() > 300 then
-    -- I don't want the alert when I turn on the computer
+-- I don't want the alert when I have just turned on the computer
     hs.alert.show("Hammerspoon loaded")
 end
-
--- }}}1
-
--- Slow Cmd-Q so you don't quit apps accidentally {{{1
-
-socket = require "socket"
-pressedQTime = 0
-
-hs.hotkey.bind(
-    'cmd',
-    'Q',
-    function()
-        if socket then
-            pressedQTime = socket.gettime()
-        else
-            pressedQTime = os.time()
-        end
-    end,
-    nil,
-    function()
-        if socket then
-            if pressedQTime > 0 and socket.gettime() - pressedQTime > 0.2 then
-                pressedQTime = 0
-                hs.application.frontmostApplication():kill()
-            end
-        else
-            if pressedQTime > 0 and os.time() - pressedQTime > 1 then
-                pressedQTime = 0
-                hs.application.frontmostApplication():kill()
-            end
-        end
-    end
-)
 
 -- }}}1
 
