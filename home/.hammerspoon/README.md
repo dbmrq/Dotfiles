@@ -1,4 +1,4 @@
-# My hammerspoon config
+# My Hammerspoon config
 
 
 ## [winman.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/winman.lua)
