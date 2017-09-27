@@ -26,7 +26,7 @@ end
 
 function repeatQ()
     if socket then
-        if pressedQTime > 0 and socket.gettime() - pressedQTime > 0.25 then
+        if pressedQTime > 0 and socket.gettime() - pressedQTime > 0.01 then
             pressedQTime = 0
             hs.application.frontmostApplication():kill()
             hs.alert.closeAll()

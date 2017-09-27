@@ -38,7 +38,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'sheerun/vim-polyglot'
     Plug 'altercation/vim-colors-solarized'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-    Plug 'wellle/targets.vim', { 'branch': '162-separator-expand' }
+    Plug 'wellle/targets.vim'
     Plug 'junegunn/goyo.vim', { 'for': ['markdown', 'text', 'tex'] }
 
     if has('nvim')
@@ -54,7 +54,7 @@ call plug#begin('~/.vim/bundle')
 
 call plug#end()
 
-command! Plug PlugUpdate | PlugUpgrade
+command! Plug so % | PlugUpdate | PlugUpgrade
 
 " }}}1
 
@@ -480,20 +480,48 @@ endif
 " }}}1
 
 " vim-textobj-user {{{1
-call textobj#user#plugin('aroundpar', {
-\   '-': {
-\     'select-a-function': 'AroundParA',
-\     'select-a': 'Ap',
-\   },
-\ })
 
-function! AroundParA()
+function! AroundParA()" {{{2
   normal! {
   let head_pos = getpos('.')
   normal! }
   let tail_pos = getpos('.')
   return ['v', head_pos, tail_pos]
 endfunction
+
+call textobj#user#plugin('aroundpar', {
+\   '-': {
+\     'select-a-function': 'AroundParA',
+\     'select-a': 'Ap',
+\   },
+\ })" }}}2
+
+function! InsideParI()" {{{2
+    let head = line(".")
+    while strlen(getline(head - 1)) > strlen(getline(head)) / 2
+        let head -= 1
+    endwhile
+
+    let tail = line(".")
+    while strlen(getline(tail + 1)) > strlen(getline(tail)) / 2
+        let tail += 1
+    endwhile
+
+    let head_pos = [bufnr('%'), head, 1, 0]
+    let tail_pos = [bufnr('%'), tail, strlen(getline(tail)), 0]
+
+  return ['v', head_pos, tail_pos]
+endfunction
+
+call textobj#user#plugin('insidepar', {
+\   '-': {
+\     'select-a-function': 'InsideParI',
+\     'select-a': 'Ip',
+\   },
+\ })" }}}2
+
+nmap <leader>gq gqIp
+
 " }}}1
 
 " Howdy {{{

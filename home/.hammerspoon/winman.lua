@@ -7,6 +7,9 @@ local grid = require "hs.grid"
 grid.setMargins('20,20')
 grid.setGrid('6x6')
 
+local hsVersion = hs.processInfo["version"]:gsub('%.', '')
+hsVersion = tonumber(hsVersion)
+
 -- hs.window.animationDuration = 0
 
 -- Helper functions {{{1
@@ -39,6 +42,10 @@ end-- }}}2
 
 -- Compensate for the double margin between windows {{{2
 local function compensateMargins(window)
+    if hsVersion >= 0956 then
+        -- This has been fixed in version 0.9.56
+        return
+    end
     local win = window or hs.window.focusedWindow()
     local cell = grid.get(win)
     local frame = win:frame()

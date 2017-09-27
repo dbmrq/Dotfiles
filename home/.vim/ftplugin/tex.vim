@@ -105,6 +105,23 @@ endfunction
 
 " }}}1
 
+" Symbols {{{1
+
+" Can't do this because it screws up with some accented characters
+" let s:uname = system("uname -s")
+" if !has("gui_running") && s:uname =~ "Darwin"
+"     inoremap s §
+"     inoremap p ¶
+" else
+"     inoremap <m-s> §
+"     inoremap <m-p> ¶
+" endif
+
+inoremap <F5> §
+inoremap <F6> ¶
+
+" }}}1
+
 
 set spell
 set spelllang=pt

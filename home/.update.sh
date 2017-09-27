@@ -76,15 +76,15 @@ echo ""
 
 # }}}1
 
-# RubyGems {{{1
+# # RubyGems {{{1
 
-echo ""
-echo "`date`: Running gem update"
-echo ""
-sudo /usr/local/bin/gem update —system
-sudo /usr/local/bin/gem update
+# echo ""
+# echo "`date`: Running gem update"
+# echo ""
+# sudo gem update —-system
+# sudo gem update
 
-# }}}1
+# # }}}1
 
 /usr/local/bin/terminal-notifier -title '.update.sh' -message 'Software updated!' -execute 'open /tmp'
 
