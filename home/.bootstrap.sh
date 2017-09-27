@@ -53,10 +53,6 @@ defaults write com.apple.LaunchServices LSQuarantine -bool false
 # Disable the crash reporter
 defaults write com.apple.CrashReporter DialogType -string "none"
 
-# Wipe all (default) app icons from the Dock
-defaults write com.apple.dock persistent-apps -array
-killall Dock
-
 # Disable Dashboard (seems to be default now?)
 # defaults write com.apple.dashboard mcx-disabled -bool true
 
@@ -178,6 +174,17 @@ echo "---"
 # MacVim {{{1
 
 /bin/bash ~/.macvim.sh
+
+# }}}1
+
+# Dock {{{1
+
+# Wipe all (default) app icons from the Dock
+defaults write com.apple.dock persistent-apps -array
+
+/usr/local/bin/dockutil --add /Applications/Safari.app
+/usr/local/bin/dockutil --add /usr/local/opt/macvim/MacVim.app
+/usr/local/bin/dockutil --add /Applications/Utilities/Terminal.app
 
 # }}}1
 
