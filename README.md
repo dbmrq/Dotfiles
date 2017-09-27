@@ -24,9 +24,9 @@ files. There's also some cool stuff on
 
 ---
 
-Note to self: to bootstrap a new Mac, run
+Note to self: to bootstrap a new Mac, run something like
 
-    curl --remote-name https://raw.githubusercontent.com/dbmrq/dotfiles/master/home/.bootstrap.sh && chmod +x .bootstrap.sh && ./.bootstrap.sh
+    git clone https://github.com/dbmrq/dotfiles.git ~/Desktop/dotfiles && cd ~/Desktop/dotfiles/home/.bootstrap && ./.bootstrap.sh
 
 That'll download and run the `.bootstrap.sh` script, which will take care of
 the rest.
