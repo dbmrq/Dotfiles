@@ -97,7 +97,7 @@ echo "---"
 
 # Homebrew {{{1
 
-/bin/bash ~/.brew.sh
+/bin/bash .brew.sh
 
 # }}}1
 
@@ -167,13 +167,13 @@ echo "---"
 
 # MAS {{{1
 
-/bin/bash ~/.mas.sh
+/bin/bash .mas.sh
 
 # }}}1
 
 # MacVim {{{1
 
-/bin/bash ~/.macvim.sh
+/bin/bash .macvim.sh
 
 # }}}1
 
@@ -243,7 +243,7 @@ trash ~/Desktop/tmp
 # }}}1
 
 # LaTeX {{{1
-/bin/bash ~/.tlmgr.sh
+/bin/bash .tlmgr.sh
 # }}}1
 
 echo "Remember to check Homebrew's results!"
