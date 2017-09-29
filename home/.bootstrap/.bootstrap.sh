@@ -22,6 +22,32 @@ echo "---"
 
 # }}}1
 
+# # Xcode developer tools {{{1
+
+# echo ""
+# echo "Installing Xcode developer tools..."
+# echo ""
+
+# xcode-select --install
+# sudo xcodebuild -license accept
+
+# echo ""
+# echo "Done."
+# echo ""
+# echo "---"
+
+# # }}}1
+
+# Homebrew {{{1
+
+/bin/bash .brew.sh
+
+# }}}1
+
+# MAS {{{1
+osascript -e 'tell application "Terminal" to do script "source ~/.bootstrap/.mas.sh"'
+# }}}1
+
 # Preferences {{{1
 
 # based on https://mths.be/macos
@@ -104,7 +130,6 @@ defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
 # Enable snap-to-grid for icons on the desktop and in other icon views
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 
 # Minimize windows into their application’s icon
@@ -139,28 +164,6 @@ echo ""
 echo "Done."
 echo ""
 echo "---"
-
-# }}}1
-
-# # Xcode developer tools {{{1
-
-# echo ""
-# echo "Installing Xcode developer tools..."
-# echo ""
-
-# xcode-select --install
-# sudo xcodebuild -license accept
-
-# echo ""
-# echo "Done."
-# echo ""
-# echo "---"
-
-# # }}}1
-
-# Homebrew {{{1
-
-/bin/bash .brew.sh
 
 # }}}1
 
@@ -228,17 +231,6 @@ echo "---"
 
 # }}}1
 
-# Dock {{{1
-
-# Wipe all (default) app icons from the Dock
-defaults write com.apple.dock persistent-apps -array
-
-/usr/local/bin/dockutil --add /Applications/Safari.app
-/usr/local/bin/dockutil --add /usr/local/opt/macvim/MacVim.app
-/usr/local/bin/dockutil --add /Applications/Utilities/Terminal.app
-
-# }}}1
-
 # .update.sh {{{1
 
 git clone https://gist.github.com/a755dde62bf109cb5c0d32bec800fa7a.git ~/Desktop/update
@@ -297,12 +289,6 @@ echo "---"
 osascript -e 'tell application "Terminal" to do script "source ~/.bootstrap/.tlmgr.sh"'
 # }}}1
 
-# MAS {{{1
-
-/bin/bash .mas.sh
-
-# }}}1
-
 read -n 1 -s -r -p "A few applications require Xcode to be installed and opened once. Open Xcode now and press any key to continue."
 
 # Swiftlint {{{1
@@ -312,6 +298,17 @@ brew install swiftlint
 # MacVim {{{1
 
 /bin/bash .macvim.sh
+
+# }}}1
+
+# Dock {{{1
+
+# Wipe all (default) app icons from the Dock
+defaults write com.apple.dock persistent-apps -array
+
+/usr/local/bin/dockutil --add /Applications/Safari.app
+/usr/local/bin/dockutil --add /usr/local/opt/macvim/MacVim.app
+/usr/local/bin/dockutil --add /Applications/Utilities/Terminal.app
 
 # }}}1
 
