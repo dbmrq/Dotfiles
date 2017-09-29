@@ -63,3 +63,8 @@ alias cleanzip="find . -type d -print0 | xargs -0 chmod 0755 && \
 
 #  }}}1
 
+# Autocompletion often doesn't work when you change permissions on /usr/local;
+# this can help
+# autoload -U compinit && compinit
+# zmodload -i zsh/complist
+
