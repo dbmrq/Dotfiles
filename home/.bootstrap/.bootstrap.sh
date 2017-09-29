@@ -22,21 +22,21 @@ echo "---"
 
 # }}}1
 
-# # Xcode developer tools {{{1
+# Xcode developer tools {{{1
 
-# echo ""
-# echo "Installing Xcode developer tools..."
-# echo ""
+echo ""
+echo "Installing Xcode developer tools..."
+echo ""
 
-# xcode-select --install
-# sudo xcodebuild -license accept
+xcode-select --install
+sudo xcodebuild -license accept
 
-# echo ""
-# echo "Done."
-# echo ""
-# echo "---"
+echo ""
+echo "Done."
+echo ""
+echo "---"
 
-# # }}}1
+# }}}1
 
 # Homebrew {{{1
 
