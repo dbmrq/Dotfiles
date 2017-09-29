@@ -24,7 +24,6 @@ brew install python3
 brew install dockutil
 brew install carthage
 brew install thefuck
-brew install swiftlint
 brew install terminal-notifier
 brew install curl --with-openssl
 
