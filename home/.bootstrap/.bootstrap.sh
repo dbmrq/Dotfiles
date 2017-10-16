@@ -56,15 +56,6 @@ echo ""
 echo "Setting preferences..."
 echo ""
 
-# Trackpad: enable tap to click for this user and for the login screen
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-
-# Enable 3-finger drag
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
-defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
-
 # Disable Gatekeeper
 sudo spctl --master-disable
 
@@ -98,14 +89,6 @@ defaults write com.apple.LaunchServices LSQuarantine -bool false
 # Disable the crash reporter
 defaults write com.apple.CrashReporter DialogType -string "none"
 
-# Enable full keyboard access for all controls
-# (e.g. enable Tab in modal dialogs)
-defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
-
-# Set a blazingly fast keyboard repeat rate
-defaults write NSGlobalDomain KeyRepeat -int 1
-defaults write NSGlobalDomain InitialKeyRepeat -int 10
-
 # Set Home as the default location for new Finder windows
 defaults write com.apple.finder NewWindowTarget -string "PfLo"
 defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}"
@@ -118,9 +101,6 @@ defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool false
 
 # Finder: show status bar
 defaults write com.apple.finder ShowStatusBar -bool true
-
-# Finder: show path bar
-defaults write com.apple.finder ShowPathbar -bool true
 
 # Keep folders on top when sorting by name
 defaults write com.apple.finder _FXSortFoldersFirst -bool true
@@ -313,11 +293,11 @@ defaults write com.apple.dock persistent-apps -array
 # }}}1
 
 
-
 # Remove group write permissions for directories that would cause problems
 # with auto completion
 # rm ~/.zcompdump && compaudit && compinit
-compaudit | xargs chmod g-w
+osascript -e 'tell application "Terminal" to do script "compaudit | xargs chmod g-w"'
+
 
 # vim: set tw=0:
 

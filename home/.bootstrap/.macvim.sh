@@ -15,7 +15,12 @@ git clone https://github.com/dbmrq/vim-chalk.git ~/Code/Vim/vim-chalk
 git clone https://github.com/dbmrq/vim-dialect.git ~/Code/Vim/vim-dialect
 git clone https://github.com/dbmrq/vim-howdy.git ~/Code/Vim/vim-howdy
 
-vim +Plug +qall
+
+# Neocomplete tries to save stuff at .cache and since High Sierra the owner is
+# root
+sudo chown -R $(whoami):staff ~/.cache
+
+vim +PlugUpdate +qall
 
 echo ""
 echo "Done."

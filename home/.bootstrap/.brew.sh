@@ -37,6 +37,7 @@ brew cask install basictex
 brew cask install appcleaner
 brew cask install hammerspoon
 brew cask install transmission
+brew cask install flash-player
 brew cask install google-chrome
 brew cask install the-unarchiver
 brew cask install qlcolorcode qlstephen qlmarkdown quicklook-csv qlimagesize
@@ -44,6 +45,7 @@ brew cask install qlcolorcode qlstephen qlmarkdown quicklook-csv qlimagesize
 # sudo chown -R $(whoami):admin /usr/local
 # sudo chmod -R g+rwx /usr/local
 # This is necessary so that `brew prune` can do its thing.
+# Edit: apparently not anymore on High Sierra
 
 brew prune
 brew cleanup

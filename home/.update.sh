@@ -46,7 +46,7 @@ echo ""
 
 # MacVim dock icon and alias {{{1
 
-if echo "$upgraderesult" | grep -q 'MacVim'; then
+if echo "$upgraderesult" | grep -q 'macvim'; then
 
     echo ""
     echo "`date`: Fixing MacVim Dock icon"

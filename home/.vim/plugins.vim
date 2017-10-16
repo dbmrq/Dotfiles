@@ -428,6 +428,9 @@ else
 
     " NeoComplete {{{2
 
+    " Since High Sierra ~/.cache, the default directory, is owned by root
+    let g:neocomplete#data_directory = "~/.vim/neocomplete"
+
     " Disable AutoComplPop.
     let g:acp_enableAtStartup = 0
     " Use neocomplete.
