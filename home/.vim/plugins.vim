@@ -344,7 +344,28 @@ let g:vimtex_quickfix_latexlog = {'fix_paths':0}
 let g:vimtex_compiler_latexmk = {
     \ 'backend' : 'jobs',
     \ 'continuous' : 0,
+    \ 'options' : [
+    \   '-pdf',
+    \   '-verbose',
+    \   '-file-line-error',
+    \   '-synctex=1',
+    \   '-interaction=nonstopmode',
+    \ ],
     \}
+
+function! ToggleOption(option)
+    let index = index(g:vimtex_compiler_latexmk["options"], a:option)
+    if index >= 0
+        call remove(g:vimtex_compiler_latexmk["options"], index)
+        echom(a:option . " removed from latexmk's options")
+    else
+        call add(g:vimtex_compiler_latexmk["options"], a:option)
+        echom(a:option . " added to latexmk's options")
+    endif
+endfunction
+
+autocmd User VimtexEventInitPost
+            \ command! RC call ToggleOption("-norc")
 
 let g:VimtexImportante = {
       \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
