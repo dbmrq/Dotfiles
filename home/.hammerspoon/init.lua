@@ -58,7 +58,7 @@ hs.pathwatcher.new(os.getenv("HOME") ..
 hs.pathwatcher.new(os.getenv("HOME") ..
     ".homesick/repos/dotfiles/home/.hammerspoon/", reloadConfig):start()
 
-if uptime() > 300 then
+if uptime() > 1000 then
 -- I don't want the alert when I have just turned on the computer
     hs.alert.show("Hammerspoon loaded")
 end
