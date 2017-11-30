@@ -7,8 +7,8 @@ syntax enable
 
 set title
 
-set relativenumber
-set number
+" set relativenumber
+" set number
 
 set showcmd
 
@@ -73,6 +73,7 @@ endif
 
 " Wrapping {{{
 
+set bri
 set wrap
 set linebreak
 set textwidth=78
@@ -80,15 +81,18 @@ set whichwrap+=h,l
 
 au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 
+" Highlight lines that are wrapped
+au VimResized * exe 'match FoldColumn /\%>' . winwidth('%') . 'v.*/'
+
 " if executable("par")
 "     set formatprg=par\ -w78
 " endif
 
-if &l:formatoptions =~ "t"
-    let &colorcolumn="79,".join(range(101,999),",")
-else
-    let &colorcolumn="79"
-endif
+" if &l:formatoptions =~ "t"
+"     let &colorcolumn="+1,".join(range(101,999),",")
+" else
+"     let &colorcolumn="+1"
+" endif
 
 " }}}
 

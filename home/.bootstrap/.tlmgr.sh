@@ -10,7 +10,7 @@ sudo tlmgr update --self --all
 
 sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
 collection-langother collection-latexextra collection-pictures logreq \
-biblatex biber biblatex-abnt abntex2
+biblatex biber
 
 mkdir -pv ~/Code/LaTeX/Bibliography
 mkdir -pv ~/Code/LaTeX/Classes

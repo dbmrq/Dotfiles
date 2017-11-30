@@ -21,31 +21,26 @@ call plug#begin('~/.vim/bundle')
     Plug 'kana/vim-textobj-entire'
     Plug 'kana/vim-textobj-syntax'
     Plug 'kana/vim-textobj-fold'
-    Plug 'justinmk/vim-sneak'
+    " Plug 'justinmk/vim-sneak'
     Plug 'tommcdo/vim-exchange'
     Plug 'junegunn/vim-easy-align'
-    Plug 'AndrewRadev/splitjoin.vim'
-    Plug 'FooSoft/vim-argwrap'
-    Plug 'ntpeters/vim-better-whitespace'
+    " Plug 'AndrewRadev/splitjoin.vim'
+    " Plug 'FooSoft/vim-argwrap'
+    " Plug 'ntpeters/vim-better-whitespace'
     Plug 'tweekmonster/spellrotate.vim'
-    Plug 'maxbrunsfeld/vim-yankstack'
+    " Plug 'maxbrunsfeld/vim-yankstack'
     Plug 'henrik/vim-indexed-search'
     Plug 'nelstrom/vim-visual-star-search'
     Plug 'haya14busa/incsearch.vim'
     Plug 'Raimondi/delimitMate'
-    Plug 'mbbill/undotree'
+    " Plug 'mbbill/undotree'
     Plug 'lervag/vimtex'
-    Plug 'sheerun/vim-polyglot'
+    " Plug 'sheerun/vim-polyglot'
     Plug 'altercation/vim-colors-solarized'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'wellle/targets.vim'
-    Plug 'junegunn/goyo.vim', { 'for': ['markdown', 'text', 'tex'] }
-
-    if has('nvim')
-        Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    else
-        Plug 'Shougo/neocomplete.vim'
-    endif
+    " Plug 'junegunn/goyo.vim', { 'for': ['markdown', 'text', 'tex'] }
+    Plug 'Shougo/neocomplete.vim'
 
     Plug '~/Code/Vim/vim-ditto'
     Plug '~/Code/Vim/vim-chalk'
@@ -59,77 +54,168 @@ command! Plug so % | PlugUpdate | PlugUpgrade
 " }}}1
 
 
-" vim-polyglot {{{1
-let g:polyglot_disabled = ['latex']
+" NeoComplete {{{1
+
+" Since High Sierra ~/.cache, the default directory, is owned by root
+let g:neocomplete#data_directory = "~/.vim/neocomplete"
+
+" Disable AutoComplPop.
+let g:acp_enableAtStartup = 0
+" Use neocomplete.
+let g:neocomplete#enable_at_startup = 1
+" Use smartcase.
+let g:neocomplete#enable_smart_case = 1
+" Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 2
+let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+" Plugin key-mappings.
+inoremap <expr><C-g>     neocomplete#undo_completion()
+" inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+" <C-h>, <BS>: close popup and delete backword char.
+" inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+" inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+" Close popup by <Space>.
+"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+" Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+if !exists('g:neocomplete#sources#omni#input_patterns')
+    let g:neocomplete#sources#omni#input_patterns = {}
+  endif
+  let g:neocomplete#sources#omni#input_patterns.tex =
+        \ g:vimtex#re#neocomplete
+
+" let last_spell_changedtick = -1
+" let last_spell_count = 1
+
 " }}}1
+
+" Vimtex {{{1
+
+autocmd User VimtexEventInitPost exe 'cd' fnameescape(b:vimtex.root)
+autocmd User VimtexEventInitPost
+            \ command! CD exe 'cd' fnameescape(b:vimtex.root)
+autocmd User VimtexEventInitPost
+            \ command! -nargs=1 G silent exe 'cd' b:vimtex.root |
+            \ silent vimgrep /<args>/g **/*.tex |
+            \ cw
+
+let g:vimtex_text_obj_enabled = 1
+let g:vimtex_imaps_enabled = 0
+let g:vimtex_indent_bib_enabled = 0
+let g:vimtex_index_split_pos = "full"
+let g:vimtex_toc_fold = 1
+let g:vimtex_toc_fold_level_start = 2
+let g:vimtex_index_show_help = 0
+let g:vimtex_view_automatic = 0
+" let g:vimtex_quickfix_open_on_warning = 0
+
+let g:vimtex_quickfix_latexlog = {'fix_paths':0}
+
+let g:vimtex_compiler_latexmk = {
+    \ 'backend' : 'jobs',
+    \ 'continuous' : 0,
+    \ 'options' : [
+    \   '-pdf',
+    \   '-verbose',
+    \   '-file-line-error',
+    \   '-synctex=1',
+    \   '-interaction=nonstopmode',
+    \ ],
+    \}
+
+function! ToggleOption(option)
+    let index = index(g:vimtex_compiler_latexmk["options"], a:option)
+    if index >= 0
+        call remove(g:vimtex_compiler_latexmk["options"], index)
+        echom(a:option . " removed from latexmk's options")
+    else
+        call add(g:vimtex_compiler_latexmk["options"], a:option)
+        echom(a:option . " added to latexmk's options")
+    endif
+endfunction
+
+autocmd User VimtexEventInitPost
+            \ command! RC call ToggleOption("-norc")
+
+let g:VimtexImportante = {
+      \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
+      \ 'in_preamble' : 1,
+      \}
+
+function! g:VimtexImportante.get_entry(context) abort dict
+  return {
+        \ 'title'  : 'IMPORTANTE: ' .
+            \ matchstr(a:context.file, '\(\/.*\).*\/\zs\a.*\.\a\a\a') .
+            \ ' - line ' . a:context.lnum,
+        \ 'number' : '[!]',
+        \ 'file'   : a:context.file,
+        \ 'line'   : a:context.lnum,
+        \ 'level'  : a:context.max_level,
+        \ 'rank'   : a:context.lnum_total,
+        \ }
+endfunction
+
+let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
+
+let g:vimtex_toc_hotkeys = {
+    \ 'enabled' : 1,
+    \ 'keys' : 'asdfjkleurei',
+    \ 'leader' : '<space>',
+    \}
+
+" }}}1
+
+
+" " vim-polyglot {{{1
+" let g:polyglot_disabled = ['latex']
+" " }}}1
 
 " vim-rsi {{{1
 let g:rsi_no_meta = 1
 " }}}1
 
-" golden-ratio {{{1
-let g:golden_ratio_autocommand = 0
-let g:golden_ratio_exclude_nonmodifiable = 1
-" }}}1
+" " golden-ratio {{{1
+" let g:golden_ratio_autocommand = 0
+" let g:golden_ratio_exclude_nonmodifiable = 1
+" " }}}1
 
-" goyo {{{1
+" " goyo {{{1
 
-nnoremap <leader>gy :Goyo<cr>
+" nnoremap <leader>gy :Goyo<cr>
 
-" }}}1
+" " }}}1
 
-" undotree {{{1
-nnoremap <leader>ut :UndotreeToggle<cr>
-" }}}1
+" " undotree {{{1
+" nnoremap <leader>ut :UndotreeToggle<cr>
+" " }}}1
 
 " Solarized {{{1
 colorscheme solarized
 " }}}1
 
-" chalk {{{1
+" " gitgutter {{{1
 
-vmap zf <Plug>Chalk
-nmap zf <Plug>Chalk
-nmap zF <Plug>ChalkRange
-nmap Zf <Plug>SingleChalk
-nmap ZF <Plug>SingleChalkUp
-nmap =z <Plug>ChalkUp
-nmap -z <Plug>ChalkDown
-vmap =z <Plug>ChalkUp
-vmap -z <Plug>ChalkDown
+" let g:gitgutter_map_keys = 0
 
-" }}}1
+" " }}}1
 
-" ditto {{{1
+" " ArgWrap {{{1
 
-" au FileType markdown,text,tex DittoOn
+" nnoremap <silent> <leader>aw :ArgWrap<cr>
 
-nmap <leader>di <Plug>ToggleDitto
+" let g:argwrap_tail_comma = 1
 
-nmap +d <Plug>DittoGood
-nmap _d <Plug>DittoBad
-nmap =d <Plug>DittoNext
-nmap -d <Plug>DittoPrev
-nmap ]d <Plug>DittoMore
-nmap [d <Plug>DittoLess
+" " }}}1
 
-" }}}1
-
-" gitgutter {{{1
-
-let g:gitgutter_map_keys = 0
-
-" }}}1
-
-" ArgWrap {{{1
-
-nnoremap <silent> <leader>aw :ArgWrap<cr>
-
-let g:argwrap_tail_comma = 1
-
-" }}}1
-
-" splitjoin {{{1
+" " splitjoin {{{1
 
 " let g:splitjoin_split_mapping = 'K'
 " let g:splitjoin_join_mapping = 'J'
@@ -143,7 +229,7 @@ let g:argwrap_tail_comma = 1
 " nnoremap <expr> K argwrap#validateRange(argwrap#findClosestRange()) ?
 "     \ ":ArgWrap<cr>" : ":SplitjoinSplit<cr>"
 
-" }}}1
+" " }}}1
 
 " delimitMate {{{1
 
@@ -159,23 +245,23 @@ nmap ga <Plug>(EasyAlign)
 
 " }}}1
 
-"unimpaired.vim {{{1
+""unimpaired.vim {{{1
 
-" move lines up and down
-let s:uname = system("uname -s")
-if !has("gui_running") && s:uname =~ "Darwin"
-    nmap k [e
-    nmap j ]e
-    vmap k [egv
-    vmap j ]egv
-else
-    nmap <m-k> [e
-    vmap <m-k> [egv
-    nmap <m-j> ]e
-    vmap <m-j> ]egv
-endif
+"" move lines up and down
+"let s:uname = system("uname -s")
+"if !has("gui_running") && s:uname =~ "Darwin"
+"    nmap k [e
+"    nmap j ]e
+"    vmap k [egv
+"    vmap j ]egv
+"else
+"    nmap <m-k> [e
+"    vmap <m-k> [egv
+"    nmap <m-j> ]e
+"    vmap <m-j> ]egv
+"endif
 
-" }}}1
+"" }}}1
 
 " Spellrotate {{{1
 
@@ -287,221 +373,37 @@ augroup END
 
 " }}}1
 
-" vim-sneak {{{1
+"" vim-sneak {{{1
 
-let g:sneak#use_ic_scs = 1
-" hi clear SneakPluginTarget
-" hi link SneakPluginTarget Search
-autocmd ColorScheme * hi! link Sneak Search
+"let g:sneak#use_ic_scs = 1
+"" hi clear SneakPluginTarget
+"" hi link SneakPluginTarget Search
+"autocmd ColorScheme * hi! link Sneak Search
 
-"replace 'f' with 1-char Sneak
-nmap f <Plug>Sneak_f
-nmap F <Plug>Sneak_F
-xmap f <Plug>Sneak_f
-xmap F <Plug>Sneak_F
-omap f <Plug>Sneak_f
-omap F <Plug>Sneak_F
-"replace 't' with 1-char Sneak
-nmap t <Plug>Sneak_t
-nmap T <Plug>Sneak_T
-xmap t <Plug>Sneak_t
-xmap T <Plug>Sneak_T
-omap t <Plug>Sneak_t
-omap T <Plug>Sneak_T
+""replace 'f' with 1-char Sneak
+"nmap f <Plug>Sneak_f
+"nmap F <Plug>Sneak_F
+"xmap f <Plug>Sneak_f
+"xmap F <Plug>Sneak_F
+"omap f <Plug>Sneak_f
+"omap F <Plug>Sneak_F
+""replace 't' with 1-char Sneak
+"nmap t <Plug>Sneak_t
+"nmap T <Plug>Sneak_T
+"xmap t <Plug>Sneak_t
+"xmap T <Plug>Sneak_T
+"omap t <Plug>Sneak_t
+"omap T <Plug>Sneak_T
 
-" }}}1
+"" }}}1
 
-" yankstack {{{1
+" " yankstack {{{1
 
-let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y']
-nmap <leader>p <Plug>yankstack_substitute_older_paste
-nmap <leader>P <Plug>yankstack_substitute_newer_paste
+" let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y']
+" nmap <leader>p <Plug>yankstack_substitute_older_paste
+" nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
-" }}}1
-
-" Vimtex {{{1
-
-autocmd User VimtexEventInitPost exe 'cd' fnameescape(b:vimtex.root)
-autocmd User VimtexEventInitPost
-            \ command! CD exe 'cd' fnameescape(b:vimtex.root)
-autocmd User VimtexEventInitPost
-            \ command! -nargs=1 G silent exe 'cd' b:vimtex.root |
-            \ silent vimgrep /<args>/g **/*.tex |
-            \ cw
-
-let g:vimtex_text_obj_enabled = 1
-let g:vimtex_imaps_enabled = 0
-let g:vimtex_indent_bib_enabled = 0
-let g:vimtex_index_split_pos = "full"
-let g:vimtex_toc_fold = 1
-let g:vimtex_toc_fold_level_start = 2
-let g:vimtex_index_show_help = 0
-let g:vimtex_view_automatic = 0
-" let g:vimtex_quickfix_open_on_warning = 0
-
-let g:vimtex_quickfix_latexlog = {'fix_paths':0}
-
-let g:vimtex_compiler_latexmk = {
-    \ 'backend' : 'jobs',
-    \ 'continuous' : 0,
-    \ 'options' : [
-    \   '-pdf',
-    \   '-verbose',
-    \   '-file-line-error',
-    \   '-synctex=1',
-    \   '-interaction=nonstopmode',
-    \ ],
-    \}
-
-function! ToggleOption(option)
-    let index = index(g:vimtex_compiler_latexmk["options"], a:option)
-    if index >= 0
-        call remove(g:vimtex_compiler_latexmk["options"], index)
-        echom(a:option . " removed from latexmk's options")
-    else
-        call add(g:vimtex_compiler_latexmk["options"], a:option)
-        echom(a:option . " added to latexmk's options")
-    endif
-endfunction
-
-autocmd User VimtexEventInitPost
-            \ command! RC call ToggleOption("-norc")
-
-let g:VimtexImportante = {
-      \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
-      \ 'in_preamble' : 1,
-      \}
-
-function! g:VimtexImportante.get_entry(context) abort dict
-  return {
-        \ 'title'  : 'IMPORTANTE: ' .
-            \ matchstr(a:context.file, '\(\/.*\).*\/\zs\a.*\.\a\a\a') .
-            \ ' - line ' . a:context.lnum,
-        \ 'number' : '[!]',
-        \ 'file'   : a:context.file,
-        \ 'line'   : a:context.lnum,
-        \ 'level'  : a:context.max_level,
-        \ 'rank'   : a:context.lnum_total,
-        \ }
-endfunction
-
-let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
-
-let g:vimtex_toc_hotkeys = {
-    \ 'enabled' : 1,
-    \ 'keys' : 'asdfjkleurei',
-    \ 'leader' : '<space>',
-    \}
-
-" }}}1
-
-" neocomplete/deoplete {{{1
-
-if has('nvim')
-
-    " Deoplete {{{2
-
-    let g:deoplete#enable_at_startup = 1
-    let g:deoplete#enable_smart_case = 1
-    let g:deoplete#sources#syntax#min_keyword_length = 2
-    let g:deoplete#lock_buffer_name_pattern = '\*ku\*'
-
-    inoremap <expr><C-g>     deoplete#undo_completion()
-
-    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-    if !exists('g:deoplete#omni#input_patterns')
-        let g:deoplete#omni#input_patterns = {}
-    endif
-    let g:deoplete#omni#input_patterns.tex = '\\(?:'
-        \ .  '\w*cite\w*(?:\s*\[[^]]*\]){0,2}\s*{[^}]*'
-        \ . '|\w*ref(?:\s*\{[^}]*|range\s*\{[^,}]*(?:}{)?)'
-        \ . '|hyperref\s*\[[^]]*'
-        \ . '|includegraphics\*?(?:\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-        \ . '|(?:include(?:only)?|input)\s*\{[^}]*'
-        \ . '|\w*(gls|Gls|GLS)(pl)?\w*(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-        \ . '|includepdf(\s*\[[^]]*\])?\s*\{[^}]*'
-        \ . '|includestandalone(\s*\[[^]]*\])?\s*\{[^}]*'
-        \ .')'
-
-    " }}}2
-
-else
-
-" " completor {{{2
-
-" let g:completor_tex_omni_trigger = '\\\\(:?'
-"         \ .  '\w*cite\w*(?:\s*\[[^]]*\]){0,2}\s*{[^}]*'
-"         \ . '|\w*ref(?:\s*\{[^}]*|range\s*\{[^,}]*(?:}{)?)'
-"         \ . '|hyperref\s*\[[^]]*'
-"         \ . '|includegraphics\*?(?:\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-"         \ . '|(?:include(?:only)?|input)\s*\{[^}]*'
-"         \ . '|\w*(gls|Gls|GLS)(pl)?\w*(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-"         \ . '|includepdf(\s*\[[^]]*\])?\s*\{[^}]*'
-"         \ . '|includestandalone(\s*\[[^]]*\])?\s*\{[^}]*'
-"         \ .')$'
-
-" " }}}2
-
-    " NeoComplete {{{2
-
-    " Since High Sierra ~/.cache, the default directory, is owned by root
-    let g:neocomplete#data_directory = "~/.vim/neocomplete"
-
-    " Disable AutoComplPop.
-    let g:acp_enableAtStartup = 0
-    " Use neocomplete.
-    let g:neocomplete#enable_at_startup = 1
-    " Use smartcase.
-    let g:neocomplete#enable_smart_case = 1
-    " Set minimum syntax keyword length.
-    let g:neocomplete#sources#syntax#min_keyword_length = 2
-    let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
-
-    " Plugin key-mappings.
-    inoremap <expr><C-g>     neocomplete#undo_completion()
-    " inoremap <expr><C-l>     neocomplete#complete_common_string()
-
-    " <C-h>, <BS>: close popup and delete backword char.
-    " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-    " inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-    " Close popup by <Space>.
-    "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
-
-    " Enable omni completion.
-    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-    autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-    if !exists('g:neocomplete#sources#omni#input_patterns')
-        let g:neocomplete#sources#omni#input_patterns = {}
-    endif
-    let g:neocomplete#sources#omni#input_patterns.tex =
-            \ '\v\\%('
-            \ . '\a*cite\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-            \ . '|\a*ref%(\s*\{[^}]*|range\s*\{[^,}]*%(}\{)?)'
-            \ . '|hyperref\s*\[[^]]*'
-            \ . '|includegraphics\*?%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-            \ . '|%(include%(only)?|input)\s*\{[^}]*'
-            \ . '|\a*(gls|Gls|GLS)(pl)?\a*%(\s*\[[^]]*\]){0,2}\s*\{[^}]*'
-            \ . '|includepdf%(\s*\[[^]]*\])?\s*\{[^}]*'
-            \ . '|includestandalone%(\s*\[[^]]*\])?\s*\{[^}]*'
-            \ . ')'
-
-    " let last_spell_changedtick = -1
-    " let last_spell_count = 1
-
-    " }}}2
-
-endif
-
-" }}}1
+" " }}}1
 
 " vim-textobj-user {{{1
 
@@ -557,4 +459,33 @@ let g:howdy_ignore = [
     \ ]
 
 " }}}
+
+" chalk {{{1
+
+vmap zf <Plug>Chalk
+nmap zf <Plug>Chalk
+nmap zF <Plug>ChalkRange
+nmap Zf <Plug>SingleChalk
+nmap ZF <Plug>SingleChalkUp
+nmap =z <Plug>ChalkUp
+nmap -z <Plug>ChalkDown
+vmap =z <Plug>ChalkUp
+vmap -z <Plug>ChalkDown
+
+" }}}1
+
+" ditto {{{1
+
+" au FileType markdown,text,tex DittoOn
+
+nmap <leader>di <Plug>ToggleDitto
+
+nmap +d <Plug>DittoGood
+nmap _d <Plug>DittoBad
+nmap =d <Plug>DittoNext
+nmap -d <Plug>DittoPrev
+nmap ]d <Plug>DittoMore
+nmap [d <Plug>DittoLess
+
+" }}}1
 

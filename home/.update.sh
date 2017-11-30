@@ -37,10 +37,15 @@ echo "`date`: Running brew cleanup"
 echo ""
 /usr/local/bin/brew cleanup
 
+# echo ""
+# echo "`date`: Running brew cask reinstall for outdated casks"
+# echo ""
+# /usr/local/bin/brew cask outdated | xargs /usr/local/bin/brew cask reinstall
+
 echo ""
-echo "`date`: Running brew cask reinstall for outdated casks"
+echo "`date`: Running brew cask upgrade"
 echo ""
-/usr/local/bin/brew cask outdated | xargs /usr/local/bin/brew cask reinstall
+/usr/local/bin/brew cask upgrade
 
 # }}}1
 

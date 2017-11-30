@@ -1,8 +1,29 @@
-snippet "\\?newc(ommand)?" "\newcommand" br
+
+snippet \documentclass "\documentclass" b
+\documentclass${1:[$2]}{${3:dbmrq}}
+endsnippet
+
+snippet \usepackage "\usepackage" b
+\usepackage${1:[$2]}{$3}
+endsnippet
+
+snippet \addbibresource "\addbibresource" b
+\addbibresource{$1}
+endsnippet
+
+snippet \input "\input" b
+\input{$1}
+endsnippet
+
+snippet \footnote "\footnote"
+\footnote{$1}$0
+endsnippet
+
+snippet \newcommand "\newcommand" b
 \newcommand{${1:cmd}}[${2:args}]{${3:def}}
 endsnippet
 
-snippet "\\?renewc(ommand)?" "\newcommand" br
+snippet renewcommand "\newcommand" b
 \newcommand{${1:cmd}}[${2:args}]{${3:def}}
 endsnippet
 
@@ -32,10 +53,6 @@ endsnippet
 
 snippet "\\?(text)?sc" "\textsc" r
 \textsc{$1}$0
-endsnippet
-
-snippet "\\?footn(ote)?" "\footnote" r
-\footnote{$1}$0
 endsnippet
 
 priority 2

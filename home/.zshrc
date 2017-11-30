@@ -34,6 +34,7 @@ alias rmi="${aliases[rm]:-rm} -i"
 #  }}}2
 
 eval $(thefuck --alias)
+eval "$(docker-machine env default)"
 
 alias ..="cd .."
 alias ...="cd ../.."
@@ -60,6 +61,10 @@ alias cleanzip="find . -type d -print0 | xargs -0 chmod 0755 && \
     find . -name '*.DS_Store' -type f -delete && \
     find . -name '__MACOSX' -type f -delete && \
     zip -r ../archive.zip ."
+
+alias dockstop="docker stop $(docker ps -a -q)"
+
+alias dockrm="docker rm $(docker ps -a -q)"
 
 #  }}}1
 

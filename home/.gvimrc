@@ -7,13 +7,13 @@ if has('gui_macvim')
         \ "get bounds of window of desktop' | cut -d ' ' -f 4")
 
     if resolution >= 1440
-        set guifont=SF\ Mono:h18
-    elseif resolution >= 1080
         set guifont=SF\ Mono:h16
-    else
+    elseif resolution >= 1080
         set guifont=SF\ Mono:h14
+    else
+        set guifont=SF\ Mono:h12
     end
 else
-    set guifont=inconsolata\ 14
+    set guifont=inconsolata\ 12
 endif
 

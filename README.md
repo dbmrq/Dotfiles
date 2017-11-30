@@ -12,21 +12,21 @@ They're managed using
 
 The most interesting stuff here is probably
 [my Hammerspoon configuration](https://github.com/dbmrq/dotfiles/tree/master/home/.hammerspoon),
-[the `.bootstrap.sh` script](https://github.com/dbmrq/dotfiles/blob/master/home/.bootstrap.sh)
-and [my `.vimrc`](https://github.com/dbmrq/dotfiles/blob/master/home/.vimrc),
+[the .bootstrap scripts](https://github.com/dbmrq/dotfiles/tree/master/home/.bootstrap)
+and [my .vimrc](https://github.com/dbmrq/dotfiles/blob/master/home/.vimrc),
 which is split into the
-[`settings.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/settings.vim),
-[`mappings.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/mappings.vim)
+[settings.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/settings.vim),
+[mappings.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/mappings.vim)
 and
-[`plugins.vim`](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/plugins.vim)
+[plugins.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/plugins.vim)
 files. There's also some cool stuff on
-[my `ftplugin` files](https://github.com/dbmrq/dotfiles/tree/master/home/.vim/ftplugin).
+[my ftplugin files](https://github.com/dbmrq/dotfiles/tree/master/home/.vim/ftplugin).
 
 ---
 
 Note to self: to bootstrap a new Mac, run something like
 
-    git clone https://github.com/dbmrq/dotfiles.git ~/Desktop/dotfiles && cd ~/Desktop/dotfiles/home/.bootstrap && ./.bootstrap.sh
+    git clone https://github.com/dbmrq/dotfiles.git && cd dotfiles/home/.bootstrap && ./.bootstrap.sh
 
 That'll download and run the `.bootstrap.sh` script, which will take care of
 the rest.
@@ -34,5 +34,3 @@ the rest.
 If you're not me, you should probably check out the contents of that file before
 doing that. There's a lot of stuff that wouldn't make sense for other people.
 
-
-<img src="http://media.creativebloq.futurecdn.net/sites/creativebloq.com/files/images/2014/07/c88056dea9dd2944000badf9e086f745.jpg" width="360">

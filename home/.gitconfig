@@ -16,9 +16,15 @@
 	dump = cat-file -p
 
 	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    hist5 = !git hist --max-count=5
     hist10 = !git hist --max-count=10
     hist20 = !git hist --max-count=20
     hist30 = !git hist --max-count=30
+
+    rebase5 = !git rebase -i HEAD~5
+    rebase10 = !git rebase -i HEAD~10
+    rebase15 = !git rebase -i HEAD~15
+    rebase20 = !git rebase -i HEAD~20
 
     last = log -1 HEAD --format=format:"%Cred%H"
 
