@@ -64,6 +64,13 @@ endfunction
 command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 " }}}1
 
+
+command! StripWeirdWhitespaces %s/^[^\a\d]$//gc
+
+command! ConvertAccents %s/é/é/g | %s/ú/ú/g | %s/ó/ó/g
+            \ | %s/ã/ã/g | %s/ê/ê/g | %s/à/à/g | %s/ç/ç/g | %s/õ/õ/g
+
+
 " Better b, e and w for TeX {{{1
 
 nnoremap <silent> b B

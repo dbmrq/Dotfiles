@@ -10,7 +10,6 @@ endif
 
 call plug#begin('~/.vim/bundle')
 
-    " Plug 'tpope/vim-sensible'
     Plug 'tpope/vim-surround'
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-repeat'
@@ -19,33 +18,33 @@ call plug#begin('~/.vim/bundle')
     Plug 'kana/vim-textobj-line'
     Plug 'kana/vim-textobj-indent'
     Plug 'kana/vim-textobj-entire'
-    Plug 'kana/vim-textobj-syntax'
     Plug 'kana/vim-textobj-fold'
-    " Plug 'justinmk/vim-sneak'
+    Plug 'justinmk/vim-sneak'
+    " Plug 'kana/vim-textobj-syntax'
     Plug 'tommcdo/vim-exchange'
     Plug 'junegunn/vim-easy-align'
     " Plug 'AndrewRadev/splitjoin.vim'
     " Plug 'FooSoft/vim-argwrap'
     " Plug 'ntpeters/vim-better-whitespace'
     Plug 'tweekmonster/spellrotate.vim'
-    " Plug 'maxbrunsfeld/vim-yankstack'
-    Plug 'henrik/vim-indexed-search'
+    Plug 'google/vim-searchindex'
     Plug 'nelstrom/vim-visual-star-search'
-    Plug 'haya14busa/incsearch.vim'
     Plug 'Raimondi/delimitMate'
+    Plug 'romainl/vim-cool'
     " Plug 'mbbill/undotree'
     Plug 'lervag/vimtex'
     " Plug 'sheerun/vim-polyglot'
     Plug 'altercation/vim-colors-solarized'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'wellle/targets.vim'
-    " Plug 'junegunn/goyo.vim', { 'for': ['markdown', 'text', 'tex'] }
-    Plug 'Shougo/neocomplete.vim'
+    " Plug 'Shougo/neocomplete.vim'
+    Plug 'lifepillar/vim-mucomplete'
 
     Plug '~/Code/Vim/vim-ditto'
     Plug '~/Code/Vim/vim-chalk'
     Plug '~/Code/Vim/vim-dialect'
     Plug '~/Code/Vim/vim-howdy'
+    Plug '~/Code/Vim/vim-redacted'
 
 call plug#end()
 
@@ -54,46 +53,90 @@ command! Plug so % | PlugUpdate | PlugUpgrade
 " }}}1
 
 
-" NeoComplete {{{1
+" MUcomplete {{{1
 
-" Since High Sierra ~/.cache, the default directory, is owned by root
-let g:neocomplete#data_directory = "~/.vim/neocomplete"
+imap <plug>Unused <plug>(MUcompleteCR)
 
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplete.
-let g:neocomplete#enable_at_startup = 1
-" Use smartcase.
-let g:neocomplete#enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 2
-let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+function! MyThesaurus()
+    let s:saved_ut = &ut
+    if &ut > 200 | let &ut = 200 | endif
+    augroup ThesaurusAuGroup
+    autocmd CursorHold,CursorHoldI <buffer>
+            \ let &ut = s:saved_ut |
+            \ set iskeyword-=32 |
+            \ autocmd! ThesaurusAuGroup
+    augroup END
+    set iskeyword+=32
+    return "\<c-x>\<c-t>"
+endfunction
 
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplete#undo_completion()
-" inoremap <expr><C-l>     neocomplete#complete_common_string()
+let g:mucomplete#user_mappings = { 'mythes': "\<c-r>=MyThesaurus()\<cr>" }
 
-" <C-h>, <BS>: close popup and delete backword char.
-" inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-" inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-" Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+set infercase
+set completeopt+=menuone
+set completeopt+=noselect
+set complete-=kspell
+set complete-=t
+set complete-=i
 
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+" This is remapped by UltiSnips, hence the autocmd
+au BufRead * inoremap <c-tab> <tab>
 
-if !exists('g:neocomplete#sources#omni#input_patterns')
-    let g:neocomplete#sources#omni#input_patterns = {}
-  endif
-  let g:neocomplete#sources#omni#input_patterns.tex =
-        \ g:vimtex#re#neocomplete
+" inoremap <expr> <c-e> mucomplete#popup_exit("\<c-e>")
+inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
 
-" let last_spell_changedtick = -1
-" let last_spell_count = 1
+inoremap <expr>  <esc> pumvisible() ? mucomplete#popup_exit("\<c-e>") : "<esc>"
+
+function! CYOrCR()
+    if pumvisible()
+        return mucomplete#popup_exit("\<c-y>")
+    else
+        return CROrUncomment()
+    endif
+endfunction
+inoremap <silent> <expr> <CR> "<C-R>=CYOrCR()<CR>"
+
+
+let g:mucomplete#enable_auto_at_startup = 1
+let g:mucomplete#cycle_all = 1
+
+inoremap <silent> <plug>(MUcompleteBwdKey) <c-k>
+imap <expr> <c-k>  pumvisible() ? "<plug>(MUcompleteCycBwd)" : "<Esc>lDA"
+
+let g:mucomplete#chains = {
+      \ 'default' : ['path', 'ulti', 'omni', 'mythes', 'keyp', 'incl'],
+      \ 'vim'     : ['path', 'cmd', 'keyp']
+      \ }
+
+let g:mucomplete#can_complete = {}
+let g:mucomplete#can_complete.default = {
+    \ 'mythes': { t -> g:mucomplete_with_key && strlen(&thesaurus) > 0 },
+    \ 'incl': { t -> g:mucomplete_with_key && t =~# '\m\k\k$' },
+    \ 'tags': { t -> !empty(tagfiles()) &&
+    \	        g:mucomplete_with_key && t =~# '\m\k\k$' },
+    \ }
+
+let g:mucomplete#popup_direction = { 'keyp' : 1 }
+
+" }}}1
+
+" UltiSnips {{{1
+
+" Use <CR> to accept snippets
+let g:UltiSnipsExpandTrigger = "<nop>"
+let g:ulti_expand_res = 0
+
+function! SnipOrCYOrCR()
+    let snippet = UltiSnips#ExpandSnippet()
+    if g:ulti_expand_res > 0
+        return snippet
+    elseif pumvisible() && exists("g:loaded_mucomplete")
+        return mucomplete#popup_exit("\<c-y>")
+    else
+        return CROrUncomment()
+    endif
+endfunction
+inoremap <silent> <expr> <CR> "<C-R>=SnipOrCYOrCR()<CR>"
 
 " }}}1
 
@@ -115,9 +158,9 @@ let g:vimtex_toc_fold = 1
 let g:vimtex_toc_fold_level_start = 2
 let g:vimtex_index_show_help = 0
 let g:vimtex_view_automatic = 0
-" let g:vimtex_quickfix_open_on_warning = 0
+" let g:vimtex_quickfix_open_on_warning = 1
 
-let g:vimtex_quickfix_latexlog = {'fix_paths':0}
+" let g:vimtex_quickfix_latexlog = {'fix_paths':0}
 
 let g:vimtex_compiler_latexmk = {
     \ 'backend' : 'jobs',
@@ -173,6 +216,49 @@ let g:vimtex_toc_hotkeys = {
 
 " }}}1
 
+" " NeoComplete {{{1
+
+" " Since High Sierra ~/.cache, the default directory, is owned by root
+" let g:neocomplete#data_directory = "~/.vim/neocomplete"
+
+" " Disable AutoComplPop.
+" let g:acp_enableAtStartup = 0
+" " Use neocomplete.
+" let g:neocomplete#enable_at_startup = 1
+" " Use smartcase.
+" let g:neocomplete#enable_smart_case = 1
+" " Set minimum syntax keyword length.
+" let g:neocomplete#sources#syntax#min_keyword_length = 2
+" let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+" " Plugin key-mappings.
+" inoremap <expr><C-g>     neocomplete#undo_completion()
+" " inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+" " <C-h>, <BS>: close popup and delete backword char.
+" " inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+" " inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+" " Close popup by <Space>.
+" "inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+" " Enable omni completion.
+" autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+" autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+" autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+" autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+" autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+" if !exists('g:neocomplete#sources#omni#input_patterns')
+"     let g:neocomplete#sources#omni#input_patterns = {}
+"   endif
+"   let g:neocomplete#sources#omni#input_patterns.tex =
+"         \ g:vimtex#re#neocomplete
+
+" " let last_spell_changedtick = -1
+" " let last_spell_count = 1
+
+" " }}}1
+
 
 " " vim-polyglot {{{1
 " let g:polyglot_disabled = ['latex']
@@ -182,17 +268,6 @@ let g:vimtex_toc_hotkeys = {
 let g:rsi_no_meta = 1
 " }}}1
 
-" " golden-ratio {{{1
-" let g:golden_ratio_autocommand = 0
-" let g:golden_ratio_exclude_nonmodifiable = 1
-" " }}}1
-
-" " goyo {{{1
-
-" nnoremap <leader>gy :Goyo<cr>
-
-" " }}}1
-
 " " undotree {{{1
 " nnoremap <leader>ut :UndotreeToggle<cr>
 " " }}}1
@@ -200,12 +275,6 @@ let g:rsi_no_meta = 1
 " Solarized {{{1
 colorscheme solarized
 " }}}1
-
-" " gitgutter {{{1
-
-" let g:gitgutter_map_keys = 0
-
-" " }}}1
 
 " " ArgWrap {{{1
 
@@ -330,72 +399,29 @@ nmap <expr> cd ChangeDetectedSurrounding()
 
 " }}}1
 
-" UltiSnips {{{1
+" vim-sneak {{{1
 
-" Use <CR> to accept snippets
-let g:UltiSnipsExpandTrigger = "<nop>"
-let g:ulti_expand_res = 0
-function! SnippetOrCR()
-    let snippet = UltiSnips#ExpandSnippet()
-    if g:ulti_expand_res > 0
-        return snippet
-    else
-        return CROrUncomment()
-    endif
-endfunction
-inoremap <silent><expr> <CR> "<C-R>=SnippetOrCR()<CR>"
+let g:sneak#use_ic_scs = 1
+" hi clear SneakPluginTarget
+" hi link SneakPluginTarget Search
+autocmd ColorScheme * hi! link Sneak Title
 
-" }}}1
-
-" incsearch.vim {{{1
-
-map /  <Plug>(incsearch-forward)
-map ?  <Plug>(incsearch-backward)
-map g/ <Plug>(incsearch-stay)
-
-if !exists('g:hlsearch_set')
-    set hlsearch
-endif
-let g:hlsearch_set = 1
-let g:incsearch#auto_nohlsearch = 1
-map n  <Plug>(incsearch-nohl-n)zv:ShowSearchIndex<CR>
-map N  <Plug>(incsearch-nohl-N)zv:ShowSearchIndex<CR>
-map *  <Plug>(incsearch-nohl-*)
-map #  <Plug>(incsearch-nohl-#)
-map g* <Plug>(incsearch-nohl-g*)
-map g# <Plug>(incsearch-nohl-g#)
-
-let g:indexed_search_mappings = 0
-augroup incsearch-indexed
-    autocmd!
-    autocmd User IncSearchLeave ShowSearchIndex
-augroup END
+"replace 'f' with 1-char Sneak
+nmap f <Plug>Sneak_f
+nmap F <Plug>Sneak_F
+xmap f <Plug>Sneak_f
+xmap F <Plug>Sneak_F
+omap f <Plug>Sneak_f
+omap F <Plug>Sneak_F
+"replace 't' with 1-char Sneak
+nmap t <Plug>Sneak_t
+nmap T <Plug>Sneak_T
+xmap t <Plug>Sneak_t
+xmap T <Plug>Sneak_T
+omap t <Plug>Sneak_t
+omap T <Plug>Sneak_T
 
 " }}}1
-
-"" vim-sneak {{{1
-
-"let g:sneak#use_ic_scs = 1
-"" hi clear SneakPluginTarget
-"" hi link SneakPluginTarget Search
-"autocmd ColorScheme * hi! link Sneak Search
-
-""replace 'f' with 1-char Sneak
-"nmap f <Plug>Sneak_f
-"nmap F <Plug>Sneak_F
-"xmap f <Plug>Sneak_f
-"xmap F <Plug>Sneak_F
-"omap f <Plug>Sneak_f
-"omap F <Plug>Sneak_F
-""replace 't' with 1-char Sneak
-"nmap t <Plug>Sneak_t
-"nmap T <Plug>Sneak_T
-"xmap t <Plug>Sneak_t
-"xmap T <Plug>Sneak_T
-"omap t <Plug>Sneak_t
-"omap T <Plug>Sneak_T
-
-"" }}}1
 
 " " yankstack {{{1
 
@@ -478,7 +504,8 @@ vmap -z <Plug>ChalkDown
 
 " au FileType markdown,text,tex DittoOn
 
-nmap <leader>di <Plug>ToggleDitto
+nmap <leader>d <Plug>Ditto
+vmap <leader>d <Plug>Ditto
 
 nmap +d <Plug>DittoGood
 nmap _d <Plug>DittoBad

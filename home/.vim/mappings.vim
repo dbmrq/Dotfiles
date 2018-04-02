@@ -24,6 +24,9 @@ onoremap L $
 vnoremap H ^
 vnoremap L $h
 noremap G G$
+nnoremap K H
+nnoremap J L
+" I'll use <CR> and <BS> so split and join
 
 " }}}
 
@@ -38,12 +41,12 @@ inoremap : :<C-g>u
 
 " }}}
 
-" Tab completion and pop up menu {{{1
-inoremap <expr> <TAB>  pumvisible() ? "\<c-n>" : "\<TAB>"
-inoremap <expr> <S-TAB>  pumvisible() ? "\<c-p>" : "\<S-TAB>"
-inoremap <expr> <c-j>  pumvisible() ? "\<Down>" : "j"
-inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "<Esc>lDA"
-" }}}1
+" " Tab completion and pop up menu {{{1
+" inoremap <expr> <TAB>  pumvisible() ? "\<c-n>" : "\<TAB>"
+" inoremap <expr> <S-TAB>  pumvisible() ? "\<c-p>" : "\<S-TAB>"
+" inoremap <expr> <c-j>  pumvisible() ? "\<Down>" : "j"
+" inoremap <expr> <c-k>  pumvisible() ? "\<Up>" : "<Esc>lDA"
+" " }}}1
 
 " " Insert single character {{{
 " nnoremap <leader>i i_<Esc>r
@@ -266,49 +269,51 @@ nnoremap <expr> <leader>, <SID>addCommas()
 
 " }}}1
 
-" Split lines at space {{{1
+" Split and join lines {{{1
 
-function! s:FindClosest(...)
-    let line = getline('.')
-    let col = col('.') - 1
-    for arg in a:000
-        let i = 0
-        while i < &l:textwidth
-            if line[col - i] =~ arg
-                call cursor(line, col - i + 1)
-                return
-            elseif line[col + i] =~ arg
-                call cursor(line, col + i + 1)
-                return
-            endif
-            let i += 1
-        endwhile
-    endfor
-endfunction
+" function! s:FindClosest(...)
+"     let line = getline('.')
+"     let col = col('.') - 1
+"     for arg in a:000
+"         let i = 0
+"         while i < &l:textwidth
+"             if line[col - i] =~ arg
+"                 call cursor(line, col - i + 1)
+"                 return
+"             elseif line[col + i] =~ arg
+"                 call cursor(line, col + i + 1)
+"                 return
+"             endif
+"             let i += 1
+"         endwhile
+"     endfor
+" endfunction
 
-function! s:split()
-    let line = getline('.')
-    let col = col('.') - 1
-    let i = 0
-    while i < (&l:textwidth / 2)
-        if line[col - i] == ' '
-            call cursor(line, col - i + 1)
-            execute "normal! r\<cr>"
-            return
-        elseif line[col + i] == ' '
-            call cursor(line, col + i + 1)
-            execute "normal! r\<cr>"
-            return
-        endif
-        let i += 1
-    endwhile
-    execute "normal! i\<cr>"
-endfunction
+" function! s:split()
+"     let line = getline('.')
+"     let col = col('.') - 1
+"     let i = 0
+"     while i < (&l:textwidth / 2)
+"         if line[col - i] == ' '
+"             call cursor(line, col - i + 1)
+"             execute "normal! r\<cr>"
+"             return
+"         elseif line[col + i] == ' '
+"             call cursor(line, col + i + 1)
+"             execute "normal! r\<cr>"
+"             return
+"         endif
+"         let i += 1
+"     endwhile
+"     execute "normal! i\<cr>"
+" endfunction
 
-nnoremap J :call i<CR><esc>
-au FileType markdown,text,tex nnoremap J :call <SID>FindClosest(' ')<CR>r<CR>
+" nnoremap <CR> i<CR><esc>
+" au FileType markdown,text,tex nnoremap <CR> :call <SID>FindClosest(' ')<CR>r<CR>
 
-nnoremap K J
+nnoremap <BS> J
+nnoremap <CR> i<CR><esc>
+autocmd BufReadPost quickfix unmap <CR>
 
 " }}}1
 
@@ -402,6 +407,28 @@ endfunction
 
 nnoremap <leader>cc :call ReplaceLastChange()<cr>
 
+" }}}1
+
+" " Indentation {{{1
+
+" vnoremap < <gv
+" vnoremap > >gv
+
+" " }}}1
+
+" Auto mkdir {{{1
+function! s:MkNonExDir(file, buf)
+    if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'\v^\w+\:\/'
+        let dir=fnamemodify(a:file, ':h')
+        if !isdirectory(dir)
+            call mkdir(dir, 'p')
+        endif
+    endif
+endfunction
+augroup BWCCreateDir
+    autocmd!
+    autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
+augroup END
 " }}}1
 
 " Edit vimrc {{{

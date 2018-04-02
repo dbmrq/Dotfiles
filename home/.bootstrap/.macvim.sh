@@ -4,7 +4,7 @@ echo ""
 echo "Installilng MacVim and plugins..."
 echo ""
 
-brew install macvim --with-override-system-vim --with-luajit --with-lua --with-python3 --HEAD
+brew install macvim --with-override-system-vim --with-luajit --with-lua --with-python --HEAD
 
 osascript -e 'tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'
 

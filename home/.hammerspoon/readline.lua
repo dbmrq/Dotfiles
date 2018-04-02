@@ -7,8 +7,16 @@ hs.hotkey.bind({"alt"}, 'f', function()-- {{{1
     hs.eventtap.keyStroke({"alt"}, "Right")
 end)-- }}}1
 
+hs.hotkey.bind({"alt", "shift"}, 'f', function()-- {{{1
+    hs.eventtap.keyStroke({"alt", "shift"}, "Right")
+end)-- }}}1
+
 hs.hotkey.bind({"alt"}, 'b', function()-- {{{1
     hs.eventtap.keyStroke({"alt"}, "Left")
+end)-- }}}1
+
+hs.hotkey.bind({"alt", "shift"}, 'b', function()-- {{{1
+    hs.eventtap.keyStroke({"alt", "shift"}, "Left")
 end)-- }}}1
 
 hs.hotkey.bind({"alt"}, ',', function()-- {{{1

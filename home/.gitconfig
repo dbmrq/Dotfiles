@@ -40,6 +40,8 @@
 
     nevermind = !git reset --hard HEAD && git clean -d -x -f
 
+    forgetit = git fetch --all && git reset --hard origin/master
+
 [github]
     user = danielbmarques
 

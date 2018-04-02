@@ -16,7 +16,13 @@ set showcmd
 " like Howdy's MRU start screen.
 au BufRead *.* setl scrolloff=5 sidescrolloff=7 sidescroll=1
 
-" status line and ruler {{{2
+if $BACKGROUND == 'light'
+    set background=light
+else
+    set background=dark
+endif
+
+" (no) status line and ruler {{{2
 
 set ruler
 set laststatus=0
@@ -61,13 +67,9 @@ set rulerformat+=%{&ff!='unix'?'['.&ff.']':''}
 set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'\ ':''}
 set rulerformat+=%{(&fenc!='utf-8'&&&fenc!='')?'['.&fenc.']':''}
 
-" }}}2
+" au CursorHold * execute "normal! g\<c-g>"
 
-if $BACKGROUND == 'light'
-    set background=light
-else
-    set background=dark
-endif
+" }}}2
 
 " }}}
 
@@ -82,7 +84,12 @@ set whichwrap+=h,l
 au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 
 " Highlight lines that are wrapped
-au VimResized * exe 'match FoldColumn /\%>' . winwidth('%') . 'v.*/'
+" au VimResized * exe 'match FoldColumn /\%>' . winwidth('%') . 'v.*/'
+
+augroup ErrorHiglights
+    autocmd!
+    autocmd WinEnter,BufEnter * call clearmatches() | call matchadd('FoldColumn', '\%>79v.\+', 100)
+augroup END
 
 " if executable("par")
 "     set formatprg=par\ -w78
@@ -130,6 +137,8 @@ set directory=~/.vim/swp/,.,~/tmp,/var/tmp,/tmp
 let g:tex_flavor = "latex"
 au BufReadPost,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
 
+au BufNewFile *.tex 0r ~/.vim/templates/skeleton.tex
+
 au FileType markdown,text,tex set fo+=12
 
 let g:tex_comment_nospell=1
@@ -164,8 +173,22 @@ set nojoinspaces
 
 set encoding=utf-8
 
+set incsearch
+set hlsearch
+
+set fo+=r
+
+if v:version > 703 || v:version == 703 && has('patch541')
+  set formatoptions+=j
+endif
+
+set virtualedit=onemore
+
+set updatetime=2000
+
+
 " change directory to current file's
-autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h
+" autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h
 
 " open file with cursor at last position
 autocmd BufReadPost *
@@ -180,6 +203,8 @@ if executable("ag")
 endif
 
 autocmd BufReadPost quickfix set nowrap
+
+au BufReadPost,BufNewFile *.md setlocal spell spelllang+=pt
 
 " augroup autoquickfix
 "     autocmd!
