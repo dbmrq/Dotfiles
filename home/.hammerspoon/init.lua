@@ -13,6 +13,10 @@ hs.hotkey.bind(super, 'P', function()
   hs.openPreferences()
 end)
 
+hs.hotkey.bind(super, 'C', function()
+  hs.openConsole()
+end)
+
 hs.hotkey.bind(super, 'R', function()
   hs.reload()
 end)
