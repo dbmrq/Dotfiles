@@ -53,13 +53,17 @@ alias chmodall='find . -type f -print0 | xargs -0 chmod 0644 && \
 alias rmxattr='xattr -rc * .*'
 alias rmdsstore="find . -name '*.DS_Store' -type f -delete"
 
-alias cleanzip="find . -type d -print0 | xargs -0 chmod 0755 && \
+alias cleanup="find . -type d -print0 | xargs -0 chmod 0755 && \
     find . -type f -print0 | xargs -0 chmod 0644 && \
+    rm .gitignore; \
+    rm .travis.yml; \
+    rm -rf .github; \
     xattr -rc *; \
     xattr -rc .*; \
-    find . -name '*.DS_Store' -type f -delete && \
-    find . -name '__MACOSX' -type f -delete && \
-    zip -r ../archive.zip ."
+    find . -name '*.DS_Store' -type f -delete; \
+    find . -name '__MACOSX' -type f -delete"
+
+alias zipr='f() { zip -r $1.zip $1 };f'
 
 alias installMacVim='brew install macvim --with-override-system-vim --with-luajit --with-lua --HEAD'
 

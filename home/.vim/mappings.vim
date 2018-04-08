@@ -53,15 +53,43 @@ inoremap : :<C-g>u
 " nnoremap <leader>I a_<Esc>r
 " " }}}
 
+" Resize windows {{{1
+
+function! HasHorizontalSplit()
+    return &lines - winheight(0) > 2
+endfunction
+
+function! HasVerticalSplit()
+    return winwidth(0) != &columns
+endfunction
+
+nnoremap <expr> <m-up> HasHorizontalSplit() ? ":res +5\<CR>" : ":split\<CR>"
+nnoremap <expr> <m-down> HasHorizontalSplit() ? ":res -5\<CR>" : ":split\<CR>"
+nnoremap <expr> <m-right> HasVerticalSplit() ? ":vertical res +5\<CR>" : ":vsplit\<CR>"
+nnoremap <expr> <m-left> HasVerticalSplit() ? ":vertical res -5\<CR>" : ":vsplit\<CR>"
+
+" }}}1
+
 " Switch windows and buffers {{{
 
 nnoremap <leader>ww <c-w><c-w>
 nnoremap <leader>b :b#<cr>
 
-noremap <Right> :bnext<cr>
-noremap <Left> :bprevious<cr>
-noremap <Up> :bfirst<cr>
-noremap <Down> :blast<cr>
+if has('gui_macvim')
+    let macvim_skip_cmd_opt_movement = 1
+endif
+
+nnoremap <Right> :bnext<cr>
+nnoremap <Left> :bprevious<cr>
+nnoremap <Up> :bfirst<cr>
+nnoremap <Down> :blast<cr>
+
+nnoremap <c-Right> <c-w>l
+nnoremap <c-Left> <c-w>h
+nnoremap <c-Up> <c-w>k
+nnoremap <c-Down> <c-w>j
+
+nnoremap <F13> :buffers<CR>:buffer<Space>
 
 " }}}
 
@@ -199,41 +227,6 @@ function! CROrUncomment()
 endfunction
 
 inoremap <expr> <CR> CROrUncomment()
-
-" }}}1
-
-" Split and resize windows {{{1
-
-function! s:smartSizeUp()
-    if winwidth(0) == &columns
-        " if there are no vertical splits
-        return ":res +5\<CR>"
-    else
-        return ":vertical res +5\<CR>"
-    endif
-endfunction
-nnoremap <expr> <leader>= <SID>smartSizeUp()
-
-function! s:smartSizeDown()
-    if winwidth(0) == &columns
-        " if there are no vertical splits
-        return ":res -5\<CR>"
-    else
-        return ":vertical res -5\<CR>"
-    endif
-endfunction
-nnoremap <expr> <leader>- <SID>smartSizeDown()
-
-function! s:smartSplit()
-    let l:height=winheight(0)
-    let l:width=winwidth(0)
-    if l:width > 2 * &tw + 4 || l:width > l:height * 3
-        return ":vsplit\<cr>"
-    else
-        return ":split\<cr>"
-    endif
-endfunction
-nnoremap <expr> <leader>sp <SID>smartSplit()
 
 " }}}1
 

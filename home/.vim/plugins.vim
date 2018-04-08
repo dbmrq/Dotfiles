@@ -88,11 +88,10 @@ inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
 inoremap <expr>  <esc> pumvisible() ? mucomplete#popup_exit("\<c-e>") : "<esc>"
 
 function! CYOrCR()
-    if pumvisible()
-        return mucomplete#popup_exit("\<c-y>")
-    else
-        return CROrUncomment()
-    endif
+    return pumvisible() ? "\<c-e>\<cr>" : CROrUncomment()
+    " This stops CR from deleting characters when the typed word
+    " and the completed word are the same
+    " (https://github.com/lifepillar/vim-mucomplete/issues/61)
 endfunction
 inoremap <silent> <expr> <CR> "<C-R>=CYOrCR()<CR>"
 
@@ -104,12 +103,13 @@ inoremap <silent> <plug>(MUcompleteBwdKey) <c-k>
 imap <expr> <c-k>  pumvisible() ? "<plug>(MUcompleteCycBwd)" : "<Esc>lDA"
 
 let g:mucomplete#chains = {
-      \ 'default' : ['path', 'ulti', 'omni', 'mythes', 'keyp', 'incl'],
+      \ 'default' : ['path', 'ulti', 'omni', 'mythes', 'keyp', 'incl', 'uspl'],
       \ 'vim'     : ['path', 'cmd', 'keyp']
       \ }
 
 let g:mucomplete#can_complete = {}
 let g:mucomplete#can_complete.default = {
+    \ 'uspl' : { t -> t =~# '\a\{2}$' },
     \ 'mythes': { t -> g:mucomplete_with_key && strlen(&thesaurus) > 0 },
     \ 'incl': { t -> g:mucomplete_with_key && t =~# '\m\k\k$' },
     \ 'tags': { t -> !empty(tagfiles()) &&
@@ -117,6 +117,9 @@ let g:mucomplete#can_complete.default = {
     \ }
 
 let g:mucomplete#popup_direction = { 'keyp' : 1 }
+
+let g:mucomplete#spel#good_words = 1
+let g:mucomplete#spel#max = 5
 
 " }}}1
 
@@ -131,7 +134,7 @@ function! SnipOrCYOrCR()
     if g:ulti_expand_res > 0
         return snippet
     elseif pumvisible() && exists("g:loaded_mucomplete")
-        return mucomplete#popup_exit("\<c-y>")
+        return CYOrCR()
     else
         return CROrUncomment()
     endif

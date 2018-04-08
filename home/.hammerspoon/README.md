@@ -3,7 +3,7 @@
 
 ## [winman.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/winman.lua)
 
-Awesome window management. My goal is being able to do as much as possible while memorizing as few hotkeys as possible. `⌃⌥⌘` + `hjkl` allow me to easily organize windows in halves and thirds.
+Awesome window management. My goal is being able to do as much as possible while memorizing as few hotkeys as possible. `⌃⌥⌘` + `hjkl` allow me to easily organize windows in halves and thirds. When they overlap, they're automatically cascaded.
 
 Shortcut | Effect
 -------- | --------------------------------------------------------
@@ -11,12 +11,8 @@ Shortcut | Effect
 **⌃⌥⌘J** | Grow and shrink windows while keeping them at the bottom
 **⌃⌥⌘H** | Grow and shrink windows while keeping them to the left
 **⌃⌥⌘L** | Grow and shrink windows while keeping them to the right
-**⌃⌥⌘←** | Move windows left
-**⌃⌥⌘→** | Move windows right 
-**⌃⌥⌘↑** | Move windows up
-**⌃⌥⌘↓** | Move windows down
+**⌃⌥⌘,** | Cascade all windows
 **⌃⌥⌘.** | Snap windows to the grid
-**⌃⌥⌘,** | Cascade windows
 **⌃⌥⌘;** | Fill screen with current window
 **⌃⌥⌘O** | Show a stripe of the Desktop
 

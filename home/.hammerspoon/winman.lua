@@ -3,6 +3,45 @@
 
 -- Window management
 
+
+-----------------------------
+--  Customization Options  --
+-----------------------------
+
+-- The keyboard shortcuts are composed of the `super` modifiers + each of the
+-- hotkeys below. You can change the hotkeys to whatever you prefer. The most
+-- important are the `resize*` hotkeys, so you may find it easier to set them
+-- to the arrow keys (`"Up"`, `"Down"`, etc.). The `move*` hotkeys are only
+-- useful if you plan on using more than 2 windows per column/row, so you can
+-- just comment them out.
+
+super = {"ctrl", "alt", "cmd"}
+
+local hotkeys = {
+    resizeUp = "K",
+    resizeDown = "J",
+    resizeLeft = "H",
+    resizeRight = "L",
+    moveUp = "Up",
+    moveDown = "Down",
+    moveLeft = "Left",
+    moveRight = "Right",
+    showDesktop = "O",
+    snapToGrid = ".",
+    cascadeAllWindows = ",",
+}
+
+local cascadeSpacing = 40 -- the visible margin for each window
+                          -- set to 0 to disable cascading
+
+
+------------------------------------------------------------------------------
+--  Don't make changes below this line if you don't know what you're doing  --
+------------------------------------------------------------------------------
+
+
+-- Setup {{{1
+
 local grid = require "hs.grid"
 grid.setMargins('20,20')
 grid.setGrid('6x6')
@@ -12,33 +51,35 @@ hsVersion = tonumber(hsVersion)
 
 -- hs.window.animationDuration = 0
 
+-- }}}1
+
 -- Helper functions {{{1
 
--- Keep windows anchored at the bottom {{{2
-local function snapToBottom(win, cell, screen)
+-- Keep windows anchored when resizing {{{2
+
+local function snapToBottom(win, cell, screen)-- {{{3
     local newCell = hs.geometry(cell.x, grid.GRIDHEIGHT - cell.h,
                                 cell.w, cell.h)
     grid.set(win, newCell, screen)
-end-- }}}2
+end-- }}}3
 
--- Keep windows anchored at the top {{{2
-local function snapToTop(win, cell, screen)
+local function snapToTop(win, cell, screen)-- {{{3
     local newCell = hs.geometry(cell.x, 0, cell.w, cell.h)
     grid.set(win, newCell, screen)
-end-- }}}2
+end-- }}}3
 
--- Keep windows anchored to the left {{{2
-local function snapLeft(win, cell, screen)
+local function snapLeft(win, cell, screen)-- {{{3
     local newCell = hs.geometry(0, cell.y, cell.w, cell.h)
     grid.set(win, newCell, screen)
-end-- }}}2
+end-- }}}3
 
--- Keep windows anchored to the right {{{2
-local function snapRight(win, cell, screen)
+local function snapRight(win, cell, screen)-- {{{3
     local newCell = hs.geometry(grid.GRIDWIDTH - cell.w,
                                 cell.y, cell.w, cell.h)
     grid.set(win, newCell, screen)
-end-- }}}2
+end-- }}}3
+
+-- }}}2
 
 -- Compensate for the double margin between windows {{{2
 local function compensateMargins(window)
@@ -73,39 +114,153 @@ local function compensateMargins(window)
     end
 end-- }}}2
 
--- -- Hide Finder's sidebar when the window is too narrow {{{2
--- -- I used this with a 4x4 grid. It's not as useful with 6x6.
--- function resizeFinderW(cell)
---     local app = hs.application.frontmostApplication()
---     if app:name() == "Finder" then
---         if cell.w == 2 and not grow then
---             app:selectMenuItem({"Visualizar", "Ocultar Barra Lateral"})
---             -- app:selectMenuItem({"View", "Hide Sidebar"}) -- In english
---         else
---             app:selectMenuItem({"Visualizar", "Mostrar Barra Lateral"})
---             -- app:selectMenuItem({"View", "Show Sidebar"}) -- In english
---         end
---     end
+-- Cascade windows {{{2
+
+function cascade(windows)-- {{{3
+    if #windows <= 1 or cascadeSpacing == 0 then
+        return
+    end
+    local frame = largestFrame(windows)
+
+    local nOfSpaces = #windows - 1
+
+    for i, win in ipairs(windows) do
+        local offset = (i - 1) * cascadeSpacing
+        local rect = {
+            x = frame.x + offset,
+            y = frame.y + offset,
+            w = frame.w - (nOfSpaces * cascadeSpacing),
+            h = frame.h - (nOfSpaces * cascadeSpacing),
+        }
+        win:setFrame(rect)
+    end
+    local frame = largestFrame(windows)
+end-- }}}3
+
+function cascadeOverlappingWindows()-- {{{3
+    if cascadeSpacing == 0 then return end
+    local allWindows = hs.window.allWindows()
+    local cascadedWindows = {}
+    for i, win in ipairs(allWindows) do
+        if not cascadedWindows[win:id()] then
+            local currentCascading = cascadeWindowsOverlapping(win)
+            for x, cascadedWin in ipairs(currentCascading) do
+                cascadedWindows[cascadedWin:id()] = true
+            end
+        end
+    end
+end-- }}}3
+
+function cascadeWindowsOverlapping(winA)-- {{{3
+    if cascadeSpacing == 0 then
+        return
+    end
+    local windows = hs.window.allWindows()
+    local overlappingWindows = { winA }
+    local frameA = winA:frame()
+    for i, winB in ipairs(windows) do
+        local frameB = winB:frame()
+        if winA:id() ~= winB:id() and overlaps(frameA, frameB) and
+            areCascaded(frameA, frameB) then
+                table.insert(overlappingWindows, winB)
+        end
+    end
+    -- if #overlappingWindows > 1 then
+        cascade(overlappingWindows)
+        return overlappingWindows
+    -- end
+end-- }}}3
+
+-- }}}2
+
+-- Check for overlapping {{{2
+
+function xOverlaps(frameA, frameB)-- {{{3
+    local frameAMaxX = maxX(frameA)
+    local frameBMaxX = maxX(frameB)
+    if frameA.x >= frameB.x and frameA.x <= frameBMaxX then
+        return true
+    end
+    if frameAMaxX >= frameB.x and frameAMaxX <= frameBMaxX then
+        return true
+    end
+    return false
+end-- }}}3
+
+function yOverlaps(frameA, frameB)-- {{{3
+    local frameAMaxY = maxY(frameA)
+    local frameBMaxY = maxY(frameB)
+    if frameA.y >= frameB.y and frameA.y <= frameBMaxY then
+        return true
+    end
+    if frameAMaxY >= frameB.y and frameAMaxY <= frameBMaxY then
+        return true
+    end
+    return false
+end-- }}}3
+
+function overlaps(frameA, frameB)-- {{{3
+    return xOverlaps(frameA, frameB) and yOverlaps(frameA, frameB)
+end-- }}}3
+
+-- }}}2
+
+-- function areWithinTolerance(frameA, frameB, tolerance)-- {{{2
+--     return math.abs(frameA.w - frameB.w) < tolerance and
+--             math.abs(frameA.h - frameB.h) <tolerance
 -- end-- }}}2
 
--- -- Hide Finder's toolbar when the window is too short {{{2
--- -- I used this with a 4x4 grid. It's not as useful with 6x6.
--- function resizeFinderH(cell)
---     local app = hs.application.frontmostApplication()
---     if app:name() == "Finder" then
---         if cell.h == 2 and not grow then
---             app:selectMenuItem({"Visualizar", "Ocultar Barra de Ferramentas"})
---             -- app:selectMenuItem({"View", "Hide Toolbar"})
---             app:selectMenuItem({"Visualizar", "Ocultar Barra de Estado"})
---             -- app:selectMenuItem({"View", "Hide Status Bar"})
---         else
---             app:selectMenuItem({"Visualizar", "Mostrar Barra de Ferramentas"})
---             -- app:selectMenuItem({"View", "Show Status Bar"})
---             app:selectMenuItem({"Visualizar", "Mostrar Barra de Estado"})
---             -- app:selectMenuItem({"View", "Show Status Bar"})
---         end
---     end
--- end-- }}}2
+function areCascaded(frameA, frameB)-- {{{2
+    return math.abs(frameA.w - frameB.w) % cascadeSpacing == 0 and
+            math.abs(frameA.h - frameB.h) % cascadeSpacing == 0
+end-- }}}2
+
+function maxX(frame)-- {{{2
+    return frame.x + frame.w
+end-- }}}2
+
+function maxY(win)-- {{{2
+    return win.y + win.h
+end-- }}}2
+
+function largestFrame(windows)-- {{{2
+    local screen = windows[1]:screen():frame()
+    local minX = screen.w
+    local minY = screen.h
+    local maxX = 0
+    local maxY = 0
+    for i, win in ipairs(windows) do
+        local winFrame = win:frame()
+        if winFrame.x < minX then
+            minX = winFrame.x
+        end
+        if winFrame.y < minY then
+            minY = winFrame.y
+        end
+    end
+    for i, win in ipairs(windows) do
+        local winFrame = win:frame()
+        local winX = winFrame.x + winFrame.w
+        local winY = winFrame.y + winFrame.h
+        if winX > maxX then
+            maxX = winX
+        end
+        if winY > maxY then
+            maxY = winY
+        end
+    end
+    local width = maxX - minX
+    local height = maxY - minY
+    return {x = minX, y = minY, w = width, h = height}
+end-- }}}2
+
+function getKeys(oldTable)-- {{{2
+    local newTable = {}
+    for key, value in pairs(oldTable) do
+        table.insert(newTable, key)
+    end
+    return newTable
+end-- }}}2
 
 -- }}}1
 
@@ -113,73 +268,86 @@ end-- }}}2
 
 -- Move windows {{{2
 
-hs.hotkey.bind(super, 'Up', function()-- {{{3
-    local win = hs.window.focusedWindow()
-    local cell = grid.get(win)
-    if cell.y == 0 then
-        return
-    end
-    if cell.h == 3 then
-        grid.pushWindowUp()
-        grid.pushWindowUp()
-        grid.pushWindowUp()
-    else
-        grid.pushWindowUp()
-        grid.pushWindowUp()
-    end
-    compensateMargins()
-end)-- }}}3
+if hotkeys["moveUp"] then-- {{{3
+    print("lala")
+    hs.hotkey.bind(super, hotkeys["moveUp"], function()
+        local win = hs.window.focusedWindow()
+        local cell = grid.get(win)
+        if cell.y == 0 then
+            return
+        end
+        if cell.h == 3 then
+            grid.pushWindowUp()
+            grid.pushWindowUp()
+            grid.pushWindowUp()
+        else
+            grid.pushWindowUp()
+            grid.pushWindowUp()
+        end
+        compensateMargins()
+        cascadeOverlappingWindows()
+    end)
+end-- }}}3
 
-hs.hotkey.bind(super, 'Down', function()-- {{{3
-    local win = hs.window.focusedWindow()
-    local cell = grid.get(win)
-    if cell.y + cell.h >= grid.GRIDHEIGHT then
-        return
-    end
-    if cell.h == 3 then
-        grid.pushWindowDown()
-        grid.pushWindowDown()
-        grid.pushWindowDown()
-    else
-        grid.pushWindowDown()
-        grid.pushWindowDown()
-    end
-    compensateMargins()
-end)-- }}}3
+if hotkeys["moveDown"] then-- {{{3
+    hs.hotkey.bind(super, hotkeys["moveDown"], function()
+        local win = hs.window.focusedWindow()
+        local cell = grid.get(win)
+        if cell.y + cell.h >= grid.GRIDHEIGHT then
+            return
+        end
+        if cell.h == 3 then
+            grid.pushWindowDown()
+            grid.pushWindowDown()
+            grid.pushWindowDown()
+        else
+            grid.pushWindowDown()
+            grid.pushWindowDown()
+        end
+        compensateMargins()
+        cascadeOverlappingWindows()
+    end)
+end-- }}}3
 
-hs.hotkey.bind(super, 'Left', function()-- {{{3
-    local win = hs.window.focusedWindow()
-    local cell = grid.get(win)
-    if cell.x == 0 then
-        return
-    end
-    if cell.w == 3 then
-        grid.pushWindowLeft()
-        grid.pushWindowLeft()
-        grid.pushWindowLeft()
-    else
-        grid.pushWindowLeft()
-        grid.pushWindowLeft()
-    end
-    compensateMargins()
-end)-- }}}3
+if hotkeys["moveLeft"] then-- {{{3
+    hs.hotkey.bind(super, hotkeys["moveLeft"], function()
+        local win = hs.window.focusedWindow()
+        local cell = grid.get(win)
+        if cell.x == 0 then
+            return
+        end
+        if cell.w == 3 then
+            grid.pushWindowLeft()
+            grid.pushWindowLeft()
+            grid.pushWindowLeft()
+        else
+            grid.pushWindowLeft()
+            grid.pushWindowLeft()
+        end
+        compensateMargins()
+        cascadeOverlappingWindows()
+    end)
+end-- }}}3
 
-hs.hotkey.bind(super, 'Right', function()-- {{{3
-    local win = hs.window.focusedWindow()
-    local cell = grid.get(win)
-    if cell.x + cell.w >= grid.GRIDWIDTH then
-        return
-    end
-    if cell.w == 3 then
-        grid.pushWindowRight()
-        grid.pushWindowRight()
-        grid.pushWindowRight()
-    else
-        grid.pushWindowRight()
-        grid.pushWindowRight()
-    end
-    compensateMargins()
-end)-- }}}3
+if hotkeys["moveRight"] then-- {{{3
+    hs.hotkey.bind(super, hotkeys["moveRight"], function()
+        local win = hs.window.focusedWindow()
+        local cell = grid.get(win)
+        if cell.x + cell.w >= grid.GRIDWIDTH then
+            return
+        end
+        if cell.w == 3 then
+            grid.pushWindowRight()
+            grid.pushWindowRight()
+            grid.pushWindowRight()
+        else
+            grid.pushWindowRight()
+            grid.pushWindowRight()
+        end
+        compensateMargins()
+        cascadeOverlappingWindows()
+    end)
+end-- }}}3
 
 -- }}}2
 
@@ -187,13 +355,14 @@ end)-- }}}3
 
 hs.hotkey.bind(super, ';', grid.maximizeWindow)
 
-hs.hotkey.bind(super, 'J', function()-- {{{3
+hs.hotkey.bind(super, hotkeys["resizeDown"], function()-- {{{3
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
     if cell.y < grid.GRIDHEIGHT - cell.h then
         snapToBottom(win, cell, screen)
         compensateMargins()
+        cascadeOverlappingWindows()
         return
     end
     if cell.h <= 2 then
@@ -216,15 +385,17 @@ hs.hotkey.bind(super, 'J', function()-- {{{3
     local cell = grid.get(win)
     snapToBottom(win, cell, screen)
     compensateMargins()
+    cascadeOverlappingWindows()
 end)-- }}}3
 
-hs.hotkey.bind(super, 'K', function()-- {{{3
+hs.hotkey.bind(super, hotkeys["resizeUp"], function()-- {{{3
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
     if cell.y > 0 then
         snapToTop(win, cell, screen)
         compensateMargins()
+        cascadeOverlappingWindows()
         return
     end
     if cell.h <= 2 then
@@ -247,15 +418,17 @@ hs.hotkey.bind(super, 'K', function()-- {{{3
     local cell = grid.get(win)
     snapToTop(win, cell, screen)
     compensateMargins()
+    cascadeOverlappingWindows()
 end)-- }}}3
 
-hs.hotkey.bind(super, 'H', function()-- {{{3
+hs.hotkey.bind(super, hotkeys["resizeLeft"], function()-- {{{3
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
     if cell.x > 0 then
         snapLeft(win, cell, screen)
         compensateMargins()
+        cascadeOverlappingWindows()
         return
     end
     if cell.w <= 2 then
@@ -263,7 +436,6 @@ hs.hotkey.bind(super, 'H', function()-- {{{3
     elseif cell.w >= grid.GRIDWIDTH then
         grow = false
     end
-    -- resizeFinderW(cell)
     if grow and cell.w >= 4 then
         grid.resizeWindowWider()
         grid.resizeWindowWider()
@@ -278,15 +450,17 @@ hs.hotkey.bind(super, 'H', function()-- {{{3
     local cell = grid.get(win)
     snapLeft(win, cell, screen)
     compensateMargins()
+    cascadeOverlappingWindows()
 end)-- }}}3
 
-hs.hotkey.bind(super, 'L', function()-- {{{3
+hs.hotkey.bind(super, hotkeys["resizeRight"], function()-- {{{3
     local win = hs.window.focusedWindow()
     local cell = grid.get(win)
     local screen = win:screen()
     if cell.x < grid.GRIDWIDTH - cell.w then
         snapRight(win, cell, screen)
         compensateMargins()
+        cascadeOverlappingWindows()
         return
     end
     if cell.w <= 2 then
@@ -294,7 +468,6 @@ hs.hotkey.bind(super, 'L', function()-- {{{3
     elseif cell.w >= grid.GRIDWIDTH then
         grow = false
     end
-    -- resizeFinderW(cell)
     if grow and cell.w >= 4 then
         grid.resizeWindowWider()
         grid.resizeWindowWider()
@@ -309,25 +482,21 @@ hs.hotkey.bind(super, 'L', function()-- {{{3
     local cell = grid.get(win)
     snapRight(win, cell, screen)
     compensateMargins()
+    cascadeOverlappingWindows()
 end)-- }}}3
 
-hs.hotkey.bind(super, 'M', function()-- {{{3
-    local win = hs.window.focusedWindow()
-    local screen = win:screen()
-    local newCell = hs.geometry(1, 0, grid.GRIDWIDTH - 2, grid.GRIDHEIGHT)
-    grid.set(win, newCell, screen)
-end)-- }}}3
+-- }}}2
 
--- Show and hide a stripe of Desktop {{{3
-hs.hotkey.bind(super, 'O', function()
+-- Show and hide a stripe of Desktop {{{2
+hs.hotkey.bind(super, hotkeys["showDesktop"], function()
     local windows = hs.window.visibleWindows()
     local finished = false
     for i in pairs(windows) do
         local window = windows[i]
         local frame = window:frame()
         local desktop = hs.window.desktop():frame()
-        if frame.x + frame.w > desktop.w - 120 and frame ~= desktop then
-            frame.w = desktop.w - frame.x - 120
+        if frame.x + frame.w > desktop.w - 128 and frame ~= desktop then
+            frame.w = desktop.w - frame.x - 128
             window:setFrame(frame)
             finished = true
         end
@@ -337,46 +506,45 @@ hs.hotkey.bind(super, 'O', function()
         local window = windows[i]
         local frame = window:frame()
         local desktop = hs.window.desktop():frame()
-        if frame.x + frame.w == desktop.w - 120 then
-            frame.w = frame.w + 100
+        if frame.x + frame.w == desktop.w - 128 then
+            frame.w = frame.w + 108
             window:setFrame(frame)
         end
     end
-end)-- }}}3
+end)-- }}}2
 
--- }}}2
+-- Snap windows {{{2
 
--- Snap {{{2
-
-hs.hotkey.bind(super, '.', function()
+hs.hotkey.bind(super, hotkeys["snapToGrid"], function()
     local windows = hs.window.visibleWindows()
     for i in pairs(windows) do
         local window = windows[i]
         grid.snap(window)
         compensateMargins(window)
     end
+    -- cascadeOverlappingWindows()
 end)
 
 -- }}}2
 
--- Cascade {{{2
+-- Cascade windows {{{2
 
-hs.hotkey.bind(super, ',', function()
+hs.hotkey.bind(super, hotkeys["cascadeAllWindows"], function()
+    if cascadeSpacing == 0 then return end
     local windows = hs.window.orderedWindows()
     local screen = windows[1]:screen():frame()
-    local nOfSpaces = #windows > 1 and #windows - 1 or 1
+    local nOfSpaces = #windows - 1
 
     local xMargin = screen.w / 10 -- unused horizontal margin
     local yMargin = 20            -- unused vertical margin
-    local spacing = 40            -- the visible margin for each window
 
     for i, win in ipairs(windows) do
-        local offset = (i - 1) * spacing
+        local offset = (i - 1) * cascadeSpacing
         local rect = {
             x = xMargin + offset,
             y = screen.y + yMargin + offset,
-            w = screen.w - (2 * xMargin) - (nOfSpaces * spacing),
-            h = screen.h - (2 * yMargin) - (nOfSpaces * spacing),
+            w = screen.w - (2 * xMargin) - (nOfSpaces * cascadeSpacing),
+            h = screen.h - (2 * yMargin) - (nOfSpaces * cascadeSpacing),
         }
         win:setFrame(rect)
     end
