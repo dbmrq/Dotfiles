@@ -3,7 +3,7 @@
 
 ## [winman.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/winman.lua)
 
-Awesome window management. My goal is being able to do as much as possible while memorizing as few hotkeys as possible. `⌃⌥⌘` + `hjkl` allow me to easily organize windows in halves and thirds. When they overlap, they're automatically cascaded.
+Awesome window management. My goal is being able to do as much as possible while memorizing as few keyboard shortcuts as possible. `⌃⌥⌘` + `hjkl` allow me to easily organize windows in halves and thirds. When they overlap, they're automatically cascaded. It' also easy to chose your own keyboard shortcuts. To install just copy the `winman.lua` file to your `.hammerspoon` directory and add `require "winman"` to your `init.lua` file.
 
 Shortcut | Effect
 -------- | --------------------------------------------------------
@@ -12,10 +12,9 @@ Shortcut | Effect
 **⌃⌥⌘H** | Grow and shrink windows while keeping them to the left
 **⌃⌥⌘L** | Grow and shrink windows while keeping them to the right
 **⌃⌥⌘,** | Cascade all windows
-**⌃⌥⌘.** | Snap windows to the grid
-**⌃⌥⌘;** | Fill screen with current window
 **⌃⌥⌘O** | Show a stripe of the Desktop
 
+<img width="2560" alt="screenshot" src="https://user-images.githubusercontent.com/15813674/38471427-6e946544-3b47-11e8-896e-c48a0060a472.png">
 
 
 ## [slowq.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/slowq.lua)
