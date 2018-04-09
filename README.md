@@ -14,7 +14,7 @@ The most interesting stuff here is probably:
 
 - [My Hammerspoon configuration](https://github.com/dbmrq/dotfiles/tree/master/home/.hammerspoon)
 
-- [My custom zsh prompt](https://github.com/dbmrq/dotfiles/blob/master/home/.zprezto/modules/prompt/functions/prompt_dbmrq_setup) (to use with [Prezto](https://github.com/sorin-ionescu/prezto))
+- [My custom zsh prompt](https://github.com/dbmrq/dotfiles/tree/master/home/.zprezto/modules/prompt/functions) (to use with [Prezto](https://github.com/sorin-ionescu/prezto))
 
 - [My .vimrc](https://github.com/dbmrq/dotfiles/blob/master/home/.vimrc),
 which is split into 
