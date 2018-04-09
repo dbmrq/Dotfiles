@@ -137,8 +137,6 @@ set directory=~/.vim/swp/,.,~/tmp,/var/tmp,/tmp
 let g:tex_flavor = "latex"
 au BufReadPost,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
 
-au BufNewFile *.tex 0r ~/.vim/templates/skeleton.tex
-
 au FileType markdown,text,tex set fo+=12
 
 let g:tex_comment_nospell=1
@@ -214,4 +212,8 @@ au BufReadPost,BufNewFile *.md setlocal spell spelllang+=pt
 
 " }}}
 
+
+au BufNewFile *.tex 0r ~/.vim/templates/skeleton.tex
+
+au BufNewFile *.sh 0r ~/.vim/templates/skeleton.sh
 
