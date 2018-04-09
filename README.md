@@ -10,17 +10,21 @@ They're managed using
 
 ---
 
-The most interesting stuff here is probably
-[my Hammerspoon configuration](https://github.com/dbmrq/dotfiles/tree/master/home/.hammerspoon),
-[the .bootstrap scripts](https://github.com/dbmrq/dotfiles/tree/master/home/.bootstrap)
-and [my .vimrc](https://github.com/dbmrq/dotfiles/blob/master/home/.vimrc),
-which is split into the
-[settings.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/settings.vim),
-[mappings.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/mappings.vim)
-and
-[plugins.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/plugins.vim)
-files. There's also some cool stuff on
-[my ftplugin files](https://github.com/dbmrq/dotfiles/tree/master/home/.vim/ftplugin).
+The most interesting stuff here is probably:
+
+- [My Hammerspoon configuration](https://github.com/dbmrq/dotfiles/tree/master/home/.hammerspoon)
+
+- [My custom zsh prompt](https://github.com/dbmrq/dotfiles/blob/master/home/.zprezto/modules/prompt/functions/prompt_dbmrq_setup)
+
+- [My .vimrc](https://github.com/dbmrq/dotfiles/blob/master/home/.vimrc),
+which is split into 
+    * [settings.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/settings.vim)
+    * [mappings.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/mappings.vim)
+    * [plugins.vim](https://github.com/dbmrq/dotfiles/blob/master/home/.vim/plugins.vim)
+
+- [My ftplugin files](https://github.com/dbmrq/dotfiles/tree/master/home/.vim/ftplugin)
+
+- [The .bootstrap scripts](https://github.com/dbmrq/dotfiles/tree/master/home/.bootstrap)
 
 ---
 
