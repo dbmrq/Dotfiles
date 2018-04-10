@@ -212,7 +212,10 @@ end-- }}}3
 
 function areCascaded(frameA, frameB)-- {{{2
     return math.abs(frameA.w - frameB.w) % cascadeSpacing == 0 and
-            math.abs(frameA.h - frameB.h) % cascadeSpacing == 0
+            math.abs(frameA.h - frameB.h) % cascadeSpacing == 0 and
+            math.abs(frameA.x - frameB.x) % cascadeSpacing == 0 and
+            math.abs(frameA.y - frameB.y) % cascadeSpacing == 0
+
 end-- }}}2
 
 function maxX(frame)-- {{{2
