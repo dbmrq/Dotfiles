@@ -2,6 +2,7 @@
 super = {"ctrl", "alt", "cmd"}
 
 require "slowq"    -- Avoid accidental cmd-Q
+require "cherry" -- Tiny Pomodoro timer
 require "winman"   -- Window management
 require "readline" -- Readline style bindings
 -- require "vim"      -- Vim style bindings
@@ -11,10 +12,6 @@ require "readline" -- Readline style bindings
 
 hs.hotkey.bind(super, 'P', function()
   hs.openPreferences()
-end)
-
-hs.hotkey.bind(super, 'C', function()
-  hs.openConsole()
 end)
 
 hs.hotkey.bind(super, 'R', function()

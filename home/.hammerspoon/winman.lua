@@ -15,7 +15,7 @@
 -- useful if you plan on using more than 2 windows per column/row, so you can
 -- just comment them out.
 
-super = {"ctrl", "alt", "cmd"}
+local super = {"ctrl", "alt", "cmd"}
 
 local hotkeys = {
     resizeUp = "K",
@@ -35,10 +35,9 @@ local cascadeSpacing = 40 -- the visible margin for each window
                           -- set to 0 to disable cascading
 
 
-------------------------------------------------------------------------------
---  Don't make changes below this line if you don't know what you're doing  --
-------------------------------------------------------------------------------
-
+-------------------------------------------------------------------
+--  Don't mess with this part unless you know what you're doing  --
+-------------------------------------------------------------------
 
 -- Setup {{{1
 

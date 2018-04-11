@@ -17,6 +17,12 @@ Shortcut | Effect
 <img width="2560" alt="screenshot" src="https://user-images.githubusercontent.com/15813674/38471427-6e946544-3b47-11e8-896e-c48a0060a472.png">
 
 
+## [cherry.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/cherry.lua)
+
+A tiny Pomodoro timer. Start it with ⌃⌥⌘C or check the file for customization
+options.
+
+
 ## [slowq.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/slowq.lua)
 
 Never quit an app by accident again. Replaces apps like [CommandQ](https://clickontyler.com/commandq/) and [SlowQuitApps](https://github.com/dteoh/SlowQuitApps).
