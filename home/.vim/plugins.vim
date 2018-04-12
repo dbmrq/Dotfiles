@@ -88,7 +88,7 @@ inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
 inoremap <expr>  <esc> pumvisible() ? mucomplete#popup_exit("\<c-e>") : "<esc>"
 
 function! CYOrCR()
-    return pumvisible() ? "\<c-e>\<cr>" : CROrUncomment()
+    return pumvisible() ? "\<esc>o" : CROrUncomment()
     " This stops CR from deleting characters when the typed word
     " and the completed word are the same
     " (https://github.com/lifepillar/vim-mucomplete/issues/61)
