@@ -3,6 +3,7 @@
 
 -- Cherry tomato (a tiny Pomodoro)
 
+
 -----------------------------
 --  Customization Options  --
 -----------------------------
@@ -17,6 +18,10 @@ local hotkey = "C"
 
 local duration = 25 -- timer duration in minutes
 
+-- set this to true to always show the menu bar item
+-- (making the keyboard shortcut superfluous):
+local alwaysShow = false
+
 
 -------------------------------------------------------------------
 --  Don't mess with this part unless you know what you're doing  --
@@ -27,7 +32,7 @@ local duration = 25 -- timer duration in minutes
 local updateTimer, updateMenu, start, pause, reset, stop
 
 local menu = hs.menubar.new()
-menu:setTooltip("Pomodoro")
+menu:setTooltip("Cherry")
 local isActive = false
 
 local timeLeft = duration * 60
@@ -53,7 +58,6 @@ updateMenu = function()-- {{{1
     menu:setTitle(string)
 
     local items = {
-            {title = "Reset", fn = function() reset() end},
             {title = "Stop", fn = function() stop() end},
         }
     if isActive then
@@ -81,7 +85,11 @@ end-- }}}1
 stop = function()-- {{{1
     pause()
     timeLeft = duration * 60
-    menu:removeFromMenuBar()
+    if not alwaysShow then
+        menu:delete()
+    else
+        updateMenu()
+    end
 end-- }}}1
 
 reset = function()-- {{{1
@@ -90,4 +98,6 @@ reset = function()-- {{{1
 end-- }}}1
 
 hs.hotkey.bind(super, hotkey, function() start() end)
+
+if alwaysShow then updateMenu() end
 

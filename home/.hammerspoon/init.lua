@@ -31,7 +31,7 @@ end-- }}}2
 function uptime()---- {{{2
 
     local days = hs.execute("uptime | \
-        grep -o '\\d\\+\\sdays' | grep -o '\\d\\+'")
+        grep -o '\\d\\+\\sdays\\?' | grep -o '\\d\\+'")
 
     local seconds = hs.execute("uptime | \
         grep -o '\\d\\+\\ssecs' | grep -o '\\d\\+'")
