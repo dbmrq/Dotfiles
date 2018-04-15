@@ -32,7 +32,7 @@ function repeatQ()
             hs.alert.closeAll()
         end
     else
-        if pressedQTime > 0 and os.time() - pressedQTime > 0 then
+        if pressedQTime > 0 and os.time() - pressedQTime > 1 then
             pressedQTime = 0
             hs.application.frontmostApplication():kill()
             hs.alert.closeAll()

@@ -271,7 +271,6 @@ end-- }}}2
 -- Move windows {{{2
 
 if hotkeys["moveUp"] then-- {{{3
-    print("lala")
     hs.hotkey.bind(super, hotkeys["moveUp"], function()
         local win = hs.window.focusedWindow()
         local cell = grid.get(win)
