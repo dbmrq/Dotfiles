@@ -1,12 +1,12 @@
 
 super = {"ctrl", "alt", "cmd"}
 
-require "slowq"    -- Avoid accidental cmd-Q
-require "cherry" -- Tiny Pomodoro timer
 require "winman"   -- Window management
+require "slowq"    -- Avoid accidental Cmd-Q
+require "cherry"   -- Tiny Pomodoro timer
+require "collage"  -- Clipboard management
 require "readline" -- Readline style bindings
 -- require "vim"      -- Vim style bindings
--- require "clipboard"
 
 -- Meta {{{1
 
