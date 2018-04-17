@@ -1,44 +1,36 @@
 
 -- http://github.com/dbmrq/dotfiles/
 
--- Keep holding Cmd-Q to close apps, so you don't do it accidentally.
+-- Requires you to keep holding Command + Q for a while before closing an app,
+-- so you won't do it accidentally.
 
--- Replaces apps like CommandQ and SlowQuitApps. This works better if you have
--- luasocket, which has to be installed with Lua 5.3 and luarocks to work with
--- Hammerspoon.
+-- Replaces apps like CommandQ and SlowQuitApps.
 
-socket = require "socket"
 
-pressedQTime = 0
+-----------------------------
+--  Customization Options  --
+-----------------------------
+
+local delay = 0.1 -- In seconds
+
+
+-------------------------------------------------------------------
+--  Don't mess with this part unless you know what you're doing  --
+-------------------------------------------------------------------
+
+local killedIt = false
 
 function pressedQ()
-    hs.alert.show("⌘Q")
-    if socket then
-        pressedQTime = socket.gettime()
-    else
-        pressedQTime = os.time()
-    end
-end
-
-function releasedQ()
-    hs.alert.closeAll()
+    killedIt = false
+    hs.timer.usleep(1000000 * delay)
 end
 
 function repeatQ()
-    if socket then
-        if pressedQTime > 0 and socket.gettime() - pressedQTime > 0.01 then
-            pressedQTime = 0
-            hs.application.frontmostApplication():kill()
-            hs.alert.closeAll()
-        end
-    else
-        if pressedQTime > 0 and os.time() - pressedQTime > 1 then
-            pressedQTime = 0
-            hs.application.frontmostApplication():kill()
-            hs.alert.closeAll()
-        end
-    end
+    if killedIt then return end
+    killedIt = true
+    print("lala")
+    hs.application.frontmostApplication():kill()
 end
 
-hs.hotkey.bind('cmd', 'Q', pressedQ, releasedQ, repeatQ)
+hs.hotkey.bind('cmd', 'Q', pressedQ, nil, repeatQ)
 
