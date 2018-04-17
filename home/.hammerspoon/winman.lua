@@ -18,17 +18,21 @@
 local super = {"ctrl", "alt", "cmd"}
 
 local hotkeys = {
-    resizeUp = "K",
-    resizeDown = "J",
-    resizeLeft = "H",
-    resizeRight = "L",
-    moveUp = "Up",
-    moveDown = "Down",
-    moveLeft = "Left",
-    moveRight = "Right",
-    showDesktop = "O",
-    snapToGrid = ".",
-    cascadeAllWindows = ",",
+    resizeUp           = "K", -- Resize current window keeping it at the top
+    resizeDown         = "J", -- Resize current window keepint it at the bottom
+    resizeLeft         = "H", -- Resize current window keepint it to the left
+    resizeRight        = "L", -- Resize current window keepint it to the right
+    showDesktop        = "O", -- Show a stripe of the desktop
+    cascadeAllWindows  = ",", -- Cascade all windows
+    cascadeAppWindows  = ".", -- Cascade windows for the current application
+    snapToGrid         = "/", -- Snap windows to the grid
+    maximizeWindow     = ";", -- Expand current window to take up whole grid
+
+    -- Only useful if you plan on using more than two windows per column/row:
+    moveUp = "Up", -- Move window up one cell
+    moveDown = "Down", -- Move window down one cell
+    moveLeft = "Left", -- Move window left one cell
+    moveRight = "Right", -- Move window right one cell
 }
 
 local cascadeSpacing = 40 -- the visible margin for each window
@@ -136,11 +140,16 @@ function cascade(windows)-- {{{3
     local frame = largestFrame(windows)
 end-- }}}3
 
-function cascadeOverlappingWindows()-- {{{3
+function cascadeOverlappingWindows(secondPass)-- {{{3
     if cascadeSpacing == 0 then return end
     local allWindows = hs.window.allWindows()
     local cascadedWindows = {}
+    local needsSecondPass = false
     for i, win in ipairs(allWindows) do
+        local title = win:application():title()
+        if title == "Terminal" or title == "MacVim" then
+            needsSecondPass = true
+        end
         if not cascadedWindows[win:id()] then
             local currentCascading = cascadeWindowsOverlapping(win)
             for x, cascadedWin in ipairs(currentCascading) do
@@ -148,12 +157,17 @@ function cascadeOverlappingWindows()-- {{{3
             end
         end
     end
+    -- Some windows take longer to resize and won't be overlapping when this
+    -- is first called, so we call it again after one second. Right now I'm
+    -- just doing it for MacVim and Terminal.app, but you can add others in
+    -- the check up there.
+    if needsSecondPass and not secondPass then
+        hs.timer.doAfter(1, function() cascadeOverlappingWindows(true) end)
+    end
 end-- }}}3
 
 function cascadeWindowsOverlapping(winA)-- {{{3
-    if cascadeSpacing == 0 then
-        return
-    end
+    if cascadeSpacing == 0 then return end
     local windows = hs.window.allWindows()
     local overlappingWindows = { winA }
     local frameA = winA:frame()
@@ -164,10 +178,8 @@ function cascadeWindowsOverlapping(winA)-- {{{3
                 table.insert(overlappingWindows, winB)
         end
     end
-    -- if #overlappingWindows > 1 then
-        cascade(overlappingWindows)
-        return overlappingWindows
-    -- end
+    cascade(overlappingWindows)
+    return overlappingWindows
 end-- }}}3
 
 -- }}}2
@@ -354,7 +366,7 @@ end-- }}}3
 
 -- Resize windows {{{2
 
-hs.hotkey.bind(super, ';', grid.maximizeWindow)
+hs.hotkey.bind(super, hotkeys["maximizeWindow"], grid.maximizeWindow)
 
 hs.hotkey.bind(super, hotkeys["resizeDown"], function()-- {{{3
     local win = hs.window.focusedWindow()
@@ -540,6 +552,38 @@ hs.hotkey.bind(super, hotkeys["cascadeAllWindows"], function()
     local yMargin = 20            -- unused vertical margin
 
     for i, win in ipairs(windows) do
+        local offset = (i - 1) * cascadeSpacing
+        local rect = {
+            x = xMargin + offset,
+            y = screen.y + yMargin + offset,
+            w = screen.w - (2 * xMargin) - (nOfSpaces * cascadeSpacing),
+            h = screen.h - (2 * yMargin) - (nOfSpaces * cascadeSpacing),
+        }
+        win:setFrame(rect)
+    end
+end)
+
+-- }}}2
+
+-- Cascade windows for current app {{{2
+
+hs.hotkey.bind(super, hotkeys["cascadeAppWindows"], function()
+    if cascadeSpacing == 0 then return end
+    local windows = hs.window.orderedWindows()
+    local focusedApp = hs.window.focusedWindow():application()
+    local appWindows = {}
+    for i, window in ipairs(windows) do
+        if window:application() == focusedApp then
+            table.insert(appWindows, window)
+        end
+    end
+    local screen = appWindows[1]:screen():frame()
+    local nOfSpaces = #appWindows - 1
+
+    local xMargin = screen.w / 10 -- unused horizontal margin
+    local yMargin = 20            -- unused vertical margin
+
+    for i, win in ipairs(appWindows) do
         local offset = (i - 1) * cascadeSpacing
         local rect = {
             x = xMargin + offset,
