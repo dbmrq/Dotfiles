@@ -31,8 +31,7 @@ local alwaysShow = false
 
 local updateTimer, updateMenu, start, pause, reset, stop
 
-local menu = hs.menubar.new()
-menu:setTooltip("Cherry")
+local menu
 local isActive = false
 
 local timeLeft = duration * 60
@@ -52,6 +51,11 @@ updateTimer = function()-- {{{1
 end-- }}}1
 
 updateMenu = function()-- {{{1
+    if not menu then
+        menu = hs.menubar.new()
+        menu:setTooltip("Cherry")
+    end
+    menu:returnToMenuBar()
     local minutes = math.floor(timeLeft / 60)
     local seconds = timeLeft - (minutes * 60)
     local string = string.format("%02d:%02d 🍒", minutes, seconds)
@@ -69,7 +73,6 @@ updateMenu = function()-- {{{1
 end-- }}}1
 
 start = function()-- {{{1
-    menu:returnToMenuBar()
     if isActive then return end
     timer:start()
     isActive = true

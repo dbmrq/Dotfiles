@@ -5,6 +5,7 @@ require "winman"   -- Window management
 require "slowq"    -- Avoid accidental Cmd-Q
 require "cherry"   -- Tiny Pomodoro timer
 require "collage"  -- Clipboard management
+require "mocha"    -- Prevent Mac from sleeping
 require "readline" -- Readline style bindings
 -- require "vim"      -- Vim style bindings
 

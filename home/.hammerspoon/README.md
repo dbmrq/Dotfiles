@@ -49,6 +49,10 @@ there are more than two items to show. By default, it uses Command + Shift + C,
 so not everything will be added. Check the source code for customization
 options.
 
+## [mocha.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/mocha.lua)
+
+Prevent computer from sleeping. Check the source code for more information.
+
 ## [readline.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/readline.lua)
 
 Expands the [readline

@@ -25,8 +25,7 @@ local hotkey = "c"
 --  Don't mess with this part unless you know what you're doing  --
 -------------------------------------------------------------------
 
-local menu = hs.menubar.new()
-menu:setTooltip("Clipboard")
+local menu
 
 local pasteboard = require("hs.pasteboard")
 local settings = require("hs.settings")
@@ -73,6 +72,10 @@ end-- }}}1
 
 function setMenu()-- {{{1
     if #history > 1 then
+        if not menu then
+            menu = hs.menubar.new()
+        end
+        menu:setTooltip("Clipboard")
         menu:returnToMenuBar()
         menu:setTitle("✂")
         menu:setMenu(populateMenu)
