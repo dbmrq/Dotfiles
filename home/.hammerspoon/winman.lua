@@ -15,13 +15,20 @@
 -- useful if you plan on using more than 2 windows per column/row, so you can
 -- just comment them out.
 
-local super = {"ctrl", "alt", "cmd"}
+-- UPDATE: Since the latest version, I set the arrow keys as the default and
+-- added an option to customize the shortcuts without making changes to this
+-- file. Just create the `super` and `winmanHotkeys` tables in your `init.lua`
+-- file before `require "winman"` (notice that they have to be global
+-- variables, without the `local` keyword). If you prefer you can still just
+-- edit this file, though.
 
-local hotkeys = {
-    resizeUp           = "K", -- Resize current window keeping it at the top
-    resizeDown         = "J", -- Resize current window keepint it at the bottom
-    resizeLeft         = "H", -- Resize current window keepint it to the left
-    resizeRight        = "L", -- Resize current window keepint it to the right
+local super = super or {"ctrl", "alt", "cmd"}
+
+local hotkeys = winmanHotkeys or {
+    resizeUp           = "Up", -- "K", -- Resize window keeping it at the top
+    resizeDown         = "Down", -- "J", -- Resize keeping it at the bottom
+    resizeLeft         = "Left", -- "H", -- Resize window keeping it left
+    resizeRight        = "Right", -- "L", -- Resize window keeping it right
     showDesktop        = "O", -- Show a stripe of the desktop
     cascadeAllWindows  = ",", -- Cascade all windows
     cascadeAppWindows  = ".", -- Cascade windows for the current application
@@ -29,10 +36,10 @@ local hotkeys = {
     maximizeWindow     = ";", -- Expand current window to take up whole grid
 
     -- Only useful if you plan on using more than two windows per column/row:
-    moveUp = "Up", -- Move window up one cell
-    moveDown = "Down", -- Move window down one cell
-    moveLeft = "Left", -- Move window left one cell
-    moveRight = "Right", -- Move window right one cell
+    -- moveUp = "Up", -- Move window up one cell
+    -- moveDown = "Down", -- Move window down one cell
+    -- moveLeft = "Left", -- Move window left one cell
+    -- moveRight = "Right", -- Move window right one cell
 }
 
 local cascadeSpacing = 40 -- the visible margin for each window

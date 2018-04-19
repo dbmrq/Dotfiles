@@ -1,6 +1,12 @@
 
 super = {"ctrl", "alt", "cmd"}
 
+winmanHotkeys = {resizeUp = "K", resizeDown = "J", resizeLeft = "H",
+    resizeRight = "L", showDesktop = "O", cascadeAllWindows = ",",
+    cascadeAppWindows = ".", snapToGrid = "/", maximizeWindow = ";",
+    moveUp = "Up", moveDown = "Down", moveLeft = "Left", moveRight = "Right"}
+
+
 require "winman"   -- Window management
 require "slowq"    -- Avoid accidental Cmd-Q
 require "cherry"   -- Tiny Pomodoro timer
@@ -8,6 +14,7 @@ require "collage"  -- Clipboard management
 require "mocha"    -- Prevent Mac from sleeping
 require "readline" -- Readline style bindings
 -- require "vim"      -- Vim style bindings
+
 
 -- Meta {{{1
 
@@ -35,7 +42,7 @@ function uptime()---- {{{2
         grep -o '\\d\\+\\sdays\\?' | grep -o '\\d\\+'")
 
     local seconds = hs.execute("uptime | \
-        grep -o '\\d\\+\\ssecs' | grep -o '\\d\\+'")
+        grep -o '\\d\\+\\ssecs\\?' | grep -o '\\d\\+'")
 
     if tonumber(days) then
         local minutes = hs.execute("uptime | awk '{print $5}' | \

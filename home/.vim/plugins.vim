@@ -39,6 +39,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'wellle/targets.vim'
     " Plug 'Shougo/neocomplete.vim'
     Plug 'lifepillar/vim-mucomplete'
+    Plug 'plasticboy/vim-markdown'
 
     Plug '~/Code/Vim/vim-ditto'
     Plug '~/Code/Vim/vim-chalk'
@@ -191,31 +192,31 @@ endfunction
 autocmd User VimtexEventInitPost
             \ command! RC call ToggleOption("-norc")
 
-let g:VimtexImportante = {
-      \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
-      \ 'in_preamble' : 1,
-      \}
-
-function! g:VimtexImportante.get_entry(context) abort dict
-  return {
-        \ 'title'  : 'IMPORTANTE: ' .
-            \ matchstr(a:context.file, '\(\/.*\).*\/\zs\a.*\.\a\a\a') .
-            \ ' - line ' . a:context.lnum,
-        \ 'number' : '[!]',
-        \ 'file'   : a:context.file,
-        \ 'line'   : a:context.lnum,
-        \ 'level'  : a:context.max_level,
-        \ 'rank'   : a:context.lnum_total,
-        \ }
-endfunction
-
-let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
-
 let g:vimtex_toc_hotkeys = {
     \ 'enabled' : 1,
     \ 'keys' : 'asdfjkleurei',
     \ 'leader' : '<space>',
     \}
+
+" let g:VimtexImportante = {
+"       \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
+"       \ 'in_preamble' : 1,
+"       \}
+
+" function! g:VimtexImportante.get_entry(context) abort dict
+"   return {
+"         \ 'title'  : 'IMPORTANTE: ' .
+"             \ matchstr(a:context.file, '\(\/.*\).*\/\zs\a.*\.\a\a\a') .
+"             \ ' - line ' . a:context.lnum,
+"         \ 'number' : '[!]',
+"         \ 'file'   : a:context.file,
+"         \ 'line'   : a:context.lnum,
+"         \ 'level'  : a:context.max_level,
+"         \ 'rank'   : a:context.lnum_total,
+"         \ }
+" endfunction
+
+" let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
 
 " }}}1
 
@@ -261,6 +262,10 @@ let g:vimtex_toc_hotkeys = {
 " " let last_spell_count = 1
 
 " " }}}1
+
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_frontmatter = 1
+
 
 
 " " vim-polyglot {{{1

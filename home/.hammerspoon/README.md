@@ -14,18 +14,18 @@ require "readline" -- Readline style bindings
 ## [winman.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/winman.lua)
 
 Awesome window management. My goal is being able to do as much as possible
-while memorizing as few keyboard shortcuts as possible. `⌃⌥⌘` + `hjkl` allow
-me to easily organize windows in halves and thirds. When they overlap, they're
-automatically cascaded. It's also easy to chose your own keyboard shortcuts by
-editing the source code. To install just copy the `winman.lua` file to your
-`.hammerspoon` directory and add `require "winman"` to your `init.lua` file.
+while memorizing as few keyboard shortcuts as possible. By default, `⌃⌥⌘`
++ the arrow keys will allow you to easily organize windows in halves and
+thirds of the screen. It's also easy to chose your own keyboard shortcuts,
+just check the source code (I recommend `hjkl` over the arrow keys, but
+they're less intuitive for a lot of people).
 
 Shortcut | Effect
 -------- | --------------------------------------------------------
-**⌃⌥⌘K** | Grow and shrink windows while keeping them at the top
-**⌃⌥⌘J** | Grow and shrink windows while keeping them at the bottom
-**⌃⌥⌘H** | Grow and shrink windows while keeping them to the left
-**⌃⌥⌘L** | Grow and shrink windows while keeping them to the right
+**⌃⌥⌘↑** | Grow and shrink windows while keeping them at the top
+**⌃⌥⌘↓** | Grow and shrink windows while keeping them at the bottom
+**⌃⌥⌘←** | Grow and shrink windows while keeping them to the left
+**⌃⌥⌘→** | Grow and shrink windows while keeping them to the right
 **⌃⌥⌘,** | Cascade all windows
 **⌃⌥⌘O** | Show a stripe of the Desktop
 
