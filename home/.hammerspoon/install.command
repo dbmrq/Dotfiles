@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+firstInstall=false
+
+# Install Hammerspoon {{{1
+
 if ! osascript -e "id of application \"Hammerspoon\"" >/dev/null; then
     # If Hammerspoon isn't installed
 
@@ -21,14 +25,17 @@ if ! osascript -e "id of application \"Hammerspoon\"" >/dev/null; then
 
     echo -e "\nInstalling Hammerspoon..."
     brew cask install hammerspoon
+    firstInstall=true
 
 else
     echo -e "\nHammerspoon already installed. Moving on..."
 fi
 
+# }}}1
+
+# Copy files {{{1
 
 mkdir -p ~/.hammerspoon
-
 
 echo -e "\nCopying files..."
 curl -L https://goo.gl/BUfggH \
@@ -42,6 +49,9 @@ curl -L https://goo.gl/Wa3QuJ \
 curl -L https://goo.gl/JeEW68 \
     --output ~/.hammerspoon/mocha.lua >/dev/null 2>&1
 
+# }}}1
+
+# Modify init.lua {{{1
 
 echo -e "\nModifying ~/.hammerspoon/init.lua"
 
@@ -49,8 +59,9 @@ if [ ! -f ~/.hammerspoon/init.lua ]; then
     touch ~/.hammerspoon/init.lua
 fi
 
+# Add customization options {{{2
 
-if ! grep -q "https://github.com/dbmrq/dotfiles" ~/.hammerspoon/init.lua; then
+if [ "$firstInstall" = true ] ; then
 cat <<EOT >> ~/.hammerspoon/init.lua
 
 ---------------------------------------
@@ -94,6 +105,9 @@ cat <<EOT >> ~/.hammerspoon/init.lua
 EOT
 fi
 
+# }}}2
+
+# Require winman {{{2
 
 if ! grep -q "require \"winman\"" ~/.hammerspoon/init.lua; then
     echo -e "\nrequiring winman.lua"
@@ -103,6 +117,10 @@ else
     echo -e "\nwinman.lua already required. Moving on..."
 fi
 
+# }}}2
+
+# Require slowq {{{2
+
 if ! grep -q "require \"slowq\"" ~/.hammerspoon/init.lua; then
     echo -e "\nrequiring slowq.lua"
     echo "require \"slowq\"    -- Avoid accidental Cmd-Q" >> \
@@ -110,6 +128,10 @@ if ! grep -q "require \"slowq\"" ~/.hammerspoon/init.lua; then
 else
     echo -e "\nslowq.lua already required. Moving on..."
 fi
+
+# }}}2
+
+# Require cherry {{{2
 
 if ! grep -q "require \"cherry\"" ~/.hammerspoon/init.lua; then
     echo -e "\nrequiring cherry.lua"
@@ -119,6 +141,10 @@ else
     echo -e "\ncherry.lua already required. Moving on..."
 fi
 
+# }}}2
+
+# Require collage {{{2
+
 if ! grep -q "require \"collage\"" ~/.hammerspoon/init.lua; then
     echo -e "\nrequiring collage.lua"
     echo "require \"collage\"  -- Clipboard management" >> \
@@ -126,6 +152,10 @@ if ! grep -q "require \"collage\"" ~/.hammerspoon/init.lua; then
 else
     echo -e "\ncollage.lua already required. Moving on..."
 fi
+
+# }}}2
+
+# Require mocha {{{2
 
 if ! grep -q "require \"mocha\"" ~/.hammerspoon/init.lua; then
     echo -e "\nrequiring mocha.lua"
@@ -135,12 +165,22 @@ else
     echo -e "\nmocha.lua already required. Moving on..."
 fi
 
+# }}}2
+
+# }}}1
+
 echo -e "\nDONE!"
 
-echo -e "\nCheck your ~/.hammerspoon directory to see what's new!"
+if [ "$firstInstall" = true ] ; then
+    echo -e "\nOpen Hammerspoon and follow the instructions to allow
+    Accessibility access."
+fi
 
-echo -e "\nIf this is the first time you install Hammerspoon, don't forget to
-open it and follow the instructions to allow Accessibility access.\n"
+echo -e "\nCheck your ~/.hammerspoon directory to see what's new!\n"
 
 read -n 1 -s -r -p "Press any key to quit."
+
+open ~/.hammerspoon
+
+# vim:set et sw=4 ts=4 tw=78 fdm=marker:
 
