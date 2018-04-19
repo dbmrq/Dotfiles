@@ -1,24 +1,19 @@
 # My Hammerspoon config
 
-To use, copy each file into your `.hammerspoon` directory and require it from your
-`init.lua` file:
-
-```lua
-require "winman"   -- Window management
-require "slowq"    -- Avoid accidental Cmd-Q
-require "cherry"   -- Tiny Pomodoro timer
-require "collage"  -- Clipboard management
-require "readline" -- Readline style bindings
-```
+To install, just download (option + click) and open the
+[install.command](https://github.com/dbmrq/dotfiles/raw/master/home/.hammerspoon/install.command)
+file. Then you can use the keyboard shortcuts below or check your init.lua
+file to customize them.
 
 ## [winman.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/winman.lua)
 
 Awesome window management. My goal is being able to do as much as possible
-while memorizing as few keyboard shortcuts as possible. By default, `⌃⌥⌘`
-+ the arrow keys will allow you to easily organize windows in halves and
-thirds of the screen. It's also easy to chose your own keyboard shortcuts,
-just check the source code (I recommend `hjkl` over the arrow keys, but
-they're less intuitive for a lot of people).
+while memorizing as few keyboard shortcuts as possible. By default, `⌃⌥⌘` +
+the arrow keys will allow you to easily organize windows in halves and thirds
+of the screen. Windows are automatically cascaded when they overlap. It's also
+easy to chose your own keyboard shortcuts, just check the source code (I
+recommend `hjkl` over the arrow keys, but they're less intuitive for a lot of
+people).
 
 Shortcut | Effect
 -------- | --------------------------------------------------------
@@ -45,13 +40,14 @@ Never quit an app by accident again. Replaces apps like
 ## [collage.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/collage.lua)
 
 Minimalistic clipboard management solution. The menu icon only appears when
-there are more than two items to show. By default, it uses Command + Shift + C,
+there are more than one item to show. By default, it uses Command + Shift + C,
 so not everything will be added. Check the source code for customization
 options.
 
 ## [mocha.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/mocha.lua)
 
-Prevent computer from sleeping. Check the source code for more information.
+Prevent computer from sleeping. Start it with ⌃⌥⌘M and click the menu icon to
+disable.
 
 ## [readline.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/readline.lua)
 
