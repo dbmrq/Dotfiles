@@ -61,7 +61,7 @@ fi
 
 # Add customization options {{{2
 
-if [ "$firstInstall" = true ] ; then
+if ! grep -q "https://github.com/dbmrq/dotfiles" ~/.hammerspoon/init.lua; then
 cat <<EOT >> ~/.hammerspoon/init.lua
 
 ---------------------------------------
@@ -178,9 +178,8 @@ fi
 
 echo -e "\nCheck your ~/.hammerspoon directory to see what's new!\n"
 
-read -n 1 -s -r -p "Press any key to quit."
-
 open ~/.hammerspoon
+open ~/.hammerspoon/init.lua
 
 # vim:set et sw=4 ts=4 tw=78 fdm=marker:
 

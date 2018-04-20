@@ -129,6 +129,20 @@ inoremap <F6> ¶
 
 " }}}1
 
+" Add space when pasting at period or new line {{{1
+
+function! PasteOrSpacePaste()
+    let char = getline('.')[col('.') - 1]
+    if char == '.' || char == ''
+        return "a \<esc>p"
+    else
+        return "p"
+    endif
+endfunction
+
+nnoremap <expr> p PasteOrSpacePaste()
+
+" }}}1
 
 set spell
 set spelllang=pt

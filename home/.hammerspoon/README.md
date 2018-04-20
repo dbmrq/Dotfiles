@@ -1,9 +1,22 @@
 # My Hammerspoon config
 
-To install, just download (option + click) and open the
-[install.command](https://github.com/dbmrq/dotfiles/raw/master/home/.hammerspoon/install.command)
-file. Then you can use the keyboard shortcuts below or check your init.lua
-file to customize them.
+## Quick Start
+
+- Download (option + click) the
+    [install.sh](https://github.com/dbmrq/dotfiles/raw/master/home/.hammerspoon/install.sh)
+    script
+
+- Open the Terminal (type Command + Space to open Spotlight, type "Terminal"
+    and press Enter)
+
+- Type `cd `, drag and drop the folder that contains the install.sh script
+    into the terminal window and press Enter
+
+- Type `chmod +x install.sh && ./install.sh` and press Enter
+
+- Follow the instructions
+
+Use the shortcuts below or check your init.lua file to customize them
 
 ## [winman.lua](https://github.com/dbmrq/dotfiles/blob/master/home/.hammerspoon/winman.lua)
 

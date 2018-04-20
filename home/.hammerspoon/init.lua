@@ -1,4 +1,6 @@
 
+-- https://github.com/dbmrq/dotfiles
+
 super = {"ctrl", "alt", "cmd"}
 
 winmanHotkeys = {resizeUp = "K", resizeDown = "J", resizeLeft = "H",
