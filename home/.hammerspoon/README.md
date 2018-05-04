@@ -2,19 +2,14 @@
 
 ## Quick Start
 
-- Download (option + click) the
-    [install.sh](https://github.com/dbmrq/dotfiles/raw/master/home/.hammerspoon/install.sh)
-    script
+- Open Terminal (press Command + Space to open Spotlight, type "Terminal"
+  and press Enter)
 
-- Open the Terminal (type Command + Space to open Spotlight, type "Terminal"
-    and press Enter)
+- Copy and paste the following line:
 
-- Type `cd `, drag and drop the folder that contains the install.sh script
-    into the terminal window and press Enter
+        curl -fsSL https://git.io/vpwL7 | bash
 
-- Type `chmod +x install.sh && ./install.sh` and press Enter
-
-- Follow the instructions
+- Press Enter and follow the instructions
 
 Use the shortcuts below or check your init.lua file to customize them
 

@@ -80,20 +80,17 @@ set wrap
 set linebreak
 set textwidth=78
 set whichwrap+=h,l
+set showbreak=...\ 
 
 au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 
 " Highlight lines that are wrapped
 " au VimResized * exe 'match FoldColumn /\%>' . winwidth('%') . 'v.*/'
 
-augroup ErrorHiglights
-    autocmd!
-    autocmd WinEnter,BufEnter * call clearmatches() | call matchadd('FoldColumn', '\%>79v.\+', 100)
-augroup END
-
-" if executable("par")
-"     set formatprg=par\ -w78
-" endif
+" augroup ErrorHiglights
+"     autocmd!
+"     autocmd WinEnter,BufEnter * call clearmatches() | call matchadd('FoldColumn', '\%>79v.\+', 100)
+" augroup END
 
 " if &l:formatoptions =~ "t"
 "     let &colorcolumn="+1,".join(range(101,999),",")
@@ -140,6 +137,9 @@ au BufReadPost,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
 au FileType markdown,text,tex set fo+=12
 
 let g:tex_comment_nospell=1
+
+let g:tex_itemize_env = 'itemize\|description\|enumerate\|thebibliography' .
+                      \ '\|inline\|inlinin\|inlinex\|inlinalt'
 
 " }}}
 

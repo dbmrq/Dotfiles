@@ -10,6 +10,7 @@ brew install git
 brew install lua
 brew install zsh
 brew install mas
+brew install par
 brew install ruby
 brew install fasd
 brew install trash
@@ -19,6 +20,7 @@ brew install lua@5.3
 brew install luajit
 brew install cscope
 brew install pandoc
+brew install rename
 brew install python
 brew install python3
 brew install dockutil

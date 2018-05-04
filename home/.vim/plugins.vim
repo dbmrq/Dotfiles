@@ -157,6 +157,7 @@ autocmd User VimtexEventInitPost
 let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
+let g:vimtex_indent_enabled = 0
 let g:vimtex_index_split_pos = "full"
 let g:vimtex_toc_fold = 1
 let g:vimtex_toc_fold_level_start = 2
@@ -263,10 +264,16 @@ let g:vimtex_toc_hotkeys = {
 
 " " }}}1
 
+" vim-markdown {{{1
+
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_frontmatter = 1
 
+" }}}1
 
+" Targets {{{1
+let g:targets_aiAI = '  ai'
+" }}}1
 
 " " vim-polyglot {{{1
 " let g:polyglot_disabled = ['latex']

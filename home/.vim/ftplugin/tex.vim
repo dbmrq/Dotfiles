@@ -144,6 +144,13 @@ nnoremap <expr> p PasteOrSpacePaste()
 
 " }}}1
 
+" formatprg {{{1
+if executable("latexindent")
+    set formatprg=latexindent\ -m
+    " set formatprg=latexindent\ -m\ -y=\"modifyLineBreaks:oneSentencePerLine:manipulateSentences:1\"\ \|\ latexindent\ -m
+endif
+" }}}1
+
 set spell
 set spelllang=pt
 

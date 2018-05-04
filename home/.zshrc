@@ -89,3 +89,4 @@ alias reinstallMacVim='brew uninstall macvim; installMacVim && rm /Applications/
 # autoload -U compinit && compinit
 # zmodload -i zsh/complist
 
+eval "$(perl -I$HOME/.perl5/lib/perl5 -Mlocal::lib=$HOME/.perl5)"

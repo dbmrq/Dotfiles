@@ -281,6 +281,31 @@ brew install swiftlint
 
 # }}}1
 
+# Perl {{{1
+
+# brew install perl
+
+# PERL_MM_OPT="INSTALL_BASE=$HOME/.perl5" cpan local::lib
+
+# sudo chown -R `whoami` ~/.perl5
+
+cpan App::cpanminus
+sudo cpanm Log::Log4perl
+sudo cpanm Log::Dispatch::File
+sudo cpanm YAML::Tiny
+sudo cpanm File::HomeDir
+sudo cpanm Unicode::GCString
+
+# }}}1
+
+# nltk {{{1
+
+pip3 install nltk
+
+ython3 -m nltk.downloader -d /usr/local/share/nltk_data punkt
+
+# }}}1
+
 # Dock {{{1
 
 # Wipe all (default) app icons from the Dock

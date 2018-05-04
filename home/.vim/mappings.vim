@@ -402,6 +402,32 @@ nnoremap <leader>cc :call ReplaceLastChange()<cr>
 
 " }}}1
 
+" Format with one sentence per line {{{1
+
+function! OneSentencePerLine(type, ...)
+    if a:0
+        normal! gv"my
+    else
+        normal! `[V`]"my
+    endif
+    new
+    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+    normal! "mp
+    silent execute "normal! ggVGJ"
+    setl formatprg=/Users/dbmrq/.nltk_sent.py\|par\ -w78p2dh
+    silent execute "normal! ggVGgq"
+    setl formatprg=
+    g/^$/d
+    silent execute "normal! ggVG\"my"
+    q
+    silent execute "normal! gv\"mp"
+endfunction
+
+nnoremap gQ :set opfunc=OneSentencePerLine<CR>g@
+vnoremap gQ :call OneSentencePerLine(visualmode(), 1)<CR>
+
+" }}}1
+
 " " Indentation {{{1
 
 " vnoremap < <gv
