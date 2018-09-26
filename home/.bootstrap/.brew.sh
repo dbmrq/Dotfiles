@@ -4,7 +4,23 @@ echo ""
 echo "Installing Homebrew and formulae..."
 echo ""
 
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+if ! hash brew 2>/dev/null; then
+    # If Homebrew isn't installed
+    echo -e "\nInstalling Homebrew..."
+    /usr/bin/ruby -e "$(curl -fsSL https://goo.gl/p2uJdM)"
+else
+    echo -e "\nHomebrew already installed. Moving on..."
+fi
+
+if ! brew cask --version &>/dev/null; then
+    # If Homebrew-Cask isn't tapped
+    echo -e "\nTapping Homebrew-Cask..."
+    brew tap caskroom/cask
+else
+    echo -e "\nHomebrew-Cask already tapped. Moving on..."
+fi
+
 
 brew install git
 brew install lua
@@ -29,7 +45,6 @@ brew install thefuck
 brew install terminal-notifier
 brew install curl --with-openssl
 
-brew tap caskroom/cask
 brew cask install vlc
 brew cask install java
 brew cask install calibre
@@ -55,6 +70,7 @@ sudo chown -R $(whoami) $(brew --prefix)/*
 
 brew prune
 brew cleanup
+brew doctor
 
 echo ""
 echo "Done."

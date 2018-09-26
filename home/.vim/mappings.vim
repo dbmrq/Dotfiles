@@ -2,6 +2,25 @@
 " Mappings and commands
 
 let mapleader = " "
+let maplocalleader = ";"
+
+" Marks {{{1
+
+noremap ' `
+noremap ` '
+
+nnoremap à `a
+nnoremap è `a
+nnoremap ì `a
+nnoremap ò `a
+nnoremap ù `a
+nnoremap á 'a
+nnoremap é 'a
+nnoremap í 'a
+nnoremap ó 'a
+nnoremap ú 'a
+
+" }}}1
 
 " Enter normal mode {{{
 
@@ -53,43 +72,53 @@ inoremap : :<C-g>u
 " nnoremap <leader>I a_<Esc>r
 " " }}}
 
-" Resize windows {{{1
+" " Resize windows {{{1
 
-function! HasHorizontalSplit()
-    return &lines - winheight(0) > 2
-endfunction
+" function! HasHorizontalSplit()
+"     return &lines - winheight(0) > 2
+" endfunction
 
-function! HasVerticalSplit()
-    return winwidth(0) != &columns
-endfunction
+" function! HasVerticalSplit()
+"     return winwidth(0) != &columns
+" endfunction
 
-nnoremap <expr> <m-up> HasHorizontalSplit() ? ":res +5\<CR>" : ":split\<CR>"
-nnoremap <expr> <m-down> HasHorizontalSplit() ? ":res -5\<CR>" : ":split\<CR>"
-nnoremap <expr> <m-right> HasVerticalSplit() ? ":vertical res +5\<CR>" : ":vsplit\<CR>"
-nnoremap <expr> <m-left> HasVerticalSplit() ? ":vertical res -5\<CR>" : ":vsplit\<CR>"
+" nnoremap <expr> <m-up> HasHorizontalSplit() ? ":res +5\<CR>" : ":split\<CR>"
+" nnoremap <expr> <m-down> HasHorizontalSplit() ? ":res -5\<CR>" : ":split\<CR>"
+" nnoremap <expr> <m-right> HasVerticalSplit() ? ":vertical res +5\<CR>" : ":vsplit\<CR>"
+" nnoremap <expr> <m-left> HasVerticalSplit() ? ":vertical res -5\<CR>" : ":vsplit\<CR>"
 
-" }}}1
+" " }}}1
 
-" Switch windows and buffers {{{
+" Switch windows, buffers and quickfix items {{{
 
-nnoremap <leader>ww <c-w><c-w>
+nnoremap <leader>w <c-w><c-w>
 nnoremap <leader>b :b#<cr>
 
 if has('gui_macvim')
     let macvim_skip_cmd_opt_movement = 1
 endif
 
-nnoremap <Right> :bnext<cr>
-nnoremap <Left> :bprevious<cr>
-nnoremap <Up> :bfirst<cr>
-nnoremap <Down> :blast<cr>
-
-nnoremap <c-Right> <c-w>l
-nnoremap <c-Left> <c-w>h
-nnoremap <c-Up> <c-w>k
-nnoremap <c-Down> <c-w>j
-
 nnoremap <F13> :buffers<CR>:buffer<Space>
+
+nnoremap <expr> <Down> NextBufferOrQF('next')
+nnoremap <expr> <Up> NextBufferOrQF('previous')
+nnoremap <expr> <Left> NextBufferOrQF('first')
+nnoremap <expr> <Right> NextBufferOrQF('last')
+
+function! NextBufferOrQF(command) 
+    for i in range(1, winnr('$')) 
+        let bnum = winbufnr(i) 
+        if getbufvar(bnum, '&buftype') == 'quickfix' 
+            return ":c" . a:command . "\<cr>zvzz"
+        endif 
+    endfor 
+    return ":b" . a:command . "\<cr>"
+endfunction 
+
+" nnoremap <c-Right> <c-w>l
+" nnoremap <c-Left> <c-w>h
+" nnoremap <c-Up> <c-w>k
+" nnoremap <c-Down> <c-w>j
 
 " }}}
 
@@ -118,13 +147,54 @@ nnoremap <leader>y :set opfunc=<SID>YankUnwrapped<CR>g@
 
 " }}}
 
+" Registers {{{1
+
+noremap <leader>d "_d
+noremap <leader>c "_c
+noremap <leader>s "_s
+noremap <leader>x "_x
+" xnoremap <leader>p "_dP
+xnoremap <silent> <leader>p p:let @+=@0<CR>:let @"=@0<CR>
+
+" " Use unnamed register for yank and paste, but delete to Z {{{2
+
+" nnoremap <expr> y (v:register ==# '"' ? '"+' : '') . 'y'
+" nnoremap <expr> yy (v:register ==# '"' ? '"+' : '') . 'yy'
+" nnoremap <expr> Y (v:register ==# '"' ? '"+' : '') . 'Y'
+" xnoremap <expr> y (v:register ==# '"' ? '"+' : '') . 'y'
+" xnoremap <expr> Y (v:register ==# '"' ? '"+' : '') . 'Y'
+
+" nnoremap <expr> p (v:register ==# '"' ? '"+' : '') . 'p'
+" nnoremap <expr> P (v:register ==# '"' ? '"+' : '') . 'P'
+
+" nnoremap <expr> d (v:register ==# '"' ? '"z' : '') . 'd'
+" nnoremap <expr> dd (v:register ==# '"' ? '"z' : '') . 'dd'
+" nnoremap <expr> D (v:register ==# '"' ? '"z' : '') . 'D'
+" xnoremap <expr> d (v:register ==# '"' ? '"z' : '') . 'd'
+" xnoremap <expr> D (v:register ==# '"' ? '"z' : '') . 'D'
+
+" nnoremap <expr> c (v:register ==# '"' ? '"z' : '') . 'c'
+" nnoremap <expr> cc (v:register ==# '"' ? '"z' : '') . 'cc'
+" nnoremap <expr> C (v:register ==# '"' ? '"z' : '') . 'C'
+" xnoremap <expr> c (v:register ==# '"' ? '"z' : '') . 'c'
+" xnoremap <expr> C (v:register ==# '"' ? '"z' : '') . 'C'
+
+" " nnoremap <expr> s (v:register ==# '"' ? '"z' : '') . 's'
+" "  <expr> S (v:register ==# '"' ? '"z' : '') . 'S'
+" " xnoremap <expr> s (v:register ==# '"' ? '"z' : '') . 's'
+" " xnoremap <expr> S (v:register ==# '"' ? '"z' : '') . 'S'
+
+" " }}}2
+
+" }}}1
+
 " Fold {{{
 nnoremap <leader>f za
 " }}}
 
 " Spell {{{
 
-nnoremap <leader>ss :set spell!<cr>:set spell?<cr>
+nnoremap <localleader>ss :set spell!<cr>:set spell?<cr>
 
 function! ToggleSpellLang(lang)
     if &l:spelllang =~ a:lang
@@ -134,8 +204,8 @@ function! ToggleSpellLang(lang)
     endif
 endfunction
 
-nnoremap <expr> <leader>sen ToggleSpellLang("en")
-nnoremap <expr> <leader>spt ToggleSpellLang("pt")
+nnoremap <expr> <localleader>sen ToggleSpellLang("en")
+nnoremap <expr> <localleader>spt ToggleSpellLang("pt")
 
 " Correct last mistake from insert mode
 inoremap <c-s> <esc>D[s1z=$mNp`Nla
@@ -179,8 +249,11 @@ vmap <leader>aa <esc>`<<Plug>BlankUp`><Plug>BlankDown<esc>`<kV`>j
 " }}}1
 
 " Open current file's directory {{{1
+" autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h
+
+command! CD silent! lcd %:p:h
 command! Finder silent exe '!open ' . expand("%:p:h")
-command! Terminal silent exe '! osascript
+command! Term silent exe '! osascript
             \ -e "tell application \"Terminal\" to activate"
             \ -e "tell application \"Terminal\" to do script \"cd ' .
             \ expand("%:p:h") . '\""'
@@ -190,9 +263,9 @@ command! Terminal silent exe '! osascript
 
 command! W w !sudo tee % > /dev/null
 
-nnoremap <silent> <expr> <leader>q Quit() . "\<CR>"
-nnoremap <silent> <expr> <leader>Q Quit() . "!\<CR>"
-nnoremap <silent> <expr> <leader>x ":w\<CR>" . Quit() . "\<CR>"
+nnoremap <silent> <expr> <localleader>q Quit() . "\<CR>"
+nnoremap <silent> <expr> <localleader>Q Quit() . "!\<CR>"
+nnoremap <silent> <expr> <localleader>x ":w\<CR>" . Quit() . "\<CR>"
 
 function! Quit()
     if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
@@ -306,7 +379,7 @@ nnoremap <expr> <leader>, <SID>addCommas()
 
 nnoremap <BS> J
 nnoremap <CR> i<CR><esc>
-autocmd BufReadPost quickfix unmap <CR>
+autocmd BufReadPost quickfix silent! unmap <CR>
 
 " }}}1
 
@@ -365,7 +438,7 @@ nnoremap <leader>r :set opfunc=TargetPaste<CR>g@
 " Replace text {{{1
 
 " Replace last search pattern
-nnoremap <Leader>cl :%s/<C-r>///g<left><left>
+nnoremap <localleader>cl :%s/<C-r>///g<left><left>
 
 function! Replace(type, ...)
     if a:0
@@ -385,8 +458,8 @@ function! Replace(type, ...)
     execute command
 endfunction
 
-nnoremap <leader>c :set opfunc=Replace<CR>g@
-vnoremap <leader>c :call Replace(visualmode(), 1)<CR>
+nnoremap <localleader>c :set opfunc=Replace<CR>g@
+vnoremap <localleader>c :call Replace(visualmode(), 1)<CR>
 
 function! ReplaceLastChange()
     let pattern = substitute(escape(@*, '\?'), '\n', '\\n', 'g')
@@ -398,33 +471,7 @@ function! ReplaceLastChange()
     endtry
 endfunction
 
-nnoremap <leader>cc :call ReplaceLastChange()<cr>
-
-" }}}1
-
-" Format with one sentence per line {{{1
-
-function! OneSentencePerLine(type, ...)
-    if a:0
-        normal! gv"my
-    else
-        normal! `[V`]"my
-    endif
-    new
-    setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
-    normal! "mp
-    silent execute "normal! ggVGJ"
-    setl formatprg=/Users/dbmrq/.nltk_sent.py\|par\ -w78p2dh
-    silent execute "normal! ggVGgq"
-    setl formatprg=
-    g/^$/d
-    silent execute "normal! ggVG\"my"
-    q
-    silent execute "normal! gv\"mp"
-endfunction
-
-nnoremap gQ :set opfunc=OneSentencePerLine<CR>g@
-vnoremap gQ :call OneSentencePerLine(visualmode(), 1)<CR>
+nnoremap <localleader>cc :call ReplaceLastChange()<cr>
 
 " }}}1
 
@@ -477,7 +524,7 @@ function! s:sourceVimRC()
     endif
 endfunction
 
-nnoremap <leader>sv :call <SID>sourceVimRC()<CR>
+nnoremap <localleader>sv :call <SID>sourceVimRC()<CR>
 command! SourceVimRC call <SID>sourceVimRC()
 
 autocmd BufWritePost $MYVIMRC,~/.vim/*.vim SourceVimRC

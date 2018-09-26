@@ -92,6 +92,10 @@ au BufRead,BufNewFile */.vim/thesaurus/* set tw=0
 "     autocmd WinEnter,BufEnter * call clearmatches() | call matchadd('FoldColumn', '\%>79v.\+', 100)
 " augroup END
 
+" if executable("latexindent")
+"     set formatprg=latexindent\ -l=~/.\ -m
+" endif
+
 " if &l:formatoptions =~ "t"
 "     let &colorcolumn="+1,".join(range(101,999),",")
 " else
@@ -108,8 +112,21 @@ set shiftround
 " }}}
 
 " Folding {{{
+
 set foldmethod=marker
 set foldmarker=\ {{{,\ }}}
+
+" function! ShortFoldText()
+"     let text = foldtext()
+"     if strchars(text) > &l:textwidth
+"         let regex = '\(.\{,' . (&l:textwidth - 3) . '}\).*$'
+"         let text = substitute(text, regex, '\1', '') . "..."
+"     end
+"     return text
+" endfunction
+
+" set foldtext=ShortFoldText()
+
 " }}}
 
 " Undo {{{
@@ -134,7 +151,7 @@ set directory=~/.vim/swp/,.,~/tmp,/var/tmp,/tmp
 let g:tex_flavor = "latex"
 au BufReadPost,BufNewFile *.bbx,*.cbx,*.lbx,*.cls,*.sty set ft=plaintex
 
-au FileType markdown,text,tex set fo+=12
+" au FileType markdown,text,tex set fo+=12
 
 let g:tex_comment_nospell=1
 
@@ -213,7 +230,7 @@ au BufReadPost,BufNewFile *.md setlocal spell spelllang+=pt
 " }}}
 
 
-au BufNewFile *.tex 0r ~/.vim/templates/skeleton.tex
+" au BufNewFile *.tex 0r ~/.vim/templates/skeleton.tex
 
 au BufNewFile *.sh 0r ~/.vim/templates/skeleton.sh
 

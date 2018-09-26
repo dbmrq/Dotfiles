@@ -1,6 +1,5 @@
 
-
-" Plug {{{1
+" Plug .................................................................. {{{1
 
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
@@ -27,36 +26,110 @@ call plug#begin('~/.vim/bundle')
     " Plug 'FooSoft/vim-argwrap'
     " Plug 'ntpeters/vim-better-whitespace'
     Plug 'tweekmonster/spellrotate.vim'
-    Plug 'google/vim-searchindex'
-    Plug 'nelstrom/vim-visual-star-search'
     Plug 'Raimondi/delimitMate'
-    Plug 'romainl/vim-cool'
+    " Plug 'junegunn/vim-slash'
     " Plug 'mbbill/undotree'
-    Plug 'lervag/vimtex'
+    Plug 'lervag/vimtex', { 'branch': 'better-toc' }
+    " Plug 'lervag/vimtex'
     " Plug 'sheerun/vim-polyglot'
-    Plug 'altercation/vim-colors-solarized'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'wellle/targets.vim'
+    Plug 'wellle/visual-split.vim'
     " Plug 'Shougo/neocomplete.vim'
     Plug 'lifepillar/vim-mucomplete'
     Plug 'plasticboy/vim-markdown'
+    Plug 'machakann/vim-highlightedyank'
+    Plug 'wellle/visual-split.vim'
+    Plug 'haya14busa/vim-edgemotion'
+    " Plug 'nathanaelkane/vim-indent-guides'
+    Plug 'simeji/winresizer'
+    Plug 'maxbrunsfeld/vim-yankstack'
+    Plug 'kshenoy/vim-signature'
+    Plug 'markonm/traces.vim'
+
+    Plug 'romainl/vim-cool'
+    Plug 'google/vim-searchindex'
+    Plug 'nelstrom/vim-visual-star-search'
+
+    Plug 'altercation/vim-colors-solarized'
 
     Plug '~/Code/Vim/vim-ditto'
     Plug '~/Code/Vim/vim-chalk'
     Plug '~/Code/Vim/vim-dialect'
     Plug '~/Code/Vim/vim-howdy'
-    Plug '~/Code/Vim/vim-redacted'
+    Plug '~/Code/Vim/vim-bucky'
+    " Plug '~/Code/Vim/vim-redacted'
 
 call plug#end()
 
+" au filetype tex set autoindent& cindent& smartindent& indentexpr&
+
 command! Plug so % | PlugUpdate | PlugUpgrade
 
-" }}}1
+" ....................................................................... }}}1
 
 
-" MUcomplete {{{1
+" " vim-slash ............................................................. {{{1
+" noremap <plug>(slash-after) zz
+" noremap <expr> <plug>(slash-after) slash#blink(2, 50)
+" " ....................................................................... }}}1
 
-imap <plug>Unused <plug>(MUcompleteCR)
+" visual-split .......................................................... {{{1
+
+xmap <leader>s <Plug>(Visual-Split-VSSplit)
+nmap <leader>s <Plug>(Visual-Split-Split)
+
+" ....................................................................... }}}1
+
+" highlightedyank ....................................................... {{{1
+au ColorScheme * hi! link HighlightedyankRegion FoldColumn
+let g:highlightedyank_highlight_duration = 750
+" ....................................................................... }}}1
+
+" edgemotion ............................................................ {{{1
+
+nmap <C-j> <Plug>(edgemotion-j)
+nmap <C-k> <Plug>(edgemotion-k)
+
+" ....................................................................... }}}1
+
+" indent-guides ......................................................... {{{1
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 1
+let g:indent_guides_color_change_percent = 5
+let g:indent_guides_default_mapping = 0
+let g:indent_guides_exclude_filetypes = ['help', 'tex']
+" ....................................................................... }}}1
+
+" Yankstack ............................................................. {{{1
+
+let g:yankstack_yank_keys = ['y', 'd', 'c', 'x']
+
+nmap <c-p> <Plug>yankstack_substitute_older_paste
+
+" ....................................................................... }}}1
+
+" vim-signature ......................................................... {{{1
+
+let g:SignatureIncludeMarkers = ')⚑@#$%ˆ&*('
+
+au ColorScheme * hi! link SignatureMarkLine CursorLine
+au ColorScheme * hi! link SignatureMarkerLine CursorLine
+au ColorScheme * hi! link SignColumn FoldColumn
+" au ColorScheme * hi! link SignatureMarkText DiffChange
+au ColorScheme * hi! SignatureMarkText guibg=NONE guifg=#2aa198 gui=bold
+" au ColorScheme * hi! link SignatureMarkerText DiffAdd
+au ColorScheme * hi! SignatureMarkerText guibg=NONE guifg=#6c71c4 gui=bold
+
+" ....................................................................... }}}1
+
+" MUcomplete ............................................................ {{{1
+
+" imap <plug>MuCUnused <plug>(MUcompleteCR)
+" imap <plug>MuCUnused2 <plug>(MUcompletePopupCancel)
+" imap <plug>MuCUnused3 <plug>(MUcompletePopupAccept)
+" inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
 
 function! MyThesaurus()
     let s:saved_ut = &ut
@@ -83,10 +156,8 @@ set complete-=i
 " This is remapped by UltiSnips, hence the autocmd
 au BufRead * inoremap <c-tab> <tab>
 
-" inoremap <expr> <c-e> mucomplete#popup_exit("\<c-e>")
-inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
 
-inoremap <expr>  <esc> pumvisible() ? mucomplete#popup_exit("\<c-e>") : "<esc>"
+inoremap <expr> <esc> pumvisible() ? "\<c-e>" : "<esc>"
 
 function! CYOrCR()
     return pumvisible() ? "\<esc>o" : CROrUncomment()
@@ -122,9 +193,9 @@ let g:mucomplete#popup_direction = { 'keyp' : 1 }
 let g:mucomplete#spel#good_words = 1
 let g:mucomplete#spel#max = 5
 
-" }}}1
+" ....................................................................... }}}1
 
-" UltiSnips {{{1
+" UltiSnips ............................................................. {{{1
 
 " Use <CR> to accept snippets
 let g:UltiSnipsExpandTrigger = "<nop>"
@@ -142,26 +213,58 @@ function! SnipOrCYOrCR()
 endfunction
 inoremap <silent> <expr> <CR> "<C-R>=SnipOrCYOrCR()<CR>"
 
-" }}}1
+" ....................................................................... }}}1
 
-" Vimtex {{{1
+" Vimtex ................................................................ {{{1
 
-autocmd User VimtexEventInitPost exe 'cd' fnameescape(b:vimtex.root)
-autocmd User VimtexEventInitPost
-            \ command! CD exe 'cd' fnameescape(b:vimtex.root)
-autocmd User VimtexEventInitPost
-            \ command! -nargs=1 G silent exe 'cd' b:vimtex.root |
-            \ silent vimgrep /<args>/g **/*.tex |
-            \ cw
+augroup vimtex_customization
+    autocmd!
+    autocmd FileType tex call CreateTocs()
+augroup END
 
+function! CreateTocs()
+    let g:custom_toc1 = vimtex#toc#new({
+                \ 'layers' : ['todo'],
+                \ 'todo_sorted' : 0,
+                \ 'show_help' : 0,
+                \ 'show_numbers' : 0,
+                \ 'mode' : 4,
+                \})
+    command! TODO call g:custom_toc1.open()
+    " nnoremap <silent> <leader>T :call g:custom_toc1.open()<cr>
+
+    " let g:custom_toc2 = vimtex#toc#new({
+    "             \ 'layers' : ['include'],
+    "             \ 'show_help' : 0,
+    "             \})
+    " nnoremap <silent> \lY :call g:custom_toc2.open()<cr>
+endfunction
+
+
+" augroup vimtex_customization
+"     autocmd!
+"     autocmd FileType tex nnoremap <silent> <leader>T
+"         \ :call b:vimtex.toc.open('todo')<cr>
+"     autocmd User VimtexEventInitPost exe 'cd' fnameescape(b:vimtex.root)
+"     autocmd User VimtexEventInitPost
+"                 \ command! CD exe 'cd' fnameescape(b:vimtex.root)
+"     autocmd User VimtexEventInitPost
+"                 \ command! -nargs=1 G silent exe 'cd' b:vimtex.root |
+"                 \ silent vimgrep /<args>/g **/*.tex |
+"                 \ cw
+" augroup END
+
+
+let g:vimtex_toc_todo_keywords = ['TODO', 'FIXME', 'IMPORTANT', 'IMPORTANTE']
 let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
-let g:vimtex_indent_enabled = 0
-let g:vimtex_index_split_pos = "full"
+let g:vimtex_indent_enabled = 1
+let g:vimtex_toc_split_pos = "full"
 let g:vimtex_toc_fold = 1
 let g:vimtex_toc_fold_level_start = 2
-let g:vimtex_index_show_help = 0
+" let g:vimtex_toc_mode = 4
+let g:vimtex_toc_show_help = 0
 let g:vimtex_view_automatic = 0
 " let g:vimtex_quickfix_open_on_warning = 1
 
@@ -219,9 +322,9 @@ let g:vimtex_toc_hotkeys = {
 
 " let g:vimtex_toc_custom_matchers = [g:VimtexImportante]
 
-" }}}1
+" ....................................................................... }}}1
 
-" " NeoComplete {{{1
+" " NeoComplete ......................................................... {{{1
 
 " " Since High Sierra ~/.cache, the default directory, is owned by root
 " let g:neocomplete#data_directory = "~/.vim/neocomplete"
@@ -262,44 +365,44 @@ let g:vimtex_toc_hotkeys = {
 " " let last_spell_changedtick = -1
 " " let last_spell_count = 1
 
-" " }}}1
+" " ..................................................................... }}}1
 
-" vim-markdown {{{1
+" vim-markdown .......................................................... {{{1
 
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_frontmatter = 1
 
-" }}}1
+" ....................................................................... }}}1
 
-" Targets {{{1
+" Targets ............................................................... {{{1
 let g:targets_aiAI = '  ai'
-" }}}1
+" ....................................................................... }}}1
 
-" " vim-polyglot {{{1
+" " vim-polyglot ........................................................ {{{1
 " let g:polyglot_disabled = ['latex']
-" " }}}1
+" " ..................................................................... }}}1
 
-" vim-rsi {{{1
+" vim-rsi ............................................................... {{{1
 let g:rsi_no_meta = 1
-" }}}1
+" ....................................................................... }}}1
 
-" " undotree {{{1
+" " undotree ............................................................ {{{1
 " nnoremap <leader>ut :UndotreeToggle<cr>
-" " }}}1
+" " ..................................................................... }}}1
 
-" Solarized {{{1
+" Solarized ............................................................. {{{1
 colorscheme solarized
-" }}}1
+" ....................................................................... }}}1
 
-" " ArgWrap {{{1
+" " ArgWrap ............................................................. {{{1
 
 " nnoremap <silent> <leader>aw :ArgWrap<cr>
 
 " let g:argwrap_tail_comma = 1
 
-" " }}}1
+" " ..................................................................... }}}1
 
-" " splitjoin {{{1
+" " splitjoin ........................................................... {{{1
 
 " let g:splitjoin_split_mapping = 'K'
 " let g:splitjoin_join_mapping = 'J'
@@ -313,21 +416,21 @@ colorscheme solarized
 " nnoremap <expr> K argwrap#validateRange(argwrap#findClosestRange()) ?
 "     \ ":ArgWrap<cr>" : ":SplitjoinSplit<cr>"
 
-" " }}}1
+" " ..................................................................... }}}1
 
-" delimitMate {{{1
+" delimitMate ........................................................... {{{1
 
 let delimitMate_expand_space = 1
 let delimitMate_expand_cr = 1
 
-" }}}1
+" ....................................................................... }}}1
 
-" vim-easy-align {{{1
+" vim-easy-align ........................................................ {{{1
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-" }}}1
+" ....................................................................... }}}1
 
 ""unimpaired.vim {{{1
 
@@ -345,18 +448,18 @@ nmap ga <Plug>(EasyAlign)
 "    vmap <m-j> ]egv
 "endif
 
-"" }}}1
+"" ...................................................................... }}}1
 
-" Spellrotate {{{1
+" Spellrotate ........................................................... {{{1
 
 nmap <silent> =s <Plug>(SpellRotateForward)
 nmap <silent> -s <Plug>(SpellRotateBackward)
 vmap <silent> =s <Plug>(SpellRotateForwardV)
 vmap <silent> -s <Plug>(SpellRotateBackwardV)
 
-" }}}1
+" ....................................................................... }}}1
 
-" vim-surround {{{1
+" vim-surround .......................................................... {{{1
 
 function! LookLeft(char)
     let column = 2
@@ -412,9 +515,9 @@ endfunction
 
 nmap <expr> cd ChangeDetectedSurrounding()
 
-" }}}1
+" ....................................................................... }}}1
 
-" vim-sneak {{{1
+" vim-sneak ............................................................. {{{1
 
 let g:sneak#use_ic_scs = 1
 " hi clear SneakPluginTarget
@@ -436,19 +539,20 @@ xmap T <Plug>Sneak_T
 omap t <Plug>Sneak_t
 omap T <Plug>Sneak_T
 
-" }}}1
+" ....................................................................... }}}1
 
-" " yankstack {{{1
+" " yankstack ........................................................... {{{1
 
 " let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 'x', 'y']
 " nmap <leader>p <Plug>yankstack_substitute_older_paste
 " nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
-" " }}}1
+" " ..................................................................... }}}1
 
-" vim-textobj-user {{{1
+" vim-textobj-user ...................................................... {{{1
 
-function! AroundParA()" {{{2
+" Around par ............................................................ {{{2
+function! AroundParA()
   normal! {
   let head_pos = getpos('.')
   normal! }
@@ -461,9 +565,11 @@ call textobj#user#plugin('aroundpar', {
 \     'select-a-function': 'AroundParA',
 \     'select-a': 'Ap',
 \   },
-\ })" }}}2
+\ })
+" ....................................................................... }}}2
 
-function! InsideParI()" {{{2
+" Inside par ............................................................ {{{2
+function! InsideParI()
     let head = line(".")
     while strlen(getline(head - 1)) > strlen(getline(head)) / 2
         let head -= 1
@@ -485,13 +591,33 @@ call textobj#user#plugin('insidepar', {
 \     'select-a-function': 'InsideParI',
 \     'select-a': 'Ip',
 \   },
-\ })" }}}2
+\ })
+" ....................................................................... }}}2
+
+" Inside fold markers ................................................... {{{2
+function! InsideMarkers()
+    normal! [z
+    normal! j
+    let head_pos = getpos('.')
+    normal! ]z
+    normal! k
+    let tail_pos = getpos('.')
+    return ['V', head_pos, tail_pos]
+endfunction
+
+call textobj#user#plugin('insidemarkers', {
+\   '-': {
+\     'select-a-function': 'InsideMarkers',
+\     'select-a': 'Iz',
+\   },
+\ })
+" ....................................................................... }}}2
 
 nmap <leader>gq gqIp
 
-" }}}1
+" ....................................................................... }}}1
 
-" Howdy {{{
+" Howdy .................................................................. {{{
 
 let g:howdy_ignore = [
         \ 'runtime\/doc\/.*.txt',
@@ -499,35 +625,68 @@ let g:howdy_ignore = [
         \ '.*\/.git\/.*',
     \ ]
 
-" }}}
+" ........................................................................ }}}
 
-" chalk {{{1
+" Chalk ................................................................. {{{1
+
+let g:chalk_char = "."
+
+au BufRead,BufNewFile *.vim let b:chalk_add_space = 1
+au BufRead,BufNewFile *.tex let b:chalk_align = 1
+au BufRead,BufNewFile *.tex let b:chalk_edit = 1
+au BufRead,BufNewFile *.tex set foldtext=ShortFoldText()
 
 vmap zf <Plug>Chalk
 nmap zf <Plug>Chalk
+
 nmap zF <Plug>ChalkRange
-nmap Zf <Plug>SingleChalk
-nmap ZF <Plug>SingleChalkUp
+
+nmap ZF <Plug>ChalkAround
+vmap ZF <Plug>ChalkAround
+
+nmap zd <Plug>ChalkDelete
+nmap zD <Plug>ChalkDeleteR
+vmap zD <Plug>ChalkDeleteR
+nmap zE <Plug>ChalkDeleteAll
+
 nmap =z <Plug>ChalkUp
 nmap -z <Plug>ChalkDown
 vmap =z <Plug>ChalkUp
 vmap -z <Plug>ChalkDown
 
-" }}}1
+" ....................................................................... }}}1
 
-" ditto {{{1
+" Ditto ................................................................. {{{1
 
 " au FileType markdown,text,tex DittoOn
 
-nmap <leader>d <Plug>Ditto
-vmap <leader>d <Plug>Ditto
 
-nmap +d <Plug>DittoGood
-nmap _d <Plug>DittoBad
-nmap =d <Plug>DittoNext
-nmap -d <Plug>DittoPrev
+nmap <localleader>d <Plug>Ditto
+vmap <localleader>d <Plug>Ditto
+
+
+nmap <localleader>dg <Plug>DittoGood
+nmap <localleader>dw <Plug>DittoBad
+nmap <localleader>d= <Plug>DittoNext
+nmap <localleader>d- <Plug>DittoPrev
+
+" nmap +d <Plug>DittoGood
+" nmap _d <Plug>DittoBad
+" nmap =d <Plug>DittoNext
+" nmap -d <Plug>DittoPrev
+
 nmap ]d <Plug>DittoMore
 nmap [d <Plug>DittoLess
 
-" }}}1
+" ....................................................................... }}}1
+
+" Buckminster {{{1
+
+" nmap gQ <Plug>Buckminster
+" vmap gQ <Plug>Buckminster
+
+" au FileType markdown,text setl indentexpr=buckminster#Indent()
+" au FileType tex setl indentexpr=buckminster#tex#indent()
+
+" ....................................................................... }}}1
 

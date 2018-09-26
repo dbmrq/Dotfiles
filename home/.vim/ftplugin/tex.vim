@@ -40,36 +40,35 @@ nmap daC F\df{f}x
 
 " }}}
 
-" Show word count when saving {{{
+" " Show word count when saving {{{
+" " This isn't working, must check
 
-au BufWritePost <buffer> redraw | echo WrittenString() . ' | ' . WordCount()
+" au BufWritePost <buffer> redraw | echo WrittenString() . ' | ' . WordCount()
 
-function! FileSize()
-    return substitute(system('du -sh ' .
-                \ expand('%')), '^\s\?\(.*\)\s.*', '\1', 'g')
-endfunction
+" function! FileSize()
+"     return substitute(system('du -sh ' .
+"                 \ expand('%')), '^\s\?\(.*\)\s.*', '\1', 'g')
+" endfunction
 
-function! WrittenString()
-    return '"' . expand('%:t') . '" ' . FileSize()
-endfunction
+" function! WrittenString()
+"     return '"' . expand('%:t') . '" ' . FileSize()
+" endfunction
 
-function! WordCount()
-    return substitute(system('texcount -1 -sum '
-        \ . expand('%')), '[^0-9]', '', 'g') . ' words'
-endfunction
+" function! WordCount()
+"     return substitute(system('texcount -1 -sum '
+"         \ . expand('%')), '[^0-9]', '', 'g') . ' words'
+" endfunction
 
-" }}}
+" " }}}
 
 " Replace hardcoded quotes with \enquote {{{1
 command! Enquote %s/``\(\_.\{-}\)''/\\enquote{\1}/g
 " }}}1
 
-
 command! StripWeirdWhitespaces %s/^[^\a\d]$//gc
 
 command! ConvertAccents %s/é/é/g | %s/ú/ú/g | %s/ó/ó/g
             \ | %s/ã/ã/g | %s/ê/ê/g | %s/à/à/g | %s/ç/ç/g | %s/õ/õ/g
-
 
 " Better b, e and w for TeX {{{1
 
@@ -144,12 +143,14 @@ nnoremap <expr> p PasteOrSpacePaste()
 
 " }}}1
 
-" formatprg {{{1
-if executable("latexindent")
-    set formatprg=latexindent\ -m
-    " set formatprg=latexindent\ -m\ -y=\"modifyLineBreaks:oneSentencePerLine:manipulateSentences:1\"\ \|\ latexindent\ -m
-endif
-" }}}1
+" " formatprg {{{1
+" if executable("latexindent")
+"     set formatprg=latexindent\ -m
+"     " set formatprg=latexindent\ -m\ -y=\"modifyLineBreaks:oneSentencePerLine:manipulateSentences:1\"\ \|\ latexindent\ -m
+" endif
+" " }}}1
+
+command! Solo call system("solo " . fnameescape(expand('%')))
 
 set spell
 set spelllang=pt
