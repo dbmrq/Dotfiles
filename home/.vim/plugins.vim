@@ -53,11 +53,11 @@ call plug#begin('~/.vim/bundle')
 
     Plug 'altercation/vim-colors-solarized'
 
-    Plug '~/Code/Vim/vim-ditto'
-    Plug '~/Code/Vim/vim-chalk'
-    Plug '~/Code/Vim/vim-dialect'
-    Plug '~/Code/Vim/vim-howdy'
-    Plug '~/Code/Vim/vim-bucky'
+    Plug '~/Documents/Code/Vim/vim-ditto'
+    Plug '~/Documents/Code/Vim/vim-chalk'
+    Plug '~/Documents/Code/Vim/vim-dialect'
+    Plug '~/Documents/Code/Vim/vim-howdy'
+    Plug '~/Documents/Code/Vim/vim-bucky'
     " Plug '~/Code/Vim/vim-redacted'
 
 call plug#end()

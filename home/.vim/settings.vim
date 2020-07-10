@@ -22,6 +22,9 @@ else
     set background=dark
 endif
 
+" Remove tildes from end of file
+au ColorScheme * hi! EndOfBuffer guifg=#f8f1dd guibg=#f8f1dd
+
 " (no) status line and ruler {{{2
 
 set ruler
@@ -116,16 +119,16 @@ set shiftround
 set foldmethod=marker
 set foldmarker=\ {{{,\ }}}
 
-" function! ShortFoldText()
-"     let text = foldtext()
-"     if strchars(text) > &l:textwidth
-"         let regex = '\(.\{,' . (&l:textwidth - 3) . '}\).*$'
-"         let text = substitute(text, regex, '\1', '') . "..."
-"     end
-"     return text
-" endfunction
+function! ShortFoldText()
+    let text = foldtext()
+    if strchars(text) > &l:textwidth
+        let regex = '\(.\{,' . (&l:textwidth - 3) . '}\).*$'
+        let text = substitute(text, regex, '\1', '') . "..."
+    end
+    return text
+endfunction
 
-" set foldtext=ShortFoldText()
+set foldtext=ShortFoldText()
 
 " }}}
 

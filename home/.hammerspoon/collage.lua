@@ -71,7 +71,7 @@ function storeCopy()-- {{{1
 end-- }}}1
 
 function setMenu()-- {{{1
-    if #history > 1 then
+    if #history > 0 then
         if not menu then
             menu = hs.menubar.new()
         end

@@ -76,3 +76,34 @@ end
 
 -- }}}1
 
+
+
+hs.hotkey.bind(super, 'M', function()
+    local copiado = hs.pasteboard.getContents()
+    local notas = {}
+    for s in copiado:gmatch("([^\n]*)\n?") do
+        -- hs.alert.show(s)
+        table.insert(notas, s)
+    end
+    for _, nota in ipairs(notas) do
+        if string.match(nota, "%d") == nil or nota == '' or tonumber(nota) == 0 then
+            -- hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "space")
+            hs.eventtap.keyStroke({}, "tab")
+        -- elseif nota == 0 then
+        --     hs.eventtap.keyStrokes(nota)
+        --     hs.eventtap.keyStroke({}, "tab")
+        --     hs.eventtap.keyStroke({}, "tab")
+        --     hs.eventtap.keyStroke({}, "tab")
+        else
+            hs.eventtap.keyStrokes(nota)
+            hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "tab")
+        end
+    end
+    hs.alert.show("Notas inseridas! 🥳")
+end)
+
+
