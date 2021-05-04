@@ -42,7 +42,7 @@ local hotkeys = winmanHotkeys or {
     -- moveRight = "Right", -- Move window right one cell
 }
 
-local cascadeSpacing = 40 -- the visible margin for each window
+local cascadeSpacing = 40 -- the minimum visible margin for each window
                           -- set to 0 to disable cascading
 
 
@@ -53,7 +53,7 @@ local cascadeSpacing = 40 -- the visible margin for each window
 -- Setup {{{1
 
 local grid = require "hs.grid"
-grid.setMargins('20,20')
+grid.setMargins('10,10')
 grid.setGrid('6x6')
 
 local hsVersion = hs.processInfo["version"]:gsub('%.', '')
@@ -134,13 +134,15 @@ function cascade(windows)-- {{{3
 
     local nOfSpaces = #windows - 1
 
+    local spacing = cascadeSpacing
+
     for i, win in ipairs(windows) do
-        local offset = (i - 1) * cascadeSpacing
+        local offset = (i - 1) * spacing
         local rect = {
             x = frame.x + offset,
             y = frame.y + offset,
-            w = frame.w - (nOfSpaces * cascadeSpacing),
-            h = frame.h - (nOfSpaces * cascadeSpacing),
+            w = frame.w - (nOfSpaces * spacing),
+            h = frame.h - (nOfSpaces * spacing),
         }
         win:setFrame(rect)
     end
@@ -558,13 +560,18 @@ hs.hotkey.bind(super, hotkeys["cascadeAllWindows"], function()
     local xMargin = screen.w / 10 -- unused horizontal margin
     local yMargin = 20            -- unused vertical margin
 
+    local spacing = cascadeSpacing * 10 / nOfSpaces
+    if nOfSpaces > 10 then
+        spacing = cascadeSpacing
+    end
+
     for i, win in ipairs(windows) do
-        local offset = (i - 1) * cascadeSpacing
+        local offset = (i - 1) * spacing
         local rect = {
             x = xMargin + offset,
             y = screen.y + yMargin + offset,
-            w = screen.w - (2 * xMargin) - (nOfSpaces * cascadeSpacing),
-            h = screen.h - (2 * yMargin) - (nOfSpaces * cascadeSpacing),
+            w = screen.w - (2 * xMargin) - (nOfSpaces * spacing),
+            h = screen.h - (2 * yMargin) - (nOfSpaces * spacing),
         }
         win:setFrame(rect)
     end
@@ -590,13 +597,18 @@ hs.hotkey.bind(super, hotkeys["cascadeAppWindows"], function()
     local xMargin = screen.w / 10 -- unused horizontal margin
     local yMargin = 20            -- unused vertical margin
 
+    local spacing = cascadeSpacing * 10 / nOfSpaces
+    if nOfSpaces > 10 then
+        spacing = cascadeSpacing
+    end
+
     for i, win in ipairs(appWindows) do
-        local offset = (i - 1) * cascadeSpacing
+        local offset = (i - 1) * spacing
         local rect = {
             x = xMargin + offset,
             y = screen.y + yMargin + offset,
-            w = screen.w - (2 * xMargin) - (nOfSpaces * cascadeSpacing),
-            h = screen.h - (2 * yMargin) - (nOfSpaces * cascadeSpacing),
+            w = screen.w - (2 * xMargin) - (nOfSpaces * spacing),
+            h = screen.h - (2 * yMargin) - (nOfSpaces * spacing),
         }
         win:setFrame(rect)
     end

@@ -18,9 +18,8 @@ mkdir -pv ~/Documents/Code/LaTeX/Packages
 mkdir -pv ~/Library/texmf/tex/latex
 mkdir -pv ~/Library/texmf/bibtex
 
-git clone https://github.com/dbmrq/tex-dbmrq.git ~/Code/LaTeX/Classes/dbmrq
-git clone https://github.com/dbmrq/tex-sensible.git ~/Code/LaTeX/Packages/sensible
-git clone https://github.com/abntex/biblatex-abnt.git ~/Code/LaTeX/Packages/biblatex-abnt
+git clone https://github.com/dbmrq/tex-dbmrq.git ~/Documents/Code/LaTeX/Classes/dbmrq
+git clone https://github.com/abntex/biblatex-abnt.git ~/Documents/Code/LaTeX/Packages/biblatex-abnt
 
 ln -s ~/Documents/Code/LaTeX/Classes ~/Library/texmf/tex/latex/classes
 ln -s ~/Documents/Code/LaTeX/Packages ~/Library/texmf/tex/latex/packages

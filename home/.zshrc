@@ -33,7 +33,7 @@ alias rmi="${aliases[rm]:-rm} -i"
 
 #  }}}2
 
-eval $(thefuck --alias)
+# eval $(thefuck --alias)
 
 alias ..="cd .."
 alias ...="cd ../.."
@@ -65,14 +65,6 @@ alias cleanup="find . -type d -print0 | xargs -0 chmod 0755 && \
 
 alias zipr='f() { zip -r $1.zip $1 };f'
 
-alias installMacVim='brew install macvim --with-override-system-vim --with-luajit --with-lua --HEAD'
-
-alias addMacVimToDock='/usr/local/bin/dockutil --remove MacVim; /usr/local/bin/dockutil --add /usr/local/opt/macvim/MacVim.app'
-
-alias aliasMacVim='osascript -e '\''tell application "Finder" to make alias file to POSIX file "/usr/local/opt/macvim/MacVim.app" at POSIX file "/Applications/"'\'''
-
-alias reinstallMacVim='brew uninstall macvim; installMacVim && rm /Applications/MacVim && aliasMacVim && addMacVimToDock'
-
 #  }}}1
 
 # # Docker {{{1
@@ -83,10 +75,3 @@ alias reinstallMacVim='brew uninstall macvim; installMacVim && rm /Applications/
 
 # #  }}}1
 
-
-# Autocompletion often doesn't work when you change permissions on /usr/local;
-# this can help
-# autoload -U compinit && compinit
-# zmodload -i zsh/complist
-
-eval "$(perl -I$HOME/.perl5/lib/perl5 -Mlocal::lib=$HOME/.perl5)"
