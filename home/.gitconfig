@@ -15,6 +15,11 @@
 	type = cat-file -t
 	dump = cat-file -p
 
+    pushup = push -u origin HEA
+
+    scrape = clone --single-branch --depth 1
+    scrapeb = remote set-branches --add origin
+
 	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
     hist5 = !git hist --max-count=5
     hist10 = !git hist --max-count=10
@@ -40,7 +45,7 @@
 
     nevermind = !git reset --hard HEAD && git clean -d -x -f
 
-    forgetit = git fetch --all && git reset --hard origin/master
+    giveup = git fetch --all && git reset --hard origin/master
 
 [github]
     user = danielbmarques
