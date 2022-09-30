@@ -53,7 +53,7 @@ local cascadeSpacing = 40 -- the minimum visible margin for each window
 -- Setup {{{1
 
 local grid = require "hs.grid"
-grid.setMargins('10,10')
+grid.setMargins('15,15')
 grid.setGrid('6x6')
 
 local hsVersion = hs.processInfo["version"]:gsub('%.', '')

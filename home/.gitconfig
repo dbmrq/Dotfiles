@@ -15,10 +15,12 @@
 	type = cat-file -t
 	dump = cat-file -p
 
-    pushup = push -u origin HEA
+    pushup = push -u origin HEAD
 
     scrape = clone --single-branch --depth 1
     scrapeb = remote set-branches --add origin
+
+    repass = config --global credential.helper osxkeychain
 
 	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
     hist5 = !git hist --max-count=5
@@ -55,3 +57,5 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[credential]
+	helper = osxkeychain

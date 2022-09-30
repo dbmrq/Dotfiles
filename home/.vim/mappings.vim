@@ -4,6 +4,8 @@
 let mapleader = " "
 let maplocalleader = ";"
 
+command! Center silent! exe 'normal! ggVG:center' . winwidth('%') . '\<CR>'
+
 " Marks {{{1
 
 noremap ' `

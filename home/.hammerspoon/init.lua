@@ -8,6 +8,9 @@ winmanHotkeys = {resizeUp = "K", resizeDown = "J", resizeLeft = "H",
     cascadeAppWindows = ".", snapToGrid = "/", maximizeWindow = ";",
     moveUp = "Up", moveDown = "Down", moveLeft = "Left", moveRight = "Right"}
 
+Round = hs.loadSpoon("RoundedCorners")
+Round.radius = 10
+Round:start()
 Cherry = hs.loadSpoon("Cherry")
 Cherry:bindHotkeys()
 
@@ -78,6 +81,22 @@ end
 
 -- }}}1
 
+hs.hotkey.bind(super, 'M', function()
+    hs.eventtap.keyStroke({"cmd"}, "c")
+    local selection = hs.pasteboard.getContents()
+    local subReddit = string.match(selection, '/r/(.-)/')
+    hs.alert.show(subReddit)
+    hs.eventtap.keyStrokes('https://www.redditp.com/r/' .. subReddit .. '/top/?t=month')
+end)
+
+hs.hotkey.bind(super, 'Y', function()
+    hs.eventtap.keyStroke({"cmd"}, "c")
+    local selection = hs.pasteboard.getContents()
+    local subReddit = string.match(selection, '/r/(.-)/')
+    hs.alert.show(subReddit)
+    hs.eventtap.keyStrokes('https://www.redditp.com/r/' .. subReddit .. '/top/?t=year')
+end)
+
 
 -- hs.hotkey.bind(super, 'D', function()
 --     local _, numero = hs.dialog.textPrompt('Quantas notas?', 'Quantas notas 10 devem ser inseridas?')
@@ -91,32 +110,32 @@ end
 --     hs.alert.show("Notas inseridas! 🥳")
 -- end)
 
--- hs.hotkey.bind(super, 'M', function()
---     local copiado = hs.pasteboard.getContents()
---     local notas = {}
---     for s in copiado:gmatch("([^\n]*)\n?") do
---         -- hs.alert.show(s)
---         table.insert(notas, s)
---     end
---     for _, nota in ipairs(notas) do
---         if string.match(nota, "%d") == nil or nota == '' or tonumber(nota) == 0 then
---             -- hs.eventtap.keyStroke({}, "tab")
---             hs.eventtap.keyStroke({}, "tab")
---             hs.eventtap.keyStroke({}, "space")
---             hs.eventtap.keyStroke({}, "tab")
---         -- elseif nota == 0 then
---         --     hs.eventtap.keyStrokes(nota)
---         --     hs.eventtap.keyStroke({}, "tab")
---         --     hs.eventtap.keyStroke({}, "tab")
---         --     hs.eventtap.keyStroke({}, "tab")
---         else
---             hs.eventtap.keyStrokes(nota)
---             hs.eventtap.keyStroke({}, "tab")
---             hs.eventtap.keyStroke({}, "tab")
---             hs.eventtap.keyStroke({}, "tab")
---         end
---     end
---     hs.alert.show("Notas inseridas! 🥳")
--- end)
+hs.hotkey.bind(super, 'M', function()
+    local copiado = hs.pasteboard.getContents()
+    local notas = {}
+    for s in copiado:gmatch("([^\n]*)\n?") do
+        -- hs.alert.show(s)
+        table.insert(notas, s)
+    end
+    for _, nota in ipairs(notas) do
+        if string.match(nota, "%d") == nil or nota == '' or tonumber(nota) == 0 then
+            -- hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "space")
+            hs.eventtap.keyStroke({}, "tab")
+        -- elseif nota == 0 then
+        --     hs.eventtap.keyStrokes(nota)
+        --     hs.eventtap.keyStroke({}, "tab")
+        --     hs.eventtap.keyStroke({}, "tab")
+        --     hs.eventtap.keyStroke({}, "tab")
+        else
+            hs.eventtap.keyStrokes(nota)
+            hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "tab")
+            hs.eventtap.keyStroke({}, "tab")
+        end
+    end
+    hs.alert.show("Notas inseridas! 🥳")
+end)
 
 

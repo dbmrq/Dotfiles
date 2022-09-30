@@ -22,6 +22,7 @@ call plug#begin('~/.vim/bundle')
     " Plug 'kana/vim-textobj-syntax'
     Plug 'tommcdo/vim-exchange'
     Plug 'junegunn/vim-easy-align'
+    Plug 'junegunn/goyo.vim'
     " Plug 'AndrewRadev/splitjoin.vim'
     " Plug 'FooSoft/vim-argwrap'
     " Plug 'ntpeters/vim-better-whitespace'
@@ -68,6 +69,10 @@ command! Plug so % | PlugUpdate | PlugUpgrade
 
 " ....................................................................... }}}1
 
+" Goyo {{{1
+autocmd! User GoyoEnter hi! EndOfBuffer guifg=#fdf6e3 guibg=#fdf6e3
+autocmd! User GoyoLeave hi! EndOfBuffer guifg=#f8f1dd guibg=#f8f1dd
+" }}}1
 
 " " vim-slash ............................................................. {{{1
 " noremap <plug>(slash-after) zz
@@ -260,9 +265,9 @@ let g:vimtex_text_obj_enabled = 1
 let g:vimtex_imaps_enabled = 0
 let g:vimtex_indent_bib_enabled = 0
 let g:vimtex_indent_enabled = 1
-let g:vimtex_toc_split_pos = "full"
-let g:vimtex_toc_fold = 1
-let g:vimtex_toc_fold_level_start = 2
+" let g:vimtex_toc_split_pos = "full"
+" let g:vimtex_toc_fold = 1
+" let g:vimtex_toc_fold_level_start = 2
 " let g:vimtex_toc_mode = 4
 let g:vimtex_toc_show_help = 0
 let g:vimtex_view_automatic = 0
@@ -296,11 +301,11 @@ endfunction
 autocmd User VimtexEventInitPost
             \ command! RC call ToggleOption("-norc")
 
-let g:vimtex_toc_hotkeys = {
-    \ 'enabled' : 1,
-    \ 'keys' : 'asdfjkleurei',
-    \ 'leader' : '<space>',
-    \}
+" let g:vimtex_toc_hotkeys = {
+"     \ 'enabled' : 1,
+"     \ 'keys' : 'asdfjkleurei',
+"     \ 'leader' : '<space>',
+"     \}
 
 " let g:VimtexImportante = {
 "       \ 're' : g:vimtex#re#not_bslash . '\%\c\s*IMPORTANTE\s*:?\s*\zs.*',
