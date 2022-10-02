@@ -107,8 +107,13 @@ fi
 # }}}1
 
 # Symlink dotfiles {{{1
-cd $(dirname `pwd`)
-stow --target=$HOME --ignore=\.DS_Store */
+read -p "Run stow.sh? " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    cd $(dirname `pwd`)
+    stow -v --target=$HOME --ignore=\.DS_Store */
+fi
 # }}}1
 
 # vim: set tw=0:
