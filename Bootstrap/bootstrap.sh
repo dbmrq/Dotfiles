@@ -92,11 +92,11 @@ then
     echo "Adding Terminal color schemes..."
     echo ""
 
-    git clone https://github.com/dbmrq/terminal-solarized.git terminal-solarized
+    git clone https://github.com/dbmrq/terminal-solarized.git
 
-    open ~/Code/Misc/terminal-solarized/Solarized\ Dark.terminal
+    open terminal-solarized/Solarized\ Dark.terminal
 
-    open ~/Code/Misc/terminal-solarized/Solarized\ Light.terminal
+    open terminal-solarized/Solarized\ Light.terminal
 
     trash terminal-solarized
 
