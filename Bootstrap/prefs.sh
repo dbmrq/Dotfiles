@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Preferences {{{1
-
 echo ""
 echo "Setting preferences..."
 echo ""
@@ -38,10 +36,11 @@ defaults write com.apple.messageshelper.MessageController SOInputLineSettings -d
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 
+defaults write com.apple.dock persistent-apps -array
+
 echo ""
 echo "Done."
 echo ""
 echo "---"
 
-# }}}1
 

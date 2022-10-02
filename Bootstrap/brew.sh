@@ -54,6 +54,9 @@ brew install --cask the-unarchiver
 # brew install --cask github-desktop
 # brew install --cask qlcolorcode qlstephen qlmarkdown quicklook-csv qlimagesize
 
+mas install 497799835
+sudo xcodebuild -license accept
+
 read -n 1 -s -r -p "A few applications require Xcode to be installed and opened once. Open Xcode now and press any key to continue."
 
 brew install macvim

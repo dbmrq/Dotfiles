@@ -38,15 +38,6 @@ echo "---"
 
 # }}}1
 
-# MAS {{{1
-read -p "Run mas.sh? " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    osascript -e "tell application \"Terminal\" to do script \"source ${PWD}/mas.sh\""
-fi
-# }}}1
-
 # Homebrew {{{1
 read -p "Run brew.sh? " -n 1 -r
 echo
