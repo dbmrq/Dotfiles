@@ -8,9 +8,6 @@ winmanHotkeys = {resizeUp = "K", resizeDown = "J", resizeLeft = "H",
     cascadeAppWindows = ".", snapToGrid = "/", maximizeWindow = ";",
     moveUp = "Up", moveDown = "Down", moveLeft = "Left", moveRight = "Right"}
 
-Round = hs.loadSpoon("RoundedCorners")
-Round.radius = 10
-Round:start()
 Cherry = hs.loadSpoon("Cherry")
 Cherry:bindHotkeys()
 
