@@ -8,7 +8,6 @@ sudo spctl --master-disable
 
 defaults write com.apple.dock "autohide" -bool "true"
 defaults write com.apple.dock "show-recents" -bool "false"
-defaults write com.apple.dock "static-only" -bool "true"
 defaults write com.apple.dock "minimize-to-application" -bool true
 defaults write com.apple.dock "mru-spaces" -bool "false"
 defaults write com.apple.screencapture "disable-shadow" -bool "true"
