@@ -62,4 +62,4 @@
 [push]
 	autoSetupRemote = true
 [diff]
-	external = difft
+	external = difft --color always --display inline
