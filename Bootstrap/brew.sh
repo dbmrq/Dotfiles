@@ -21,7 +21,6 @@ brew install mas
 brew install par
 brew install stow
 brew install ruby
-brew install fasd
 brew install trash
 # brew install tldr
 # brew install tree
