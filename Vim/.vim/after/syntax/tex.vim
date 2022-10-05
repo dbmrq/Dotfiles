@@ -2,7 +2,7 @@
 syntax match texInputFile /\\addbibresource\%(\[.\{-}\]\)\=\s*{.\{-}}/
       \ contains=texStatement,texInputCurlies,texInputFileOpt
 
-execute 'syntax match texStatement /\v\\%(' . join([
+execute 'syntax match texCmdRefConcealed /\v\\%(' . join([
     \   '[Cc]iteauthor\*?',
     \   '[Cc]ite%(title|year|date)\*?',
     \   'citeurl',
@@ -14,9 +14,9 @@ execute 'syntax match texStatement /\v\\%(' . join([
     \   'supercite',
     \   '[Aa]utocite\*?',
     \   '[Ppf]?[Nn]otecite'], '|') . ')/'
-    \ 'nextgroup=texRefOption,texCite'
+    \ 'nextgroup=texRefConcealedArg,texCite'
 
-execute 'syntax match texStatement /\v\\%(' . join([
+execute 'syntax match texCmdRefConcealed /\v\\%(' . join([
     \   '[Cc]ites',
     \   '[Pp]arencites',
     \   'footcite%(s|texts)',
@@ -24,7 +24,7 @@ execute 'syntax match texStatement /\v\\%(' . join([
     \   '[Ss]martcites',
     \   'supercites',
     \   '[Aa]utocites'], '|') . ')/'
-    \ 'nextgroup=texRefOptions,texCites'
+    \ 'nextgroup=texRefConcealedArg,texCites'
 
 syntax match texStatement "\\singlecite" nextgroup=texRefOptions,texCites
 syntax match texStatement "\\apud" nextgroup=texRefOptions,texCites

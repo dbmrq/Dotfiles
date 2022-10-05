@@ -30,8 +30,8 @@ call plug#begin('~/.vim/bundle')
     Plug 'Raimondi/delimitMate'
     " Plug 'junegunn/vim-slash'
     " Plug 'mbbill/undotree'
-    Plug 'lervag/vimtex', { 'branch': 'better-toc' }
-    " Plug 'lervag/vimtex'
+    " Plug 'lervag/vimtex', { 'branch': 'better-toc' }
+    Plug 'lervag/vimtex'
     " Plug 'sheerun/vim-polyglot'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'wellle/targets.vim'
