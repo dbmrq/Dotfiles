@@ -61,6 +61,11 @@ read -n 1 -s -r -p "A few applications require Xcode to be installed and opened 
 
 brew install macvim
 
+OSASCRIPT='tell application "Finder" to make alias file to POSIX file "'
+OSASCRIPT+=$(find $(brew --prefix) -name MacVim.app)
+OSASCRIPT+='" at POSIX file "/Applications/"'
+osascript -e $OSASCRIPT
+
 vim +PlugUpdate +qall
 
 brew prune
