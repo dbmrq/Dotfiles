@@ -106,6 +106,15 @@ then
 fi
 # }}}1
 
+# Battery {{{1
+read -p "Install actuallymentor/battery?" -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    curl -s https://raw.githubusercontent.com/actuallymentor/battery/main/setup.sh | bash
+fi
+# }}}1
+
 # Symlink dotfiles {{{1
 read -p "Run stow.sh? " -n 1 -r
 echo

@@ -3,6 +3,8 @@
 
 -- Batman
 
+-- requires https://github.com/actuallymentor/battery
+
 local batteryMenu = hs.menubar.new(true)
 
 function disp_time(time)
@@ -14,17 +16,34 @@ end
 function updateBatteryMenu()
 
     if hs.battery.isCharging() then
-        -- batteryMenu:returnToMenuBar()
+        batteryMenu:returnToMenuBar()
         batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
-        local menuTitle = "Time Remaining: " .. disp_time(hs.battery.timeToFullCharge())
-        batteryMenu:setMenu({{title = menuTitle}})
-        batteryMenu:setTooltip(menuTitle)
-    elseif hs.battery.isCharging() or hs.battery.powerSource() == 'Battery Power' then
-        -- batteryMenu:returnToMenuBar()
+        local timeRemaining = hs.battery.timeToFullCharge()
+        local remainingString = timeRemaining == -1 and "Calculating" or disp_time(timeRemaining)
+        local remainingTitle = "Time Remaining: " .. remainingString
+        local chargeTitle = "Stop Charging"
+        local chargeFn = hs.execute('sudo /usr/local/bin/smc -k CH0B -w 02')
+        batteryMenu:setMenu({
+            {title = remainingTitle},
+            {title = chargeTitle, fn = chargeFn}
+        })
+    elseif hs.battery.powerSource() == 'Battery Power' then
+        batteryMenu:returnToMenuBar()
         batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
-        local menuTitle = "Time Remaining: " .. disp_time(hs.battery.timeRemaining())
-        batteryMenu:setMenu({{title = menuTitle}})
-        batteryMenu:setTooltip(menuTitle)
+        local timeRemaining = hs.battery.timeRemaining()
+        local remainingString = timeRemaining == -1 and "Calculating..."
+            or disp_time(timeRemaining)
+        local remainingTitle = "Time Remaining: " .. remainingString
+        batteryMenu:setMenu({{title = remainingTitle}})
+        if hs.battery.percentage() < 50.0 then
+            hs.execute('sudo /usr/local/bin/smc -k CH0B -w 00')
+        end
+    elseif hs.battery.percentage() < 100.0 then
+        batteryMenu:returnToMenuBar()
+        batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
+        local chargeTitle = "Charge"
+        local chargeFn = hs.execute('sudo /usr/local/bin/smc -k CH0B -w 00')
+        batteryMenu:setMenu({{title = chargeTitle, fn = chargeFn}})
     else
         batteryMenu:removeFromMenuBar()
     end
