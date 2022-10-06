@@ -13,6 +13,8 @@ function disp_time(time)
   return string.format("%02d:%02d",hours,minutes)
 end
 
+local charge = false
+
 function updateBatteryMenu()
 
     if hs.battery.isCharging() then
@@ -27,6 +29,9 @@ function updateBatteryMenu()
             {title = remainingTitle},
             {title = chargeTitle, fn = chargeFn}
         })
+        if hs.battery.percentage() > 70.0 and not charge then
+            hs.execute('sudo /usr/local/bin/smc -k CH0B -w 02')
+        end
     elseif hs.battery.powerSource() == 'Battery Power' then
         batteryMenu:returnToMenuBar()
         batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
@@ -42,10 +47,14 @@ function updateBatteryMenu()
         batteryMenu:returnToMenuBar()
         batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
         local chargeTitle = "Charge"
-        local chargeFn = hs.execute('sudo /usr/local/bin/smc -k CH0B -w 00')
+        local chargeFn = function()
+            charge = true
+            hs.execute('sudo /usr/local/bin/smc -k CH0B -w 00')
+        end
         batteryMenu:setMenu({{title = chargeTitle, fn = chargeFn}})
     else
         batteryMenu:removeFromMenuBar()
+        charge = false
     end
 end
 
