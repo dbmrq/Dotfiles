@@ -44,6 +44,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
     /bin/bash brew.sh
 fi
+if ! hash brew 2>/dev/null; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 # }}}1
 
 # Preferences {{{1

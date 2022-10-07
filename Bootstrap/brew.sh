@@ -8,7 +8,6 @@ if ! hash brew 2>/dev/null; then
     # If Homebrew isn't installed
     echo -e "\nInstalling Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
 else
     echo -e "\nHomebrew already installed. Moving on..."
     brew upgrade
