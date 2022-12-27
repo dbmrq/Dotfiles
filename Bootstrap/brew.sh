@@ -14,6 +14,7 @@ else
 fi
 
 brew install git
+brew install git-extras
 brew install lua
 # brew install zsh
 brew install mas

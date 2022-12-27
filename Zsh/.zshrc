@@ -40,8 +40,6 @@ alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
 
-alias brewu='~/.brewupdate.sh'
-
 alias mkdir='mkdir -pv'
 
 alias dt="cd ~/Desktop"
@@ -64,6 +62,8 @@ alias cleanup="find . -type d -print0 | xargs -0 chmod 0755 && \
     find . -name '__MACOSX' -type f -delete"
 
 alias zipr='f() { zip -r $1.zip $1 };f'
+
+alias brew='sudo -Hu dbmrq brew'
 
 #  }}}1
 

@@ -1,28 +1,46 @@
 [user]
-	name = Daniel M.
-	email = danielbmarques@gmail.com
+    name = Daniel M.
+    email = danielbmarques@gmail.com
 
 [core]
-	safecrlf = true
-	autocrlf = false
-	excludesfile = ~/.gitignore
+    safecrlf = true
+    autocrlf = false
+    excludesfile = ~/.gitignore
+
+[color]
+    ui = auto
+
+[log]
+	date = iso
 
 [alias]
-	co = checkout
-	ci = commit
-	st = status
-	br = branch
-	type = cat-file -t
-	dump = cat-file -p
+    aliases = !git config --get-regexp alias | sed -re 's/alias\\.(\\S*)\\s(.*)$/\\1 = \\2/g'
+
+    co = checkout
+    ci = commit
+    st = !git fetch --all && git status
+    br = branch
+
+    cia = !git add . && git commit -m
+
+    wdiff = "diff --color-words"
 
     pushup = push -u origin HEAD
+
+    last = log -1 HEAD
+
+    unstage = reset HEAD --
+
+    prune = fetch --prune
 
     scrape = clone --single-branch --depth 1
     scrapeb = remote set-branches --add origin
 
     repass = config --global credential.helper osxkeychain
 
-	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    hist = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+
+    lg = !git hist --max-count=15
     hist5 = !git hist --max-count=5
     hist10 = !git hist --max-count=10
     hist20 = !git hist --max-count=20
@@ -47,19 +65,29 @@
 
     nevermind = !git reset --hard HEAD && git clean -d -x -f
 
-    giveup = git fetch --all && git reset --hard origin/master
+    giveup = !git fetch --all --prune && git reset --hard origin/master && git clean -d -x -f
+
+[diff]
+    external = difft --color always --display inline
+    mnemonicPrefix = true
+    renames = true
+    wordRegex = .
 
 [github]
     user = danielbmarques
 
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
 [credential]
-	helper = osxkeychain
+    helper = osxkeychain
 [push]
-	autoSetupRemote = true
-[diff]
-	external = difft --color always --display inline
+    default = upstream
+    followTags = true
+    autoSetupRemote = true
+[safe]
+    directory = /Users/programacao/Documents/iOS/Leio/Leio
+[stats]
+    showUntrackedFiles = all

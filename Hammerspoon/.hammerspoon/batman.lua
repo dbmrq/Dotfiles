@@ -27,19 +27,17 @@ end
 
 
 function updateBatteryMenu()
-    local menu
+    local menu = {{title = hs.battery.powerSource(), disabled = true}}
     if hs.battery.isCharging() then
-        hs.alert.show("Is Charging")
+        hs.alert.show("Charging")
         batteryMenu:returnToMenuBar()
         batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
         local timeRemaining = hs.battery.timeToFullCharge()
         local remainingString = timeRemaining == -1 and "Calculating" or disp_time(timeRemaining)
         local remainingTitle = "Time Remaining: " .. remainingString
         local chargeTitle = "Disable Charging"
-        menu = {
-            {title = remainingTitle, disabled = true},
-            {title = chargeTitle, fn = disableCharging}
-        }
+        table.insert(menu, {title = remainingTitle, disabled = true})
+        table.insert(menu, {title = chargeTitle, fn = disableCharging})
         if hs.battery.percentage() > 70.0 and not forceCharge then
             disableCharging()
         end
@@ -51,7 +49,7 @@ function updateBatteryMenu()
         local remainingString = timeRemaining == -1 and "Calculating..."
             or disp_time(timeRemaining)
         local remainingTitle = "Time Remaining: " .. remainingString
-        menu = {{title = remainingTitle, disabled = true}}
+        table.insert(menu, {title = remainingTitle, disabled = true})
         if hs.battery.percentage() < 50.0 then
             enableCharging()
         end
@@ -64,14 +62,14 @@ function updateBatteryMenu()
             forceCharge = true
             enableCharging()
         end
-        menu = {{title = chargeTitle, fn = chargeFn}}
+        table.insert(menu, {title = chargeTitle, fn = chargeFn})
     else
         hs.alert.show("Plugged At 100%")
         batteryMenu:removeFromMenuBar()
         forceCharge = false
         disableCharging()
     end
-    table.insert(menu, 1, {title = chargingStatus(), disabled = true})
+    table.insert(menu, 2, {title = chargingStatus(), disabled = true})
     batteryMenu:setMenu(menu)
 end
 

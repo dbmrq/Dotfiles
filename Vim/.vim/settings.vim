@@ -204,6 +204,8 @@ set virtualedit=onemore
 
 set updatetime=2000
 
+set viminfo='1000,f1
+
 
 " change directory to current file's
 " autocmd BufEnter * if &ft !=? 'tex' | silent! lcd %:p:h

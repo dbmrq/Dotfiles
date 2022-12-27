@@ -25,7 +25,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'junegunn/goyo.vim'
     " Plug 'AndrewRadev/splitjoin.vim'
     " Plug 'FooSoft/vim-argwrap'
-    " Plug 'ntpeters/vim-better-whitespace'
+    Plug 'ntpeters/vim-better-whitespace'
     Plug 'tweekmonster/spellrotate.vim'
     Plug 'Raimondi/delimitMate'
     " Plug 'junegunn/vim-slash'
@@ -56,7 +56,7 @@ call plug#begin('~/.vim/bundle')
 
     " Plug '~/Code/Vim/vim-ditto'
     Plug 'dbmrq/vim-chalk'
-    " Plug '~/Code/Vim/vim-dialect'
+    Plug '~/Code/Vim/vim-dialect'
     Plug 'dbmrq/vim-howdy'
     Plug 'dbmrq/vim-bucky'
     " Plug '~/Code/Vim/vim-redacted'
@@ -67,6 +67,13 @@ call plug#end()
 
 command! Plug so % | PlugUpdate | PlugUpgrade
 
+" ....................................................................... }}}1
+
+" vim-better-whitespace ................................................. {{{1
+let g:better_whitespace_enabled=1
+let g:strip_whitespace_on_save=1
+let g:show_spaces_that_precede_tabs=1
+" let g:strip_whitespace_confirm=0
 " ....................................................................... }}}1
 
 " Goyo {{{1
@@ -222,28 +229,28 @@ inoremap <silent> <expr> <CR> "<C-R>=SnipOrCYOrCR()<CR>"
 
 " Vimtex ................................................................ {{{1
 
-augroup vimtex_customization
-    autocmd!
-    autocmd FileType tex call CreateTocs()
-augroup END
+" augroup vimtex_customization
+"     autocmd!
+"     autocmd FileType tex call CreateTocs()
+" augroup END
 
-function! CreateTocs()
-    let g:custom_toc1 = vimtex#toc#new({
-                \ 'layers' : ['todo'],
-                \ 'todo_sorted' : 0,
-                \ 'show_help' : 0,
-                \ 'show_numbers' : 0,
-                \ 'mode' : 4,
-                \})
-    command! TODO call g:custom_toc1.open()
-    " nnoremap <silent> <leader>T :call g:custom_toc1.open()<cr>
+" function! CreateTocs()
+"     let g:custom_toc1 = vimtex#toc#new({
+"                 \ 'layers' : ['todo'],
+"                 \ 'todo_sorted' : 0,
+"                 \ 'show_help' : 0,
+"                 \ 'show_numbers' : 0,
+"                 \ 'mode' : 4,
+"                 \})
+"     command! TODO call g:custom_toc1.open()
+"     " nnoremap <silent> <leader>T :call g:custom_toc1.open()<cr>
 
-    " let g:custom_toc2 = vimtex#toc#new({
-    "             \ 'layers' : ['include'],
-    "             \ 'show_help' : 0,
-    "             \})
-    " nnoremap <silent> \lY :call g:custom_toc2.open()<cr>
-endfunction
+"     " let g:custom_toc2 = vimtex#toc#new({
+"     "             \ 'layers' : ['include'],
+"     "             \ 'show_help' : 0,
+"     "             \})
+"     " nnoremap <silent> \lY :call g:custom_toc2.open()<cr>
+" endfunction
 
 
 " augroup vimtex_customization
@@ -274,6 +281,8 @@ let g:vimtex_view_automatic = 0
 " let g:vimtex_quickfix_open_on_warning = 1
 
 " let g:vimtex_quickfix_latexlog = {'fix_paths':0}
+
+let g:vimtex_syntax_packages = {'biblatex': {'load': 2}}
 
 let g:vimtex_compiler_latexmk = {
     \ 'backend' : 'jobs',
