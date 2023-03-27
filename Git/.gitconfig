@@ -18,8 +18,10 @@
 
     co = checkout
     ci = commit
-    st = !git fetch --all && git status
+    st = status
     br = branch
+
+    tug = !git fetch --all --prune && git pull
 
     cia = !git add . && git commit -m
 
@@ -82,12 +84,13 @@
     process = git-lfs filter-process
     required = true
 [credential]
-    helper = osxkeychain
+	helper = osxkeychain
 [push]
     default = upstream
     followTags = true
     autoSetupRemote = true
 [safe]
     directory = /Users/programacao/Documents/iOS/Leio/Leio
+	directory = /Users/programacao/Documents/iOS/mediaq
 [stats]
     showUntrackedFiles = all

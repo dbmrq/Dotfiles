@@ -16,7 +16,7 @@ require "slowq"    -- Avoid accidental Cmd-Q
 require "collage"  -- Clipboard management
 require "mocha"    -- Prevent Mac from sleeping
 require "readline" -- Readline style bindings
-require "batman" -- Readline style bindings
+require "batman"   -- Battery management
 
 
 -- Meta {{{1
