@@ -13,13 +13,13 @@
 local historySize = 30
 local menuWidth = 40
 
--- These are the keys used to copy into Collage. I don't want everything
--- I copy to go in there, so I set it to Command + Shift + C, but you can set
--- it to plain old Command + C. The menu icon will only appear when there's
--- more than one item to show.
-local modifiers = {"cmd", "shift"}
--- local modifiers = {"cmd"} -- Use this to replace Command + C
-local hotkey = "c"
+-- After using this with cmd+c for a while, I thought it made more
+-- sense to use cmd+x. When I'm copying something important, I like
+-- to see it disappear with cmd+x, because it makes me extra sure
+-- it really worked. Then if I still want it there I'll just paste
+-- it back again.
+local modifiers = {"cmd"}
+local hotkey = "x"
 
 -------------------------------------------------------------------
 --  Don't mess with this part unless you know what you're doing  --
@@ -84,7 +84,11 @@ end-- }}}1
 
 copy = hs.hotkey.bind(modifiers, hotkey, function()-- {{{1
     copy:disable()
-    hs.eventtap.keyStroke({"cmd"}, "c")
+    if table.concat(modifiers) == "cmd" and hotkey == "x" then
+        hs.eventtap.keyStroke({"cmd"}, "x")
+    else
+        hs.eventtap.keyStroke({"cmd"}, "c")
+    end
     copy:enable()
     hs.timer.doAfter(1, storeCopy)
 end)-- }}}1

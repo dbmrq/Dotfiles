@@ -6,32 +6,53 @@
 
 -- Replaces apps like CommandQ and SlowQuitApps.
 
+alertStyle = {
+    strokeWidth  = 0,
+    strokeColor = { white = 0, alpha = 0 },
+    fillColor   = { white = 0, alpha = 0 },
+    textColor = hs.drawing.color["red"],
+    textFont  = "SF Pro Display Bold",
+    textSize  = 200,
+    radius = 0,
+    atScreenEdge = 0,
+    fadeInDuration = 0.15,
+    fadeOutDuration = 0.15,
+    padding = -50,
+}
 
------------------------------
---  Customization Options  --
------------------------------
 
-local delay = 0.1 -- In seconds
-
-
--------------------------------------------------------------------
---  Don't mess with this part unless you know what you're doing  --
--------------------------------------------------------------------
-
+local delay = 4
 local killedIt = false
+local timer
+local alert
 
-function pressedQ()
+function pressQ()
     killedIt = false
-    hs.alert.show("⌘Q")
-    hs.timer.usleep(1000000 * delay)
+    timer = hs.timer.doEvery(1, tick)
+    timer:fire()
 end
 
-function repeatQ()
-    if killedIt then return end
-    hs.application.frontmostApplication():kill()
-    killedIt = true
-    hs.alert.closeAll()
+function holdQ()
+    if delay <= 0 and not killedIt then
+        killedIt = true
+        timer:stop()
+        hs.alert.closeSpecific(alert)
+        hs.application.frontmostApplication():kill()
+    end
 end
 
-hs.hotkey.bind('cmd', 'Q', pressedQ, nil, repeatQ)
+function releaseQ()
+    killedIt = false
+    timer:stop()
+    delay = 4
+    hs.alert.closeSpecific(alert)
+end
+
+function tick()
+    hs.alert.closeSpecific(alert)
+    alert = hs.alert(delay-1, alertStyle, nil, 1)
+    delay = delay - 1
+end
+
+hs.hotkey.bind('cmd', 'Q', pressQ, releaseQ, holdQ)
 
