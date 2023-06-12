@@ -23,6 +23,8 @@
 
     tug = !git fetch --all --prune && git pull
 
+    sync = !git fetch --all --prune && git pull && git push
+
     cia = !git add . && git commit -m
 
     wdiff = "diff --color-words"

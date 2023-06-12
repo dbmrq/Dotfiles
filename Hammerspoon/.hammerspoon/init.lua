@@ -13,6 +13,7 @@ Cherry:bindHotkeys()
 
 require "winman"   -- Window management
 require "slowq"    -- Avoid accidental Cmd-Q
+require "snippets" -- Some random commands
 require "collage"  -- Clipboard management
 require "mocha"    -- Prevent Mac from sleeping
 require "readline" -- Readline style bindings
@@ -76,62 +77,4 @@ if uptime() > 1000 then
 end
 
 -- }}}1
-
-hs.hotkey.bind(super, 'M', function()
-    hs.eventtap.keyStroke({"cmd"}, "c")
-    local selection = hs.pasteboard.getContents()
-    local subReddit = string.match(selection, '/r/(.-)/')
-    hs.alert.show(subReddit)
-    hs.eventtap.keyStrokes('https://www.redditp.com/r/' .. subReddit .. '/top/?t=month')
-end)
-
-hs.hotkey.bind(super, 'Y', function()
-    hs.eventtap.keyStroke({"cmd"}, "c")
-    local selection = hs.pasteboard.getContents()
-    local subReddit = string.match(selection, '/r/(.-)/')
-    hs.alert.show(subReddit)
-    hs.eventtap.keyStrokes('https://www.redditp.com/r/' .. subReddit .. '/top/?t=year')
-end)
-
-
--- hs.hotkey.bind(super, 'D', function()
---     local _, numero = hs.dialog.textPrompt('Quantas notas?', 'Quantas notas 10 devem ser inseridas?')
---     hs.timer.usleep(5000000)
---     for _ = tonumber(numero),0,-1 do
---             hs.eventtap.keyStrokes("10")
---             hs.eventtap.keyStroke({}, "tab")
---             hs.eventtap.keyStroke({}, "tab")
---             hs.eventtap.keyStroke({}, "tab")
---     end
---     hs.alert.show("Notas inseridas! 🥳")
--- end)
-
-hs.hotkey.bind(super, 'M', function()
-    local copiado = hs.pasteboard.getContents()
-    local notas = {}
-    for s in copiado:gmatch("([^\n]*)\n?") do
-        -- hs.alert.show(s)
-        table.insert(notas, s)
-    end
-    for _, nota in ipairs(notas) do
-        if string.match(nota, "%d") == nil or nota == '' or tonumber(nota) == 0 then
-            -- hs.eventtap.keyStroke({}, "tab")
-            hs.eventtap.keyStroke({}, "tab")
-            hs.eventtap.keyStroke({}, "space")
-            hs.eventtap.keyStroke({}, "tab")
-        -- elseif nota == 0 then
-        --     hs.eventtap.keyStrokes(nota)
-        --     hs.eventtap.keyStroke({}, "tab")
-        --     hs.eventtap.keyStroke({}, "tab")
-        --     hs.eventtap.keyStroke({}, "tab")
-        else
-            hs.eventtap.keyStrokes(nota)
-            hs.eventtap.keyStroke({}, "tab")
-            hs.eventtap.keyStroke({}, "tab")
-            hs.eventtap.keyStroke({}, "tab")
-        end
-    end
-    hs.alert.show("Notas inseridas! 🥳")
-end)
-
 

@@ -28,7 +28,7 @@ local alert
 
 function pressQ()
     killedIt = false
-    timer = hs.timer.doEvery(1, tick)
+    timer = hs.timer.doEvery(0.5, tick)
     timer:fire()
 end
 
