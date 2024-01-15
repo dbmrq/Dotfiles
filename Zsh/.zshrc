@@ -75,3 +75,4 @@ alias brew='sudo -Hu dbmrq brew'
 
 # #  }}}1
 
+export PATH="/opt/homebrew/opt/ffmpeg@4/bin:$PATH"

@@ -15,16 +15,21 @@ end
 
 local forceCharge = false
 
-function disableCharging() hs.execute('sudo /usr/local/bin/smc -k CH0B -w 02') end
-function enableCharging() hs.execute('sudo /usr/local/bin/smc -k CH0B -w 00') end
+function disableCharging()
+    hs.execute('sudo /usr/local/bin/smc -k CH0B -w 02')
+    hs.execute('sudo /usr/local/bin/smc -k CHWA -w 01')
+end
+function enableCharging()
+    hs.execute('sudo /usr/local/bin/smc -k CH0B -w 00')
+    hs.execute('sudo /usr/local/bin/smc -k CHWA -w 00')
+end
 
 function chargingDisabled()
-    return string.find(hs.execute("smc -k CH0B -r", true), '00') == nil
+    return string.find(hs.execute("smc -k CHWA -r", true), '00') == nil
 end
 function chargingStatus()
     return chargingDisabled and "Charging Disabled" or "ChargingEnabled"
 end
-
 
 function updateBatteryMenu()
     local menu = {{title = hs.battery.powerSource(), disabled = true}}
@@ -65,7 +70,9 @@ function updateBatteryMenu()
         table.insert(menu, {title = chargeTitle, fn = chargeFn})
     else
         hs.alert.show("Plugged At 100%")
-        batteryMenu:removeFromMenuBar()
+        batteryMenu:returnToMenuBar()
+        batteryMenu:setTitle(hs.styledtext.new('•', { color = hs.drawing.color["green"] }))
+        -- batteryMenu:removeFromMenuBar()
         forceCharge = false
         disableCharging()
     end
