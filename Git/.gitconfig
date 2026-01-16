@@ -43,6 +43,11 @@
     insteadOf = git@github.com:danatwex/
     insteadOf = https://github.com/danatwex/
 
+# Work repos (wexinc org - uses danatwex account)
+[url "git@github-work:wexinc/"]
+    insteadOf = git@github.com:wexinc/
+    insteadOf = https://github.com/wexinc/
+
 [core]
     safecrlf = true
     autocrlf = false
