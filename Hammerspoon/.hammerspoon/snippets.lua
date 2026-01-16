@@ -88,9 +88,6 @@ local items = {
     { title = "RedditP - top of the month", fn = redditTopMonth },
     { title = "RedditP - top of the year", fn = redditTopYear },
     { title = "Lock Keyboard for Cleaning", fn = lockKeyboard },
-    -- { title = "Abrir chamado", fn = abrirChamado },
-    -- { title = "Inserir notas 10", fn = inserirNotasDez },
-    -- { title = "Inserir notas copiadas", fn = inserirNotasCopiadas },
 }
 
 snippetMenu:setMenu(items)

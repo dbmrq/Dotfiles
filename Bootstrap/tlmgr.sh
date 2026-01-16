@@ -1,33 +1,26 @@
 #!/usr/bin/env bash
 
-echo ""
-echo "Installing tex packages"
-echo ""
+echo "Installing TeX packages..."
 
 sudo tlmgr update --self --all
-
 sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
-collection-langother collection-latexextra collection-pictures logreq \
-biblatex biber
+    collection-langother collection-latexextra collection-pictures logreq \
+    biblatex biber
 
-read -p "Choose a directory for your TeX supporting files"
-echo 
+read -p "Choose a directory for your TeX supporting files: " texdir
+echo
 
-mkdir -pv "${REPLY%/}/Classes"
-mkdir -pv "${REPLY%/}/Packages"
-mkdir -pv "${REPLY%/}/Bibliography"
+mkdir -pv "${texdir%/}/Classes"
+mkdir -pv "${texdir%/}/Packages"
+mkdir -pv "${texdir%/}/Bibliography"
 mkdir -pv ~/Library/texmf/tex/latex
 mkdir -pv ~/Library/texmf/bibtex
 
-git clone https://github.com/dbmrq/tex-dbmrq.git "${REPLY%/}/Classes/dbmrq"
-git clone https://github.com/abntex/biblatex-abnt.git "${REPLY%/}/Packages/biblatex-abnt"
+git clone https://github.com/dbmrq/tex-dbmrq.git "${texdir%/}/Classes/dbmrq"
+git clone https://github.com/abntex/biblatex-abnt.git "${texdir%/}/Packages/biblatex-abnt"
 
-ln -s "${REPLY%/}/Classes" ~/Library/texmf/tex/latex/classes
-ln -s "${REPLY%/}/Packages" ~/Library/texmf/tex/latex/packages
-ln -s "${REPLY%/}/Bibliography" ~/Library/texmf/bibtex/bib
+ln -s "${texdir%/}/Classes" ~/Library/texmf/tex/latex/classes
+ln -s "${texdir%/}/Packages" ~/Library/texmf/tex/latex/packages
+ln -s "${texdir%/}/Bibliography" ~/Library/texmf/bibtex/bib
 
-echo ""
 echo "Done."
-echo ""
-echo "---"
-

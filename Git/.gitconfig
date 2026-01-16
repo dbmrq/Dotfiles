@@ -11,52 +11,25 @@
     ui = auto
 
 [log]
-	date = iso
+    date = iso
 
 [alias]
-    aliases = !git config --get-regexp alias | sed -re 's/alias\\.(\\S*)\\s(.*)$/\\1 = \\2/g'
-
     co = checkout
     ci = commit
     st = status
     br = branch
 
     tug = !git fetch --all --prune && git pull
-
     sync = !git fetch --all --prune && git pull && git push
-
     cia = !git add . && git commit -m
-
-    wdiff = "diff --color-words"
-
     pushup = push -u origin HEAD
 
-    last = log -1 HEAD
-
-    unstage = reset HEAD --
-
-    prune = fetch --prune
-
-    scrape = clone --single-branch --depth 1
-    scrapeb = remote set-branches --add origin
-
-    repass = config --global credential.helper osxkeychain
+    wdiff = diff --color-words
 
     hist = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
-
     lg = !git hist --max-count=15
-    hist5 = !git hist --max-count=5
-    hist10 = !git hist --max-count=10
-    hist20 = !git hist --max-count=20
-    hist30 = !git hist --max-count=30
-
-    rebase5 = !git rebase -i HEAD~5
-    rebase10 = !git rebase -i HEAD~10
-    rebase15 = !git rebase -i HEAD~15
-    rebase20 = !git rebase -i HEAD~20
 
     last = log -1 HEAD --format=format:"%Cred%H"
-
     branches = branch -a
     tags = tag
     stashes = stash list
@@ -69,7 +42,7 @@
 
     nevermind = !git reset --hard HEAD && git clean -d -x -f
 
-    giveup = !git fetch --all --prune && git reset --hard origin/master && git clean -d -x -f
+    scrape = clone --single-branch --depth 1
 
 [diff]
     mnemonicPrefix = true
@@ -77,21 +50,21 @@
     wordRegex = .
 
 [github]
-    user = danielbmarques
+    user = dbmrq
 
 [filter "lfs"]
     clean = git-lfs clean -- %f
     smudge = git-lfs smudge -- %f
     process = git-lfs filter-process
     required = true
+
 [credential]
-	helper = osxkeychain
+    helper = osxkeychain
+
 [push]
     default = upstream
     followTags = true
     autoSetupRemote = true
-[safe]
-    directory = /Users/programacao/Documents/iOS/Leio/Leio
-	directory = /Users/programacao/Documents/iOS/mediaq
-[stats]
+
+[status]
     showUntrackedFiles = all
