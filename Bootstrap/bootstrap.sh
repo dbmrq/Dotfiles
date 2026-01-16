@@ -1,73 +1,828 @@
 #!/usr/bin/env bash
+#
+# Bootstrap script for setting up a new macOS machine
+# - Asks all questions upfront, then runs non-interactively
+# - Saves state so interrupted runs can be resumed
+# - Idempotent: safe to run multiple times
+#
 
-osascript -e 'tell application "System Preferences" to quit'
+set -euo pipefail
 
-sudo -v
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+# --- Configuration ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+STATE_FILE="$SCRIPT_DIR/.bootstrap_state"
+TEMP_FILES=()
+SUDO_PID=""
+BOOTSTRAP_SUCCESS=false
 
-echo ""
-echo "Updating macOS..."
-sudo softwareupdate -i -a
-echo "Done."
-echo ""
-
-echo "Installing Xcode developer tools..."
-xcode-select --install
-echo "Done."
-echo ""
-
-read -p "Run brew.sh? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    /bin/bash brew.sh
-fi
-if ! hash brew 2>/dev/null; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
-
-read -p "Run prefs.sh? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    /bin/bash prefs.sh
-fi
-
-read -p "Install Prezto? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Installing Prezto..."
-    git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
-    echo "Done."
+# --- Colors (with fallback for basic terminals) ---
+if [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]; then
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[0;33m'
+    BLUE='\033[0;34m'
+    BOLD='\033[1m'
+    NC='\033[0m'
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    BOLD=''
+    NC=''
 fi
 
-read -p "Add terminal colorscheme? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Adding Terminal color schemes..."
-    git clone https://github.com/dbmrq/terminal-solarized.git
-    open terminal-solarized/Solarized\ Dark.terminal
-    open terminal-solarized/Solarized\ Light.terminal
-    trash terminal-solarized
-    echo "Done."
-fi
+# --- Cleanup handler ---
+cleanup() {
+    local exit_code=$?
 
-read -p "Run tlmgr.sh (LaTeX packages)? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    osascript -e "tell application \"Terminal\" to do script \"source ${PWD}/tlmgr.sh\""
-fi
+    # Kill sudo keepalive process
+    if [[ -n "$SUDO_PID" ]]; then
+        kill "$SUDO_PID" 2>/dev/null || true
+    fi
 
-read -p "Install actuallymentor/battery? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Remove temporary files
+    for temp_file in "${TEMP_FILES[@]}"; do
+        if [[ -e "$temp_file" ]]; then
+            rm -rf "$temp_file" 2>/dev/null || true
+        fi
+    done
+
+    # Handle state file based on success/failure
+    if $BOOTSTRAP_SUCCESS; then
+        # Success: remove state file
+        rm -f "$STATE_FILE" 2>/dev/null || true
+        echo ""
+        echo -e "${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}${BOLD}║     Bootstrap Complete!                ║${NC}"
+        echo -e "${GREEN}${BOLD}╚════════════════════════════════════════╝${NC}"
+        echo ""
+        echo "You may want to:"
+        echo "  • Restart your terminal for shell changes to take effect"
+        echo "  • Log out and back in for all preferences to apply"
+        echo "  • Restart your Mac if system updates were installed"
+        echo ""
+    elif [[ $exit_code -ne 0 ]]; then
+        # Failure: state file is preserved for resume
+        echo ""
+        print_error "Bootstrap interrupted or failed (exit code: $exit_code)"
+        echo ""
+        echo "Your progress has been saved. Run the script again to resume."
+        echo "To start fresh, delete: $STATE_FILE"
+        echo ""
+    fi
+
+    exit $exit_code
+}
+
+trap cleanup EXIT INT TERM
+
+# --- Helper functions ---
+print_header() {
+    echo ""
+    echo -e "${BLUE}${BOLD}==> $1${NC}"
+}
+
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}! $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}✗ $1${NC}"
+}
+
+ask_yes_no() {
+    local prompt="$1"
+    local default="${2:-n}"
+    local reply
+
+    if [[ "$default" =~ ^[Yy]$ ]]; then
+        prompt="$prompt [Y/n] "
+    else
+        prompt="$prompt [y/N] "
+    fi
+
+    read -r -p "$prompt" reply
+    reply="${reply:-$default}"
+    [[ "$reply" =~ ^[Yy]$ ]]
+}
+
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Determine Homebrew path based on architecture
+get_brew_path() {
+    if [[ "$(uname -m)" == "arm64" ]]; then
+        echo "/opt/homebrew/bin/brew"
+    else
+        echo "/usr/local/bin/brew"
+    fi
+}
+
+ensure_brew_in_path() {
+    if ! command_exists brew; then
+        local brew_path
+        brew_path="$(get_brew_path)"
+        if [[ -x "$brew_path" ]]; then
+            eval "$("$brew_path" shellenv)"
+        fi
+    fi
+}
+
+# Track a temporary file/directory for cleanup
+track_temp() {
+    TEMP_FILES+=("$1")
+}
+
+# Mark a step as completed in state file
+mark_step_complete() {
+    local step="$1"
+    echo "$step" >> "$STATE_FILE"
+}
+
+# Check if a step was already completed
+step_completed() {
+    local step="$1"
+    [[ -f "$STATE_FILE" ]] && grep -qxF "$step" "$STATE_FILE"
+}
+
+# Save choices to state file
+save_choices() {
+    {
+        echo "# Bootstrap choices - $(date)"
+        echo "CHOICE_MACOS_UPDATE=$DO_MACOS_UPDATE"
+        echo "CHOICE_XCODE_TOOLS=$DO_XCODE_TOOLS"
+        echo "CHOICE_HOMEBREW=$DO_HOMEBREW"
+        echo "CHOICE_BREW_CLI=$DO_BREW_CLI"
+        echo "CHOICE_BREW_APPS=$DO_BREW_APPS"
+        echo "CHOICE_XCODE_APP=$DO_XCODE_APP"
+        echo "CHOICE_PREFS=$DO_PREFS"
+        echo "CHOICE_CLEAR_DOCK=$DO_CLEAR_DOCK"
+        echo "CHOICE_PREZTO=$DO_PREZTO"
+        echo "CHOICE_TERMINAL_THEME=$DO_TERMINAL_THEME"
+        echo "CHOICE_LATEX=$DO_LATEX"
+        echo "CHOICE_LATEX_DIR=$LATEX_DIR"
+        echo "CHOICE_BATTERY=$DO_BATTERY"
+        echo "CHOICE_STOW=$DO_STOW"
+    } >> "$STATE_FILE"
+}
+
+# Load choices from state file
+load_choices() {
+    if [[ -f "$STATE_FILE" ]]; then
+        # shellcheck source=/dev/null
+        while IFS='=' read -r key value; do
+            case "$key" in
+                CHOICE_MACOS_UPDATE) DO_MACOS_UPDATE="$value" ;;
+                CHOICE_XCODE_TOOLS) DO_XCODE_TOOLS="$value" ;;
+                CHOICE_HOMEBREW) DO_HOMEBREW="$value" ;;
+                CHOICE_BREW_CLI) DO_BREW_CLI="$value" ;;
+                CHOICE_BREW_APPS) DO_BREW_APPS="$value" ;;
+                CHOICE_XCODE_APP) DO_XCODE_APP="$value" ;;
+                CHOICE_PREFS) DO_PREFS="$value" ;;
+                CHOICE_CLEAR_DOCK) DO_CLEAR_DOCK="$value" ;;
+                CHOICE_PREZTO) DO_PREZTO="$value" ;;
+                CHOICE_TERMINAL_THEME) DO_TERMINAL_THEME="$value" ;;
+                CHOICE_LATEX) DO_LATEX="$value" ;;
+                CHOICE_LATEX_DIR) LATEX_DIR="$value" ;;
+                CHOICE_BATTERY) DO_BATTERY="$value" ;;
+                CHOICE_STOW) DO_STOW="$value" ;;
+            esac
+        done < "$STATE_FILE"
+        return 0
+    fi
+    return 1
+}
+
+# --- Compatibility checks ---
+check_compatibility() {
+    print_header "Checking system compatibility"
+
+    # Check macOS
+    if [[ "$(uname)" != "Darwin" ]]; then
+        print_error "This script only runs on macOS"
+        exit 1
+    fi
+
+    # Get macOS version
+    local macos_version
+    macos_version="$(sw_vers -productVersion)"
+    local major_version
+    major_version="$(echo "$macos_version" | cut -d. -f1)"
+
+    print_success "macOS $macos_version detected"
+
+    # Check architecture
+    local arch
+    arch="$(uname -m)"
+    if [[ "$arch" == "arm64" ]]; then
+        print_success "Apple Silicon (arm64) detected"
+    else
+        print_success "Intel ($arch) detected"
+    fi
+
+    # Warn about older macOS versions
+    if [[ "$major_version" -lt 11 ]]; then
+        print_warning "macOS 11+ recommended. Some features may not work."
+    fi
+
+    echo ""
+}
+
+# --- Gather all choices upfront ---
+gather_choices() {
+    print_header "Configuration"
+    echo "Answer the following questions. The script will then run unattended."
+    echo ""
+
+    # Initialize all choices
+    DO_MACOS_UPDATE=false
+    DO_XCODE_TOOLS=false
+    DO_HOMEBREW=false
+    DO_BREW_CLI=false
+    DO_BREW_APPS=false
+    DO_XCODE_APP=false
+    DO_PREFS=false
+    DO_CLEAR_DOCK=false
+    DO_PREZTO=false
+    DO_TERMINAL_THEME=false
+    DO_LATEX=false
+    LATEX_DIR=""
+    DO_BATTERY=false
+    DO_STOW=false
+
+    # Core system updates
+    if ask_yes_no "Update macOS?"; then
+        DO_MACOS_UPDATE=true
+    fi
+
+    if ! xcode-select -p >/dev/null 2>&1; then
+        if ask_yes_no "Install Xcode Command Line Tools? (required for most tasks)"; then
+            DO_XCODE_TOOLS=true
+        fi
+    else
+        print_success "Xcode Command Line Tools already installed"
+    fi
+
+    # Homebrew and packages
+    if ask_yes_no "Install/update Homebrew and packages?"; then
+        DO_HOMEBREW=true
+        if ask_yes_no "  Install CLI tools (git, lua, stow, etc.)?"; then
+            DO_BREW_CLI=true
+        fi
+        if ask_yes_no "  Install GUI apps (Chrome, VLC, Hammerspoon, etc.)?"; then
+            DO_BREW_APPS=true
+        fi
+        if ask_yes_no "  Install Xcode from App Store?"; then
+            DO_XCODE_APP=true
+        fi
+    fi
+
+    # Preferences
+    if ask_yes_no "Apply macOS preferences (Dock, Finder, etc.)?"; then
+        DO_PREFS=true
+        if ask_yes_no "  Clear all apps from Dock?"; then
+            DO_CLEAR_DOCK=true
+        fi
+    fi
+
+    # Shell setup
+    if [[ ! -d "${ZDOTDIR:-$HOME}/.zprezto" ]]; then
+        if ask_yes_no "Install Prezto (Zsh framework)?"; then
+            DO_PREZTO=true
+        fi
+    else
+        print_success "Prezto already installed"
+    fi
+
+    # Terminal theme
+    if ask_yes_no "Install Solarized terminal color scheme?"; then
+        DO_TERMINAL_THEME=true
+    fi
+
+    # LaTeX
+    if ask_yes_no "Install LaTeX packages (requires BasicTeX)?"; then
+        DO_LATEX=true
+        read -r -p "  Directory for TeX supporting files: " LATEX_DIR
+        LATEX_DIR="${LATEX_DIR/#\~/$HOME}"
+    fi
+
+    # Battery management
+    if ask_yes_no "Install battery charge limiter (actuallymentor/battery)?"; then
+        DO_BATTERY=true
+    fi
+
+    # Dotfiles symlinks
+    if ask_yes_no "Symlink dotfiles with stow?"; then
+        DO_STOW=true
+    fi
+
+    # Save choices for potential resume
+    save_choices
+
+    show_summary_and_confirm
+}
+
+# Show summary of choices and ask for confirmation
+show_summary_and_confirm() {
+    echo ""
+    print_header "Ready to bootstrap"
+    echo "The following will be installed/configured:"
+    $DO_MACOS_UPDATE && echo "  • macOS updates"
+    $DO_XCODE_TOOLS && echo "  • Xcode Command Line Tools"
+    $DO_HOMEBREW && echo "  • Homebrew"
+    $DO_BREW_CLI && echo "  • CLI tools via Homebrew"
+    $DO_BREW_APPS && echo "  • GUI apps via Homebrew"
+    $DO_XCODE_APP && echo "  • Xcode from App Store"
+    $DO_PREFS && echo "  • macOS preferences"
+    $DO_CLEAR_DOCK && echo "  • Clear Dock"
+    $DO_PREZTO && echo "  • Prezto"
+    $DO_TERMINAL_THEME && echo "  • Terminal color scheme"
+    $DO_LATEX && echo "  • LaTeX packages${LATEX_DIR:+ (to: $LATEX_DIR)}"
+    $DO_BATTERY && echo "  • Battery charge limiter"
+    $DO_STOW && echo "  • Dotfiles symlinks"
+    echo ""
+
+    if ! ask_yes_no "Proceed with installation?" "y"; then
+        rm -f "$STATE_FILE"
+        echo "Aborted."
+        exit 0
+    fi
+}
+
+# Check for and handle resuming a previous run
+check_resume() {
+    if [[ -f "$STATE_FILE" ]]; then
+        echo ""
+        print_warning "A previous bootstrap run was interrupted."
+        echo ""
+
+        # Show what was completed
+        local completed_steps
+        completed_steps=$(grep -v '^#' "$STATE_FILE" | grep -v '^CHOICE_' | grep -v '^$' || true)
+        if [[ -n "$completed_steps" ]]; then
+            echo "Completed steps:"
+            echo "$completed_steps" | while read -r step; do
+                echo "  ✓ $step"
+            done
+            echo ""
+        fi
+
+        echo "Options:"
+        echo "  1) Resume from where you left off (recommended)"
+        echo "  2) Start fresh (discard previous progress)"
+        echo "  3) Cancel"
+        echo ""
+        read -r -p "Choose [1/2/3]: " choice
+
+        case "$choice" in
+            1)
+                if load_choices; then
+                    print_success "Resuming previous run..."
+                    return 0  # Resume
+                else
+                    print_warning "Could not load previous choices. Starting fresh."
+                    rm -f "$STATE_FILE"
+                    return 1  # Fresh start
+                fi
+                ;;
+            2)
+                rm -f "$STATE_FILE"
+                return 1  # Fresh start
+                ;;
+            *)
+                echo "Cancelled."
+                exit 0
+                ;;
+        esac
+    fi
+    return 1  # No state file, fresh start
+}
+
+# --- Installation steps ---
+# Each step:
+# - Checks if already completed (for resume)
+# - Is idempotent (safe to run multiple times)
+# - Marks itself complete on success
+
+run_step() {
+    local step_name="$1"
+    local step_func="$2"
+
+    if step_completed "$step_name"; then
+        print_success "$step_name (already completed)"
+        return 0
+    fi
+
+    if $step_func; then
+        mark_step_complete "$step_name"
+        return 0
+    else
+        return 1
+    fi
+}
+
+install_macos_updates() {
+    print_header "Updating macOS"
+    sudo softwareupdate -i -a || print_warning "Some updates may require a restart"
+    print_success "macOS updates complete"
+}
+
+install_xcode_tools() {
+    print_header "Installing Xcode Command Line Tools"
+
+    # Already installed? Skip.
+    if xcode-select -p >/dev/null 2>&1; then
+        print_success "Xcode Command Line Tools already installed"
+        return 0
+    fi
+
+    # This opens a dialog; we wait for it to complete
+    xcode-select --install 2>/dev/null || true
+
+    # Wait for installation to complete (with timeout)
+    local wait_count=0
+    local max_wait=120  # 10 minutes
+    until xcode-select -p >/dev/null 2>&1; do
+        sleep 5
+        ((wait_count++))
+        if [[ $wait_count -ge $max_wait ]]; then
+            print_error "Timed out waiting for Xcode Command Line Tools"
+            return 1
+        fi
+    done
+    print_success "Xcode Command Line Tools installed"
+}
+
+install_homebrew() {
+    print_header "Setting up Homebrew"
+
+    if ! command_exists brew; then
+        echo "Installing Homebrew..."
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        # Add to current shell
+        ensure_brew_in_path
+
+        # Add to profile if not already there
+        local brew_path
+        brew_path="$(get_brew_path)"
+        if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
+            echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
+        fi
+    else
+        echo "Homebrew already installed. Updating..."
+        brew update || print_warning "brew update failed, continuing anyway"
+    fi
+
+    print_success "Homebrew ready"
+}
+
+install_brew_cli() {
+    print_header "Installing CLI tools"
+
+    ensure_brew_in_path
+    if ! command_exists brew; then
+        print_warning "Homebrew not available, skipping CLI tools"
+        return 1
+    fi
+
+    local packages=(
+        git
+        git-extras
+        lua
+        mas
+        par
+        stow
+        ruby
+        trash-cli
+        cscope
+        pandoc
+        rename
+        python3
+        swiftlint
+    )
+
+    for pkg in "${packages[@]}"; do
+        if brew list "$pkg" >/dev/null 2>&1; then
+            echo "  $pkg already installed"
+        else
+            echo "  Installing $pkg..."
+            brew install "$pkg" || print_warning "Failed to install $pkg"
+        fi
+    done
+
+    print_success "CLI tools installed"
+}
+
+install_brew_apps() {
+    print_header "Installing GUI applications"
+
+    ensure_brew_in_path
+    if ! command_exists brew; then
+        print_warning "Homebrew not available, skipping GUI apps"
+        return 1
+    fi
+
+    local apps=(
+        vlc
+        basictex
+        appcleaner
+        hammerspoon
+        google-chrome
+        the-unarchiver
+    )
+
+    for app in "${apps[@]}"; do
+        if brew list --cask "$app" >/dev/null 2>&1; then
+            echo "  $app already installed"
+        else
+            echo "  Installing $app..."
+            brew install --cask "$app" || print_warning "Failed to install $app"
+        fi
+    done
+
+    # Install MacVim after ensuring Xcode is ready
+    if brew list macvim >/dev/null 2>&1; then
+        echo "  macvim already installed"
+    else
+        echo "  Installing macvim..."
+        brew install macvim || print_warning "Failed to install macvim"
+    fi
+
+    # Update Vim plugins if vim is available
+    if command_exists vim; then
+        echo "  Updating Vim plugins..."
+        vim +PlugUpdate +qall 2>/dev/null || true
+    fi
+
+    brew cleanup || true
+
+    print_success "GUI applications installed"
+}
+
+install_xcode_app() {
+    print_header "Installing Xcode from App Store"
+
+    ensure_brew_in_path
+    if ! command_exists mas; then
+        print_warning "mas not installed, skipping Xcode App Store install"
+        return 0  # Not a failure, just skipped
+    fi
+
+    # Check if Xcode is already installed
+    if [[ -d "/Applications/Xcode.app" ]]; then
+        print_success "Xcode already installed"
+    else
+        echo "Installing Xcode (this may take a while)..."
+        mas install 497799835 || print_warning "Failed to install Xcode"
+    fi
+
+    # Accept license
+    if [[ -d "/Applications/Xcode.app" ]]; then
+        sudo xcodebuild -license accept 2>/dev/null || true
+    fi
+
+    print_success "Xcode setup complete"
+}
+
+apply_preferences() {
+    print_header "Applying macOS preferences"
+
+    # Close System Preferences/Settings to prevent conflicts
+    osascript -e 'tell application "System Preferences" to quit' 2>/dev/null || true
+    osascript -e 'tell application "System Settings" to quit' 2>/dev/null || true
+
+    /bin/bash "$SCRIPT_DIR/prefs.sh"
+
+    print_success "Preferences applied"
+}
+
+clear_dock() {
+    print_header "Clearing Dock"
+    defaults write com.apple.dock persistent-apps -array
+    defaults write com.apple.dock persistent-others -array
+    killall Dock || true
+    print_success "Dock cleared"
+}
+
+install_prezto() {
+    print_header "Installing Prezto"
+
+    local prezto_dir="${ZDOTDIR:-$HOME}/.zprezto"
+
+    if [[ -d "$prezto_dir" ]]; then
+        print_success "Prezto already installed"
+        return 0
+    fi
+
+    git clone --recursive https://github.com/sorin-ionescu/prezto.git "$prezto_dir"
+    print_success "Prezto installed"
+}
+
+install_terminal_theme() {
+    print_header "Installing Terminal color scheme"
+
+    local temp_dir
+    temp_dir="$(mktemp -d)"
+    track_temp "$temp_dir"
+
+    git clone --depth 1 https://github.com/dbmrq/terminal-solarized.git "$temp_dir"
+    open "$temp_dir/Solarized Dark.terminal"
+    open "$temp_dir/Solarized Light.terminal"
+
+    # Give Terminal time to import
+    sleep 2
+
+    # Clean up (also handled by cleanup trap)
+    rm -rf "$temp_dir"
+
+    print_success "Terminal color scheme installed"
+    print_warning "Set your preferred theme in Terminal preferences"
+}
+
+install_latex() {
+    print_header "Installing LaTeX packages"
+
+    # Ensure tlmgr is available
+    if ! command_exists tlmgr; then
+        # BasicTeX installs here
+        export PATH="/Library/TeX/texbin:$PATH"
+    fi
+
+    if ! command_exists tlmgr; then
+        print_warning "tlmgr not found. Install BasicTeX first."
+        return 0  # Not a fatal error
+    fi
+
+    echo "Updating TeX Live..."
+    sudo tlmgr update --self --all || true
+
+    echo "Installing TeX packages..."
+    sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
+        collection-langother collection-latexextra collection-pictures logreq \
+        biblatex biber || print_warning "Some packages may have failed"
+
+    # Set up directories (idempotent - mkdir -p and ln -sf are safe to repeat)
+    if [[ -n "${LATEX_DIR:-}" ]]; then
+        mkdir -p "${LATEX_DIR}/Classes"
+        mkdir -p "${LATEX_DIR}/Packages"
+        mkdir -p "${LATEX_DIR}/Bibliography"
+        mkdir -p ~/Library/texmf/tex/latex
+        mkdir -p ~/Library/texmf/bibtex
+
+        # Clone repositories (only if not exists)
+        if [[ ! -d "${LATEX_DIR}/Classes/dbmrq" ]]; then
+            git clone https://github.com/dbmrq/tex-dbmrq.git "${LATEX_DIR}/Classes/dbmrq"
+        else
+            echo "  dbmrq already cloned"
+        fi
+        if [[ ! -d "${LATEX_DIR}/Packages/biblatex-abnt" ]]; then
+            git clone https://github.com/abntex/biblatex-abnt.git "${LATEX_DIR}/Packages/biblatex-abnt"
+        else
+            echo "  biblatex-abnt already cloned"
+        fi
+
+        # Create symlinks (idempotent with -sf)
+        ln -sf "${LATEX_DIR}/Classes" ~/Library/texmf/tex/latex/classes
+        ln -sf "${LATEX_DIR}/Packages" ~/Library/texmf/tex/latex/packages
+        ln -sf "${LATEX_DIR}/Bibliography" ~/Library/texmf/bibtex/bib
+    fi
+
+    print_success "LaTeX setup complete"
+}
+
+install_battery() {
+    print_header "Installing battery charge limiter"
+
+    # Check if already installed
+    if command_exists battery; then
+        print_success "Battery tool already installed"
+        return 0
+    fi
+
     curl -s https://raw.githubusercontent.com/actuallymentor/battery/main/setup.sh | bash
-fi
+    print_success "Battery tool installed"
+}
 
-read -p "Symlink dotfiles with stow? [y/N] " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    cd "$(dirname "$PWD")"
-    stow -v --target="$HOME" --ignore='\.DS_Store' */
-fi
+setup_stow() {
+    print_header "Symlinking dotfiles"
 
-echo ""
-echo "Bootstrap complete!"
+    ensure_brew_in_path
+    if ! command_exists stow; then
+        print_warning "stow not installed, skipping dotfiles"
+        return 0  # Not a fatal error
+    fi
+
+    cd "$DOTFILES_DIR"
+
+    # Get all directories (package folders for stow)
+    local packages=()
+    for dir in */; do
+        # Skip Bootstrap directory
+        [[ "$dir" == "Bootstrap/" ]] && continue
+        packages+=("${dir%/}")
+    done
+
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        print_warning "No packages found to stow"
+        return 0
+    fi
+
+    echo "Stowing: ${packages[*]}"
+    # --restow handles re-running gracefully
+    stow --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}"
+
+    print_success "Dotfiles symlinked"
+}
+
+# --- Main execution ---
+main() {
+    echo ""
+    echo -e "${BOLD}╔════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}║     macOS Bootstrap Script             ║${NC}"
+    echo -e "${BOLD}╚════════════════════════════════════════╝${NC}"
+    echo ""
+
+    check_compatibility
+
+    # Check for resume or gather new choices
+    if check_resume; then
+        # Resuming: show what will be done
+        show_summary_and_confirm
+    else
+        # Fresh start: gather choices
+        gather_choices
+    fi
+
+    # Request sudo upfront and keep it alive
+    print_header "Requesting administrator access"
+    sudo -v
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+    SUDO_PID=$!
+
+    # Run selected installations with step tracking
+    # Each step checks if already completed and marks itself done
+    if [[ "$DO_MACOS_UPDATE" == "true" ]]; then
+        run_step "macOS updates" install_macos_updates
+    fi
+
+    if [[ "$DO_XCODE_TOOLS" == "true" ]]; then
+        run_step "Xcode Command Line Tools" install_xcode_tools
+    fi
+
+    if [[ "$DO_HOMEBREW" == "true" ]]; then
+        run_step "Homebrew" install_homebrew
+    fi
+
+    if [[ "$DO_BREW_CLI" == "true" ]]; then
+        run_step "CLI tools" install_brew_cli
+    fi
+
+    if [[ "$DO_BREW_APPS" == "true" ]]; then
+        run_step "GUI applications" install_brew_apps
+    fi
+
+    if [[ "$DO_XCODE_APP" == "true" ]]; then
+        run_step "Xcode from App Store" install_xcode_app
+    fi
+
+    if [[ "$DO_PREFS" == "true" ]]; then
+        run_step "macOS preferences" apply_preferences
+    fi
+
+    if [[ "$DO_CLEAR_DOCK" == "true" ]]; then
+        run_step "Clear Dock" clear_dock
+    fi
+
+    if [[ "$DO_PREZTO" == "true" ]]; then
+        run_step "Prezto" install_prezto
+    fi
+
+    if [[ "$DO_TERMINAL_THEME" == "true" ]]; then
+        run_step "Terminal color scheme" install_terminal_theme
+    fi
+
+    if [[ "$DO_LATEX" == "true" ]]; then
+        run_step "LaTeX packages" install_latex
+    fi
+
+    if [[ "$DO_BATTERY" == "true" ]]; then
+        run_step "Battery charge limiter" install_battery
+    fi
+
+    if [[ "$DO_STOW" == "true" ]]; then
+        run_step "Dotfiles symlinks" setup_stow
+    fi
+
+    # Mark as successful - cleanup handler will display success message
+    BOOTSTRAP_SUCCESS=true
+}
+
+main "$@"

@@ -1,54 +1,143 @@
 #!/usr/bin/env bash
+#
+# Install Homebrew and common packages
+# Can be run standalone or called from bootstrap.sh
+#
 
+set -euo pipefail
+
+# --- Determine Homebrew path based on architecture ---
+get_brew_path() {
+    if [[ "$(uname -m)" == "arm64" ]]; then
+        echo "/opt/homebrew/bin/brew"
+    else
+        echo "/usr/local/bin/brew"
+    fi
+}
+
+ensure_brew_in_path() {
+    if ! command -v brew >/dev/null 2>&1; then
+        local brew_path
+        brew_path="$(get_brew_path)"
+        if [[ -x "$brew_path" ]]; then
+            eval "$("$brew_path" shellenv)"
+        fi
+    fi
+}
+
+# --- Install/update Homebrew ---
 echo ""
-echo "Installing Homebrew and formulae..."
+echo "Setting up Homebrew..."
 echo ""
 
-if ! hash brew 2>/dev/null; then
-    echo -e "\nInstalling Homebrew..."
+if ! command -v brew >/dev/null 2>&1; then
+    echo "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> "$HOME/.zprofile"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    # Add to current shell
+    ensure_brew_in_path
+
+    # Add to profile if not already there
+    local brew_path
+    brew_path="$(get_brew_path)"
+    if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
+        echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
+    fi
 else
-    echo -e "\nHomebrew already installed. Upgrading..."
-    brew upgrade
+    echo "Homebrew already installed. Updating..."
+    brew update
 fi
 
-# CLI tools
-brew install git
-brew install git-extras
-brew install lua
-brew install mas
-brew install par
-brew install stow
-brew install ruby
-brew install trash
-brew install cscope
-brew install pandoc
-brew install rename
-brew install python3
-brew install swiftlint
-
-# GUI apps
-brew install --cask vlc
-brew install --cask basictex
-brew install --cask appcleaner
-brew install --cask hammerspoon
-brew install --cask google-chrome
-brew install --cask the-unarchiver
-
-# Install Xcode from App Store
-mas install 497799835
-sudo xcodebuild -license accept
-
-read -n 1 -s -r -p "Open Xcode once before continuing. Press any key when ready."
+# --- CLI tools ---
 echo ""
+echo "Installing CLI tools..."
 
-brew install macvim
-vim +PlugUpdate +qall
+cli_packages=(
+    git
+    git-extras
+    lua
+    mas
+    par
+    stow
+    ruby
+    trash-cli
+    cscope
+    pandoc
+    rename
+    python3
+    swiftlint
+)
 
+for pkg in "${cli_packages[@]}"; do
+    if brew list "$pkg" >/dev/null 2>&1; then
+        echo "  $pkg already installed"
+    else
+        echo "  Installing $pkg..."
+        brew install "$pkg" || echo "  Warning: Failed to install $pkg"
+    fi
+done
+
+# --- GUI apps ---
+echo ""
+echo "Installing GUI applications..."
+
+gui_apps=(
+    vlc
+    basictex
+    appcleaner
+    hammerspoon
+    google-chrome
+    the-unarchiver
+)
+
+for app in "${gui_apps[@]}"; do
+    if brew list --cask "$app" >/dev/null 2>&1; then
+        echo "  $app already installed"
+    else
+        echo "  Installing $app..."
+        brew install --cask "$app" || echo "  Warning: Failed to install $app"
+    fi
+done
+
+# --- Xcode from App Store ---
+echo ""
+echo "Installing Xcode from App Store..."
+
+if command -v mas >/dev/null 2>&1; then
+    if [[ -d "/Applications/Xcode.app" ]]; then
+        echo "  Xcode already installed"
+    else
+        mas install 497799835 || echo "  Warning: Failed to install Xcode"
+    fi
+
+    if [[ -d "/Applications/Xcode.app" ]]; then
+        sudo xcodebuild -license accept 2>/dev/null || true
+    fi
+else
+    echo "  Warning: mas not installed, skipping Xcode"
+fi
+
+# --- MacVim ---
+echo ""
+echo "Installing MacVim..."
+
+if brew list macvim >/dev/null 2>&1; then
+    echo "  macvim already installed"
+else
+    brew install macvim || echo "  Warning: Failed to install macvim"
+fi
+
+# Update Vim plugins
+if command -v vim >/dev/null 2>&1; then
+    echo "  Updating Vim plugins..."
+    vim +PlugUpdate +qall 2>/dev/null || true
+fi
+
+# --- Cleanup ---
+echo ""
+echo "Cleaning up..."
 brew cleanup
-brew doctor
+brew doctor || true
 
 echo ""
 echo "Done."
