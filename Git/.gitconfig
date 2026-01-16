@@ -1,6 +1,48 @@
+# =============================================================================
+# Git Configuration - Multiple GitHub Account Support
+# =============================================================================
+#
+# Supports 3 GitHub accounts via SSH host aliases (see ~/.ssh/config):
+#   - github-personal   -> dbmrq (personal)
+#   - github-work       -> danatwex (work on github.com)
+#   - github-enterprise -> W508153_wexinc (enterprise SSO)
+#
+# Clone using the appropriate host:
+#   git clone git@github-personal:dbmrq/repo.git
+#   git clone git@github-work:danatwex/repo.git
+#   git clone git@github-enterprise:org/repo.git
+#
+# Or just clone normally - URL rewrites below handle the mapping automatically.
+# =============================================================================
+
+# --- Default Identity (Personal) ---
 [user]
     name = Daniel M.
     email = danielbmarques@gmail.com
+
+# --- Directory-based Identity Overrides ---
+# Repos in ~/Work/ use work identity (see ~/.gitconfig-work)
+[includeIf "gitdir:~/Work/"]
+    path = ~/.gitconfig-work
+
+# --- Machine-specific Overrides ---
+# Create ~/.gitconfig.local for per-machine settings
+[include]
+    path = ~/.gitconfig.local
+
+# --- URL Rewrites for GitHub Accounts ---
+# Automatically rewrite URLs to use the correct SSH host alias
+# This means "git clone git@github.com:dbmrq/repo" uses the personal key
+
+# Personal repos (dbmrq)
+[url "git@github-personal:dbmrq/"]
+    insteadOf = git@github.com:dbmrq/
+    insteadOf = https://github.com/dbmrq/
+
+# Work repos (danatwex)
+[url "git@github-work:danatwex/"]
+    insteadOf = git@github.com:danatwex/
+    insteadOf = https://github.com/danatwex/
 
 [core]
     safecrlf = true

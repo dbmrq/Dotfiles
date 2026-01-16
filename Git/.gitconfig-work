@@ -1,0 +1,7 @@
+# Work identity for repos in ~/Work/
+# This file is included via [includeIf "gitdir:~/Work/"] in .gitconfig
+
+[user]
+    name = Daniel M
+    email = daniel.marques@wexinc.com
+

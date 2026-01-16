@@ -43,11 +43,13 @@ cleanup() {
     fi
 
     # Remove temporary files
-    for temp_file in "${TEMP_FILES[@]}"; do
-        if [[ -e "$temp_file" ]]; then
-            rm -rf "$temp_file" 2>/dev/null || true
-        fi
-    done
+    if [[ ${#TEMP_FILES[@]} -gt 0 ]]; then
+        for temp_file in "${TEMP_FILES[@]}"; do
+            if [[ -e "$temp_file" ]]; then
+                rm -rf "$temp_file" 2>/dev/null || true
+            fi
+        done
+    fi
 
     # Handle state file based on success/failure
     if $BOOTSTRAP_SUCCESS; then
@@ -736,10 +738,35 @@ setup_stow() {
     fi
 
     echo "Stowing: ${packages[*]}"
-    # --restow handles re-running gracefully
-    stow --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}"
 
-    print_success "Dotfiles symlinked"
+    # First, check for conflicts using --no (dry-run) mode
+    local conflicts
+    if ! conflicts=$(stow --no --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}" 2>&1); then
+        if echo "$conflicts" | grep -q "cannot stow"; then
+            print_warning "Conflicts detected with existing files:"
+            echo "$conflicts" | grep "cannot stow" | while read -r line; do
+                # Extract just the target filename
+                local target
+                target=$(echo "$line" | sed 's/.*over existing target //' | sed 's/ since.*//')
+                echo "  • ~/$target"
+            done
+            echo ""
+            echo "To resolve, either:"
+            echo "  1) Back up and remove the conflicting files, then re-run"
+            echo "  2) Run: cd $DOTFILES_DIR && stow --adopt --restow -v --target=\"\$HOME\" ${packages[*]}"
+            echo "     (This will move existing files into the dotfiles repo)"
+            print_warning "Stow skipped due to conflicts"
+            return 1
+        fi
+    fi
+
+    # No conflicts, proceed with stow
+    if stow --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}"; then
+        print_success "Dotfiles symlinked"
+    else
+        print_error "Stow failed"
+        return 1
+    fi
 }
 
 # --- Main execution ---

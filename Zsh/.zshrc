@@ -35,6 +35,8 @@ alias rmdsstore="find . -name '*.DS_Store' -type f -delete"
 
 # PATH
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
 
 # Completions
