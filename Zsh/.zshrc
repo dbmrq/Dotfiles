@@ -63,7 +63,9 @@ alias cleanup="find . -type d -print0 | xargs -0 chmod 0755 && \
 
 alias zipr='f() { zip -r $1.zip $1 };f'
 
-alias brew='sudo -Hu dbmrq brew'
+# alias brew='sudo -Hu dbmrq brew'
+
+alias get_idf='. $HOME/esp/esp-idf/export.sh'
 
 #  }}}1
 
@@ -76,3 +78,30 @@ alias brew='sudo -Hu dbmrq brew'
 # #  }}}1
 
 export PATH="/opt/homebrew/opt/ffmpeg@4/bin:$PATH"
+
+# Created by `pipx` on 2024-06-08 13:29:22
+export PATH="$PATH:/Users/dbmrq/.local/bin"
+export PATH="$PATH:/opt/homebrew/opt/ccache/libexec"
+
+# Python ................................................................ {{{1
+autoload -U compinit && compinit
+eval "$(register-python-argcomplete pipx)"
+# ....................................................................... }}}1
+
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+
+# # >>> conda initialize >>>
+# # !! Contents within this block are managed by 'conda init' !!
+# __conda_setup="$('/opt/homebrew/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     if [ -f "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+#         . "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+#     else
+#         export PATH="/opt/homebrew/Caskroom/miniconda/base/bin:$PATH"
+#     fi
+# fi
+# unset __conda_setup
+# # <<< conda initialize <<<
+

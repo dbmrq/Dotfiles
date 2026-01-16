@@ -4,6 +4,10 @@
 -- Batman
 
 -- requires https://github.com/actuallymentor/battery
+-- OR the smc binary from the repo above can be
+-- moved to /usr/local/bin and made executable
+-- (chmod +x smc)
+-- C.f. https://github.com/zackelia/bclm/issues/20
 
 local batteryMenu = hs.menubar.new(true)
 
@@ -71,8 +75,7 @@ function updateBatteryMenu()
     else
         hs.alert.show("Plugged At 100%")
         batteryMenu:returnToMenuBar()
-        batteryMenu:setTitle(hs.styledtext.new('•', { color = hs.drawing.color["green"] }))
-        -- batteryMenu:removeFromMenuBar()
+        batteryMenu:setTitle(math.floor(hs.battery.percentage()) .. '%')
         forceCharge = false
         disableCharging()
     end

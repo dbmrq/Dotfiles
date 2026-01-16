@@ -8,6 +8,8 @@ if ! hash brew 2>/dev/null; then
     # If Homebrew isn't installed
     echo -e "\nInstalling Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/dbmrq/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 else
     echo -e "\nHomebrew already installed. Moving on..."
     brew upgrade
@@ -36,11 +38,11 @@ brew install swiftlint
 # brew install carthage
 # brew install thefuck
 # brew install terminal-notifier
-brew install curl --with-openssl
-brew install difftastic
+# brew install curl --with-openssl
+# brew install difftastic
 
 brew install --cask vlc
-brew install --cask java
+# brew install --cask java
 # brew install --cask calibre
 # brew install --cask opensim
 # brew install --cask firefox
@@ -61,10 +63,10 @@ read -n 1 -s -r -p "A few applications require Xcode to be installed and opened 
 
 brew install macvim
 
-OSASCRIPT='tell application "Finder" to make alias file to POSIX file "'
-OSASCRIPT+=$(find $(brew --prefix) -name MacVim.app)
-OSASCRIPT+='" at POSIX file "/Applications/"'
-osascript -e $OSASCRIPT
+# OSASCRIPT='tell application "Finder" to make alias file to POSIX file "'
+# OSASCRIPT+=$(find $(brew --prefix) -name MacVim.app)
+# OSASCRIPT+='" at POSIX file "/Applications/"'
+# osascript -e $OSASCRIPT
 
 vim +PlugUpdate +qall
 

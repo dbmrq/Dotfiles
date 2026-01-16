@@ -72,7 +72,6 @@
     giveup = !git fetch --all --prune && git reset --hard origin/master && git clean -d -x -f
 
 [diff]
-    external = difft --color always --display inline
     mnemonicPrefix = true
     renames = true
     wordRegex = .

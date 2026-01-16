@@ -17,7 +17,7 @@ require "snippets" -- Some random commands
 require "collage"  -- Clipboard management
 require "mocha"    -- Prevent Mac from sleeping
 require "readline" -- Readline style bindings
-require "batman"   -- Battery management
+-- require "batman"   -- Battery management
 
 
 -- Meta {{{1

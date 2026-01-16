@@ -74,3 +74,6 @@ fi
 TMPPREFIX="${TMPDIR%/}/zsh"
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Created by `pipx` on 2024-06-08 13:29:22
+export PATH="$PATH:/Users/dbmrq/.local/bin"
