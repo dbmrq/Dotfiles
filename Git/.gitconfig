@@ -2,17 +2,16 @@
 # Git Configuration - Multiple GitHub Account Support
 # =============================================================================
 #
-# Supports 3 GitHub accounts via SSH host aliases (see ~/.ssh/config):
-#   - github-personal   -> dbmrq (personal)
-#   - github-work       -> danatwex (work on github.com)
-#   - github-enterprise -> W508153_wexinc (enterprise SSO)
+# Supports 3 GitHub accounts (see ~/.ssh/config for SSH keys):
+#   - dbmrq            (personal)
+#   - danatwex         (work on github.com)
+#   - W508153_wexinc   (enterprise SSO) <- DEFAULT
 #
-# Clone using the appropriate host:
-#   git clone git@github-personal:dbmrq/repo.git
-#   git clone git@github-work:danatwex/repo.git
-#   git clone git@github-enterprise:org/repo.git
+# Just clone normally - the right account is selected automatically:
+#   - github.com:dbmrq/*     -> uses personal SSH key
+#   - github.com:danatwex/* -> uses work SSH key
+#   - github.com:anything-else/* -> uses enterprise SSH key (default)
 #
-# Or just clone normally - URL rewrites below handle the mapping automatically.
 # =============================================================================
 
 # --- Default Identity (Personal) ---
