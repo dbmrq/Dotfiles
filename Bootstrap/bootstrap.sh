@@ -173,13 +173,19 @@ save_choices() {
         echo "CHOICE_BATTERY=$DO_BATTERY"
         echo "CHOICE_STOW=$DO_STOW"
         echo "CHOICE_SSH_KEYS=$DO_SSH_KEYS"
-        echo "CHOICE_SSH_DEFAULT=$SSH_DEFAULT_ACCOUNT"
+        echo "CHOICE_SSH_DEFAULT=$DEFAULT_GITHUB_ACCOUNT"
+        # Save GitHub accounts array
+        echo "CHOICE_GITHUB_ACCOUNT_COUNT=${#GITHUB_ACCOUNTS[@]}"
+        for i in "${!GITHUB_ACCOUNTS[@]}"; do
+            echo "CHOICE_GITHUB_ACCOUNT_$i=${GITHUB_ACCOUNTS[$i]}"
+        done
     } >> "$STATE_FILE"
 }
 
 # Load choices from state file
 load_choices() {
     if [[ -f "$STATE_FILE" ]]; then
+        local account_count=0
         # shellcheck source=/dev/null
         while IFS='=' read -r key value; do
             case "$key" in
@@ -198,7 +204,9 @@ load_choices() {
                 CHOICE_BATTERY) DO_BATTERY="$value" ;;
                 CHOICE_STOW) DO_STOW="$value" ;;
                 CHOICE_SSH_KEYS) DO_SSH_KEYS="$value" ;;
-                CHOICE_SSH_DEFAULT) SSH_DEFAULT_ACCOUNT="$value" ;;
+                CHOICE_SSH_DEFAULT) DEFAULT_GITHUB_ACCOUNT="$value" ;;
+                CHOICE_GITHUB_ACCOUNT_COUNT) account_count="$value" ;;
+                CHOICE_GITHUB_ACCOUNT_*) GITHUB_ACCOUNTS+=("$value") ;;
             esac
         done < "$STATE_FILE"
         return 0
@@ -241,6 +249,83 @@ check_compatibility() {
     echo ""
 }
 
+# --- Gather GitHub account configuration ---
+gather_github_accounts() {
+    echo ""
+    echo "  Add GitHub accounts one at a time. For each account, you'll specify:"
+    echo "    - A name (e.g., 'personal', 'work')"
+    echo "    - The GitHub username"
+    echo "    - Email for commits"
+    echo "    - Usernames/orgs to map to this account"
+    echo ""
+
+    local account_count=0
+    while true; do
+        if [[ $account_count -gt 0 ]]; then
+            if ! ask_yes_no "  Add another GitHub account?"; then
+                break
+            fi
+        fi
+
+        echo ""
+        read -r -p "  Account name (e.g., personal, work, enterprise): " account_name
+        if [[ -z "$account_name" ]]; then
+            echo "  Skipping empty account name"
+            continue
+        fi
+        # Normalize to lowercase, no spaces
+        account_name=$(echo "$account_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+
+        read -r -p "  GitHub username: " github_username
+        if [[ -z "$github_username" ]]; then
+            echo "  Skipping - username required"
+            continue
+        fi
+
+        read -r -p "  Email for commits: " account_email
+        if [[ -z "$account_email" ]]; then
+            echo "  Skipping - email required"
+            continue
+        fi
+
+        echo "  Which users/orgs should use this account?"
+        echo "  (comma-separated, e.g., 'myuser,myorg,another-org')"
+        echo "  The username '$github_username' will be added automatically."
+        read -r -p "  Additional mappings (or press Enter for none): " extra_mappings
+
+        # Always include the username itself
+        local all_mappings="$github_username"
+        if [[ -n "$extra_mappings" ]]; then
+            all_mappings="$github_username,$extra_mappings"
+        fi
+
+        # Store as "name|username|email|mappings"
+        GITHUB_ACCOUNTS+=("$account_name|$github_username|$account_email|$all_mappings")
+        ((account_count++))
+        print_success "  Added account: $account_name ($github_username)"
+    done
+
+    # Ask which is default if we have accounts
+    if [[ ${#GITHUB_ACCOUNTS[@]} -gt 0 ]]; then
+        echo ""
+        echo "  Which account should be the default for other repos?"
+        local i=1
+        for account in "${GITHUB_ACCOUNTS[@]}"; do
+            local name username
+            name=$(echo "$account" | cut -d'|' -f1)
+            username=$(echo "$account" | cut -d'|' -f2)
+            echo "    $i) $name ($username)"
+            ((i++))
+        done
+        read -r -p "  Choose [1-${#GITHUB_ACCOUNTS[@]}]: " default_choice
+        if [[ "$default_choice" =~ ^[0-9]+$ ]] && [[ "$default_choice" -ge 1 ]] && [[ "$default_choice" -le ${#GITHUB_ACCOUNTS[@]} ]]; then
+            DEFAULT_GITHUB_ACCOUNT=$((default_choice - 1))
+        else
+            DEFAULT_GITHUB_ACCOUNT=0
+        fi
+    fi
+}
+
 # --- Gather all choices upfront ---
 gather_choices() {
     print_header "Configuration"
@@ -263,7 +348,7 @@ gather_choices() {
     DO_BATTERY=false
     DO_STOW=false
     DO_SSH_KEYS=false
-    SSH_DEFAULT_ACCOUNT=""
+    GITHUB_ACCOUNTS=()  # Array of "name:username:email:mappings"
 
     # Core system updates
     if ask_yes_no "Update macOS?"; then
@@ -332,21 +417,9 @@ gather_choices() {
     fi
 
     # SSH keys for GitHub
-    if ask_yes_no "Set up SSH keys for GitHub?"; then
+    if ask_yes_no "Set up GitHub accounts (SSH keys & URL rewrites)?"; then
         DO_SSH_KEYS=true
-        echo ""
-        echo "  Which GitHub account should be the default for this machine?"
-        echo "    1) personal  - dbmrq (for personal machines)"
-        echo "    2) work      - danatwex (for work machines)"
-        echo "    3) enterprise - W508153_wexinc via SSO (for enterprise machines)"
-        echo ""
-        read -r -p "  Choose [1/2/3]: " ssh_choice
-        case "$ssh_choice" in
-            1) SSH_DEFAULT_ACCOUNT="personal" ;;
-            2) SSH_DEFAULT_ACCOUNT="work" ;;
-            3) SSH_DEFAULT_ACCOUNT="enterprise" ;;
-            *) SSH_DEFAULT_ACCOUNT="personal" ;;
-        esac
+        gather_github_accounts
     fi
 
     # Save choices for potential resume
@@ -373,7 +446,20 @@ show_summary_and_confirm() {
     $DO_LATEX && echo "  • LaTeX packages${LATEX_DIR:+ (to: $LATEX_DIR)}"
     $DO_BATTERY && echo "  • Battery charge limiter"
     $DO_STOW && echo "  • Dotfiles symlinks"
-    $DO_SSH_KEYS && echo "  • SSH keys for GitHub (default: $SSH_DEFAULT_ACCOUNT)"
+    if $DO_SSH_KEYS && [[ ${#GITHUB_ACCOUNTS[@]} -gt 0 ]]; then
+        echo "  • GitHub accounts:"
+        for i in "${!GITHUB_ACCOUNTS[@]}"; do
+            local account="${GITHUB_ACCOUNTS[$i]}"
+            local name username
+            name=$(echo "$account" | cut -d'|' -f1)
+            username=$(echo "$account" | cut -d'|' -f2)
+            if [[ "$i" -eq "${DEFAULT_GITHUB_ACCOUNT:-0}" ]]; then
+                echo "      - $name ($username) [default]"
+            else
+                echo "      - $name ($username)"
+            fi
+        done
+    fi
     echo ""
 
     if ! ask_yes_no "Proceed with installation?" "y"; then
@@ -795,81 +881,119 @@ setup_stow() {
 }
 
 setup_ssh_keys() {
-    print_header "Setting up SSH keys for GitHub"
+    print_header "Setting up GitHub accounts"
+
+    if [[ ${#GITHUB_ACCOUNTS[@]} -eq 0 ]]; then
+        print_warning "No GitHub accounts configured, skipping SSH setup"
+        return 0
+    fi
 
     mkdir -p ~/.ssh
     chmod 700 ~/.ssh
 
-    local keys_generated=false
+    local new_keys=()
+    local default_account_name=""
+    local default_identity_file=""
 
-    # Generate keys if they don't exist
-    if [[ ! -f ~/.ssh/id_ed25519_github_personal ]]; then
-        echo "Generating SSH key for personal account (dbmrq)..."
-        ssh-keygen -t ed25519 -C "danielbmarques@gmail.com" -f ~/.ssh/id_ed25519_github_personal -N ""
-        keys_generated=true
-    else
-        echo "  Personal key already exists"
-    fi
+    # Start building the SSH config
+    local ssh_config="# Machine-specific SSH config for GitHub accounts
+# Generated by bootstrap script on $(date)
+# Do not edit manually - rerun bootstrap to regenerate
 
-    if [[ ! -f ~/.ssh/id_ed25519_github_work ]]; then
-        echo "Generating SSH key for work account (danatwex)..."
-        ssh-keygen -t ed25519 -C "daniel.marques@wexinc.com" -f ~/.ssh/id_ed25519_github_work -N ""
-        keys_generated=true
-    else
-        echo "  Work key already exists"
-    fi
+"
 
-    if [[ ! -f ~/.ssh/id_ed25519_github_enterprise ]]; then
-        echo "Generating SSH key for enterprise account (W508153_wexinc)..."
-        ssh-keygen -t ed25519 -C "daniel.marques@wexinc.com" -f ~/.ssh/id_ed25519_github_enterprise -N ""
-        keys_generated=true
-    else
-        echo "  Enterprise key already exists"
-    fi
+    # Start building the gitconfig
+    local git_config="# Machine-specific Git config for GitHub accounts
+# Generated by bootstrap script on $(date)
+# Do not edit manually - rerun bootstrap to regenerate
 
-    # Create local SSH config with the chosen default
-    local identity_file
-    case "$SSH_DEFAULT_ACCOUNT" in
-        personal)   identity_file="~/.ssh/id_ed25519_github_personal" ;;
-        work)       identity_file="~/.ssh/id_ed25519_github_work" ;;
-        enterprise) identity_file="~/.ssh/id_ed25519_github_enterprise" ;;
-        *)          identity_file="~/.ssh/id_ed25519_github_personal" ;;
-    esac
+"
 
-    cat > ~/.ssh/config.local << EOF
-# Machine-specific SSH config
-# This file is not tracked in the dotfiles repo
-# Generated by bootstrap script
+    # Process each account
+    for i in "${!GITHUB_ACCOUNTS[@]}"; do
+        local account="${GITHUB_ACCOUNTS[$i]}"
+        local name username email mappings
+        name=$(echo "$account" | cut -d'|' -f1)
+        username=$(echo "$account" | cut -d'|' -f2)
+        email=$(echo "$account" | cut -d'|' -f3)
+        mappings=$(echo "$account" | cut -d'|' -f4)
 
-# Default GitHub account for this machine ($SSH_DEFAULT_ACCOUNT)
-# Used for repos not matching dbmrq/, danatwex/, or wexinc/
+        local key_file="$HOME/.ssh/id_ed25519_github_$name"
+        local host_alias="github-$name"
+
+        # Generate SSH key if it doesn't exist
+        if [[ ! -f "$key_file" ]]; then
+            echo "Generating SSH key for $name ($username)..."
+            ssh-keygen -t ed25519 -C "$email" -f "$key_file" -N ""
+            new_keys+=("$name|$username|$key_file")
+        else
+            echo "  Key for $name already exists"
+        fi
+
+        # Add SSH host alias
+        ssh_config+="# --- $name ($username) ---
+Host $host_alias
+    HostName github.com
+    User git
+    IdentityFile $key_file
+    IdentitiesOnly yes
+
+"
+
+        # Add URL rewrites for each mapping
+        IFS=',' read -ra mapping_array <<< "$mappings"
+        for mapping in "${mapping_array[@]}"; do
+            mapping=$(echo "$mapping" | xargs)  # trim whitespace
+            if [[ -n "$mapping" ]]; then
+                git_config+="[url \"git@$host_alias:$mapping/\"]
+    insteadOf = git@github.com:$mapping/
+    insteadOf = https://github.com/$mapping/
+
+"
+            fi
+        done
+
+        # Track the default account
+        if [[ "$i" -eq "${DEFAULT_GITHUB_ACCOUNT:-0}" ]]; then
+            default_account_name="$name"
+            default_identity_file="$key_file"
+        fi
+    done
+
+    # Add default github.com host (uses the default account)
+    ssh_config+="# --- Default (for repos not matching any mapping) ---
 Host github.com
     HostName github.com
     User git
-    IdentityFile $identity_file
+    IdentityFile $default_identity_file
     IdentitiesOnly yes
-EOF
+"
 
-    print_success "SSH config created (default: $SSH_DEFAULT_ACCOUNT)"
+    # Write the configs
+    echo "$ssh_config" > ~/.ssh/config.local
+    chmod 600 ~/.ssh/config.local
+    print_success "SSH config created (~/.ssh/config.local)"
 
-    # Show public keys if new ones were generated
-    if $keys_generated; then
+    echo "$git_config" > ~/.gitconfig.local
+    print_success "Git config created (~/.gitconfig.local)"
+
+    # Show public keys for new accounts
+    if [[ ${#new_keys[@]} -gt 0 ]]; then
         echo ""
         print_warning "New SSH keys generated! Add these public keys to GitHub:"
-        echo ""
-        echo "=== PERSONAL (dbmrq) - https://github.com/settings/keys ==="
-        cat ~/.ssh/id_ed25519_github_personal.pub
-        echo ""
-        echo "=== WORK (danatwex) - https://github.com/settings/keys ==="
-        cat ~/.ssh/id_ed25519_github_work.pub
-        echo ""
-        echo "=== ENTERPRISE (W508153_wexinc) - https://github.com/settings/keys ==="
-        echo "(After adding, click 'Configure SSO' to authorize for your org)"
-        cat ~/.ssh/id_ed25519_github_enterprise.pub
+        for key_info in "${new_keys[@]}"; do
+            local name username key_file
+            name=$(echo "$key_info" | cut -d'|' -f1)
+            username=$(echo "$key_info" | cut -d'|' -f2)
+            key_file=$(echo "$key_info" | cut -d'|' -f3)
+            echo ""
+            echo "=== $name ($username) - https://github.com/settings/keys ==="
+            cat "${key_file}.pub"
+        done
         echo ""
     fi
 
-    print_success "SSH keys setup complete"
+    print_success "GitHub accounts setup complete (default: $default_account_name)"
 }
 
 # --- Main execution ---
