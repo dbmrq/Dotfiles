@@ -1,0 +1,33 @@
+name: Lint and Test
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on Bootstrap scripts
+        run: |
+          for script in Bootstrap/*.sh; do
+            echo "Checking $script..."
+            shellcheck --severity=warning "$script"
+          done
+
+  test:
+    name: Bootstrap Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run test suite
+        run: ./Bootstrap/test-scripts.sh
