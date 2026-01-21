@@ -1,14 +1,11 @@
-" Mappings and commands
+" Full Vim Mappings - extends essential mappings with advanced features
 
-let mapleader = " "
-let maplocalleader = ";"
+" Load essential mappings first
+source ~/.vim/mappings-essential.vim
 
 command! Center silent! exe 'normal! ggVG:center' . winwidth('%') . '\<CR>'
 
-" Marks
-noremap ' `
-noremap ` '
-
+" Marks (accented characters for Brazilian keyboard)
 nnoremap à `a
 nnoremap è `a
 nnoremap ì `a
@@ -20,38 +17,7 @@ nnoremap í 'a
 nnoremap ó 'a
 nnoremap ú 'a
 
-" Enter normal mode
-autocmd InsertEnter * set timeoutlen=50
-autocmd InsertLeave * set timeoutlen=750
-inoremap jk <esc>
-inoremap kj <esc>
-inoremap JK <esc>
-inoremap KJ <esc>
-vnoremap <CR> <esc>
-
-" Movements
-nnoremap H ^
-nnoremap L $
-onoremap H ^
-onoremap L $
-vnoremap H ^
-vnoremap L $h
-noremap G G$
-nnoremap K H
-nnoremap J L
-
-" Undo points
-inoremap . .<C-g>u
-inoremap , ,<C-g>u
-inoremap ; ;<C-g>u
-inoremap ! !<C-g>u
-inoremap ? ?<C-g>u
-inoremap : :<C-g>u
-
-" Switch windows, buffers and quickfix items
-nnoremap <leader>w <c-w><c-w>
-nnoremap <leader>b :b#<cr>
-
+" Switch buffers and quickfix items (extends essential)
 if has('gui_macvim')
     let macvim_skip_cmd_opt_movement = 1
 endif
@@ -72,9 +38,8 @@ function! NextBufferOrQF(command)
     endfor
     return ":b" . a:command . "\<cr>"
 endfunction
-" Yank
-nnoremap Y y$
 
+" Yank unwrapped text
 function! s:YankUnwrapped(type, ...)
     if a:0
         normal! gv"ay
@@ -94,19 +59,7 @@ endfunction
 vnoremap <leader>y :call <SID>YankUnwrapped(visualmode(), 1)<CR>
 nnoremap <leader>y :set opfunc=<SID>YankUnwrapped<CR>g@
 
-" Registers
-noremap <leader>d "_d
-noremap <leader>c "_c
-noremap <leader>s "_s
-noremap <leader>x "_x
-xnoremap <silent> <leader>p p:let @+=@0<CR>:let @"=@0<CR>
-
-" Fold
-nnoremap <leader>f za
-
-" Spell
-nnoremap <localleader>ss :set spell!<cr>:set spell?<cr>
-
+" Spell (extends essential)
 function! ToggleSpellLang(lang)
     if &l:spelllang =~ a:lang
         return ":setlocal spell spelllang-=" . a:lang . "\<cr>"
@@ -124,9 +77,6 @@ map <leader>hi :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
     \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
     \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
     \ . ">"<CR>
-
-" Select text just pasted
-noremap gV `[v`]
 
 " Add blank lines
 function! s:BlankUp(count) abort
@@ -149,32 +99,14 @@ nmap <leader>j <Plug>BlankDown
 
 nnoremap <leader>aa mn{O<esc>}o<esc>`n
 vmap <leader>aa <esc>`<<Plug>BlankUp`><Plug>BlankDown<esc>`<kV`>j
-" Open current file's directory
+
+" Open current file's directory (macOS-specific)
 command! CD silent! lcd %:p:h
 command! Finder silent exe '!open ' . expand("%:p:h")
 command! Term silent exe '! osascript
             \ -e "tell application \"Terminal\" to activate"
             \ -e "tell application \"Terminal\" to do script \"cd ' .
             \ expand("%:p:h") . '\""'
-
-" Write and/or quit
-command! W w !sudo tee % > /dev/null
-
-nnoremap <silent> <expr> <localleader>q Quit() . "\<CR>"
-nnoremap <silent> <expr> <localleader>Q Quit() . "!\<CR>"
-nnoremap <silent> <expr> <localleader>x ":w\<CR>" . Quit() . "\<CR>"
-
-function! Quit()
-    if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
-        return ':bd'
-    else | return ':q' | endif
-endfunction
-
-" Close the quickfix window
-autocmd BufReadPost quickfix nnoremap <buffer> q :q<CR>
-
-" Macros
-nnoremap Q @@
 
 " vimgrep
 command! -nargs=1 G exe "vimgrep /<args>/g **/*." . expand('%:e') | cw
@@ -202,11 +134,6 @@ function! s:addCommas()
 endfunction
 
 nnoremap <expr> <leader>, <SID>addCommas()
-
-" Split and join lines
-nnoremap <BS> J
-nnoremap <CR> i<CR><esc>
-autocmd BufReadPost quickfix silent! unmap <CR>
 
 " Strip repeated lines
 function! s:stripRepeatedLines()
@@ -296,9 +223,6 @@ augroup BWCCreateDir
     autocmd!
     autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
 augroup END
-
-" Edit vimrc
-nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 
 " Source .vimrc
 if exists("g:loaded_sourceVimRC")

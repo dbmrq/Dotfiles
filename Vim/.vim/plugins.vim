@@ -43,6 +43,13 @@ call plug#begin('~/.vim/bundle')
     Plug 'dbmrq/vim-howdy'
     Plug 'dbmrq/vim-bucky'
 
+    " Which-key - shows available keybindings
+    if has('nvim')
+        Plug 'folke/which-key.nvim'
+    else
+        Plug 'liuchengxu/vim-which-key'
+    endif
+
 call plug#end()
 
 command! Plug so % | PlugUpdate | PlugUpgrade
@@ -372,3 +379,52 @@ nmap -z <Plug>ChalkDown
 vmap =z <Plug>ChalkUp
 vmap -z <Plug>ChalkDown
 
+" Which-key configuration
+if has('nvim')
+    " Neovim: which-key.nvim configuration (Lua)
+    lua << EOF
+    local ok, wk = pcall(require, "which-key")
+    if ok then
+        wk.setup({
+            delay = 500,
+            icons = { mappings = false },
+        })
+        wk.add({
+            { "<leader>b", desc = "Alternate buffer" },
+            { "<leader>c", desc = "Change (no yank)" },
+            { "<leader>d", desc = "Delete (no yank)" },
+            { "<leader>e", group = "Edit" },
+            { "<leader>ev", desc = "Edit vimrc" },
+            { "<leader>f", desc = "Toggle fold" },
+            { "<leader>g", group = "Format" },
+            { "<leader>gq", desc = "Format paragraph" },
+            { "<leader>p", desc = "Paste (keep register)" },
+            { "<leader>s", desc = "Visual split" },
+            { "<leader>w", desc = "Next window" },
+            { "<leader>x", desc = "Delete char (no yank)" },
+            { "<leader>?", desc = "Cheat sheet" },
+        })
+    end
+EOF
+else
+    " Vim: vim-which-key configuration
+    let g:which_key_timeout = 500
+    let g:which_key_display_names = {' ': 'SPC', '<CR>': 'RET', '<Tab>': 'TAB'}
+
+    let g:which_key_map = {}
+    let g:which_key_map.b = 'Alternate buffer'
+    let g:which_key_map.c = 'Change (no yank)'
+    let g:which_key_map.d = 'Delete (no yank)'
+    let g:which_key_map.e = { 'name': '+Edit', 'v': 'Edit vimrc' }
+    let g:which_key_map.f = 'Toggle fold'
+    let g:which_key_map.g = { 'name': '+Format', 'q': 'Format paragraph' }
+    let g:which_key_map.p = 'Paste (keep register)'
+    let g:which_key_map.s = 'Visual split'
+    let g:which_key_map.w = 'Next window'
+    let g:which_key_map.x = 'Delete char (no yank)'
+    let g:which_key_map['?'] = 'Cheat sheet'
+
+    autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
+    nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
+    vnoremap <silent> <leader> :WhichKeyVisual '<Space>'<CR>
+endif

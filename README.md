@@ -2,7 +2,19 @@
 
 Personal configuration files managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
-## Bootstrap a New Mac
+## Light Installation (Any Machine)
+
+For quick setup on temporary or remote machines (works on Linux too):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/light.sh | bash
+```
+
+This installs only essential configs without cloning the repo:
+- **Vim**: Basic settings and key mappings (jk/kj escape, H/L for line start/end, space leader)
+- **Git**: Core aliases (co, ci, st, br, tug, sync, lg, etc.)
+
+## Full Installation (Mac)
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/install.sh | bash

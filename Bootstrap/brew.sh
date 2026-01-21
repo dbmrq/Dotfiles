@@ -117,9 +117,9 @@ else
     echo "  Warning: mas not installed, skipping Xcode"
 fi
 
-# --- MacVim ---
+# --- MacVim and Neovim ---
 echo ""
-echo "Installing MacVim..."
+echo "Installing Vim editors..."
 
 if brew list macvim >/dev/null 2>&1; then
     echo "  macvim already installed"
@@ -127,10 +127,10 @@ else
     brew install macvim || echo "  Warning: Failed to install macvim"
 fi
 
-# Update Vim plugins
-if command -v vim >/dev/null 2>&1; then
-    echo "  Updating Vim plugins..."
-    vim +PlugUpdate +qall 2>/dev/null || true
+if brew list neovim >/dev/null 2>&1; then
+    echo "  neovim already installed"
+else
+    brew install neovim || echo "  Warning: Failed to install neovim"
 fi
 
 # --- Cleanup ---

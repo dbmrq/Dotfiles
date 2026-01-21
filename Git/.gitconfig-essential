@@ -1,0 +1,59 @@
+# =============================================================================
+# Essential Git Configuration
+# Portable settings that work anywhere
+# =============================================================================
+
+[core]
+    safecrlf = true
+    autocrlf = false
+
+[color]
+    ui = auto
+
+[log]
+    date = iso
+
+[alias]
+    co = checkout
+    ci = commit
+    st = status
+    br = branch
+
+    tug = !git fetch --all --prune && git pull
+    sync = !git fetch --all --prune && git pull && git push
+    cia = !git add . && git commit -m
+    pushup = push -u origin HEAD
+
+    wdiff = diff --color-words
+
+    hist = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+    lg = !git hist --max-count=15
+
+    last = log -1 HEAD --format=format:"%Cred%H"
+    branches = branch -a
+    tags = tag
+    stashes = stash list
+    remotes = remote -v
+
+    unstage = reset -q HEAD --
+    discard = checkout --
+    uncommit = reset --mixed HEAD~
+    amend = commit --amend --no-edit
+
+    nevermind = !git reset --hard HEAD && git clean -d -x -f
+
+    scrape = clone --single-branch --depth 1
+
+[diff]
+    mnemonicPrefix = true
+    renames = true
+    wordRegex = .
+
+[push]
+    default = upstream
+    followTags = true
+    autoSetupRemote = true
+
+[status]
+    showUntrackedFiles = all
+

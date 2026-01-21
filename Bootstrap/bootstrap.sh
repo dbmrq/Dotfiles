@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 #
 # Bootstrap script for setting up a new macOS machine
-# - Asks all questions upfront, then runs non-interactively
+# - Detects what's already installed and verifies configuration
+# - Asks only about things that need to be installed/fixed
 # - Saves state so interrupted runs can be resumed
 # - Idempotent: safe to run multiple times
+#
+# Usage:
+#   ./bootstrap.sh           # Interactive mode - detect, verify, ask
+#   ./bootstrap.sh --verify  # Only check status, don't make changes
+#   ./bootstrap.sh --force   # Install everything without asking
 #
 
 set -euo pipefail
@@ -15,6 +21,7 @@ STATE_FILE="$SCRIPT_DIR/.bootstrap_state"
 TEMP_FILES=()
 SUDO_PID=""
 BOOTSTRAP_SUCCESS=false
+MODE="${1:-interactive}"  # interactive, --verify, or --force
 
 # --- Colors (with fallback for basic terminals) ---
 if [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]; then
@@ -137,6 +144,179 @@ ensure_brew_in_path() {
     fi
 }
 
+# --- Status checking functions ---
+# These check if components are installed/configured correctly
+
+# Check if a brew package is installed
+brew_pkg_installed() {
+    local pkg="$1"
+    ensure_brew_in_path
+    command_exists brew && brew list "$pkg" >/dev/null 2>&1
+}
+
+# Check if a brew cask is installed
+brew_cask_installed() {
+    local cask="$1"
+    ensure_brew_in_path
+    command_exists brew && brew list --cask "$cask" >/dev/null 2>&1
+}
+
+# CLI tools list
+CLI_PACKAGES=(git git-extras lua mas par stow ruby trash-cli cscope pandoc rename python3 swiftlint)
+# GUI apps list
+GUI_APPS=(vlc basictex appcleaner hammerspoon google-chrome the-unarchiver macvim neovim)
+
+# Check status of all CLI tools
+check_cli_tools_status() {
+    local installed=0 missing=0
+    for pkg in "${CLI_PACKAGES[@]}"; do
+        if brew_pkg_installed "$pkg"; then
+            ((installed++))
+        else
+            ((missing++))
+        fi
+    done
+    echo "$installed:$missing"
+}
+
+# Get list of missing CLI tools
+get_missing_cli_tools() {
+    local missing=()
+    for pkg in "${CLI_PACKAGES[@]}"; do
+        if ! brew_pkg_installed "$pkg"; then
+            missing+=("$pkg")
+        fi
+    done
+    echo "${missing[*]}"
+}
+
+# Check status of all GUI apps
+check_gui_apps_status() {
+    local installed=0 missing=0
+    for app in "${GUI_APPS[@]}"; do
+        if brew_cask_installed "$app" || brew_pkg_installed "$app"; then
+            ((installed++))
+        else
+            ((missing++))
+        fi
+    done
+    echo "$installed:$missing"
+}
+
+# Get list of missing GUI apps
+get_missing_gui_apps() {
+    local missing=()
+    for app in "${GUI_APPS[@]}"; do
+        if ! brew_cask_installed "$app" && ! brew_pkg_installed "$app"; then
+            missing+=("$app")
+        fi
+    done
+    echo "${missing[*]}"
+}
+
+# Check if dotfiles are properly symlinked
+check_stow_status() {
+    if [[ -x "$SCRIPT_DIR/stow.sh" ]]; then
+        if "$SCRIPT_DIR/stow.sh" --verify >/dev/null 2>&1; then
+            echo "ok"
+        else
+            echo "needs_attention"
+        fi
+    else
+        echo "unknown"
+    fi
+}
+
+# Check if SSH keys exist for GitHub
+check_ssh_keys_status() {
+    local count=0
+    for key in ~/.ssh/id_ed25519_github_*; do
+        [[ -f "$key" ]] && ((count++))
+    done
+    echo "$count"
+}
+
+# Check prezto status
+check_prezto_status() {
+    [[ -d "${ZDOTDIR:-$HOME}/.zprezto" ]] && echo "installed" || echo "missing"
+}
+
+# Display full system status
+show_system_status() {
+    print_header "System Status"
+
+    # Xcode CLI tools
+    if xcode-select -p >/dev/null 2>&1; then
+        print_success "Xcode Command Line Tools"
+    else
+        print_warning "Xcode Command Line Tools: not installed"
+    fi
+
+    # Homebrew
+    ensure_brew_in_path
+    if command_exists brew; then
+        print_success "Homebrew"
+    else
+        print_warning "Homebrew: not installed"
+    fi
+
+    # CLI tools
+    local cli_status
+    cli_status=$(check_cli_tools_status)
+    local cli_installed="${cli_status%:*}"
+    local cli_missing="${cli_status#*:}"
+    if [[ "$cli_missing" -eq 0 ]]; then
+        print_success "CLI tools ($cli_installed packages)"
+    else
+        print_warning "CLI tools: $cli_installed installed, $cli_missing missing"
+    fi
+
+    # GUI apps
+    local gui_status
+    gui_status=$(check_gui_apps_status)
+    local gui_installed="${gui_status%:*}"
+    local gui_missing="${gui_status#*:}"
+    if [[ "$gui_missing" -eq 0 ]]; then
+        print_success "GUI applications ($gui_installed apps)"
+    else
+        print_warning "GUI applications: $gui_installed installed, $gui_missing missing"
+    fi
+
+    # Xcode app
+    if [[ -d "/Applications/Xcode.app" ]]; then
+        print_success "Xcode (App Store)"
+    else
+        print_warning "Xcode (App Store): not installed"
+    fi
+
+    # Prezto
+    if [[ "$(check_prezto_status)" == "installed" ]]; then
+        print_success "Prezto"
+    else
+        print_warning "Prezto: not installed"
+    fi
+
+    # Dotfiles
+    local stow_status
+    stow_status=$(check_stow_status)
+    if [[ "$stow_status" == "ok" ]]; then
+        print_success "Dotfiles symlinks"
+    else
+        print_warning "Dotfiles: some symlinks need attention"
+    fi
+
+    # SSH keys
+    local ssh_count
+    ssh_count=$(check_ssh_keys_status)
+    if [[ "$ssh_count" -gt 0 ]]; then
+        print_success "GitHub SSH keys ($ssh_count accounts)"
+    else
+        print_warning "GitHub SSH keys: not configured"
+    fi
+
+    echo ""
+}
+
 # Track a temporary file/directory for cleanup
 track_temp() {
     TEMP_FILES+=("$1")
@@ -170,7 +350,6 @@ save_choices() {
         echo "CHOICE_TERMINAL_THEME=$DO_TERMINAL_THEME"
         echo "CHOICE_LATEX=$DO_LATEX"
         echo "CHOICE_LATEX_DIR=$LATEX_DIR"
-        echo "CHOICE_BATTERY=$DO_BATTERY"
         echo "CHOICE_STOW=$DO_STOW"
         echo "CHOICE_SSH_KEYS=$DO_SSH_KEYS"
         echo "CHOICE_SSH_DEFAULT=$DEFAULT_GITHUB_ACCOUNT"
@@ -201,7 +380,6 @@ load_choices() {
                 CHOICE_TERMINAL_THEME) DO_TERMINAL_THEME="$value" ;;
                 CHOICE_LATEX) DO_LATEX="$value" ;;
                 CHOICE_LATEX_DIR) LATEX_DIR="$value" ;;
-                CHOICE_BATTERY) DO_BATTERY="$value" ;;
                 CHOICE_STOW) DO_STOW="$value" ;;
                 CHOICE_SSH_KEYS) DO_SSH_KEYS="$value" ;;
                 CHOICE_SSH_DEFAULT) DEFAULT_GITHUB_ACCOUNT="$value" ;;
@@ -328,10 +506,6 @@ gather_github_accounts() {
 
 # --- Gather all choices upfront ---
 gather_choices() {
-    print_header "Configuration"
-    echo "Answer the following questions. The script will then run unattended."
-    echo ""
-
     # Initialize all choices
     DO_MACOS_UPDATE=false
     DO_XCODE_TOOLS=false
@@ -345,81 +519,224 @@ gather_choices() {
     DO_TERMINAL_THEME=false
     DO_LATEX=false
     LATEX_DIR=""
-    DO_BATTERY=false
     DO_STOW=false
     DO_SSH_KEYS=false
-    GITHUB_ACCOUNTS=()  # Array of "name:username:email:mappings"
+    GITHUB_ACCOUNTS=()
+    SELECTED_CLI_PACKAGES=()
+    SELECTED_GUI_APPS=()
+    DEFAULT_GITHUB_ACCOUNT=""
 
-    # Core system updates
-    if ask_yes_no "Update macOS?"; then
-        DO_MACOS_UPDATE=true
+    # First, show current system status (this also caches all the checks)
+    show_system_status
+
+    # --- Run all status checks UPFRONT (slow operations) ---
+    echo "Checking system state..."
+    ensure_brew_in_path
+
+    local has_xcode_tools=false
+    xcode-select -p >/dev/null 2>&1 && has_xcode_tools=true
+
+    local has_brew=false
+    command_exists brew && has_brew=true
+
+    local missing_cli=""
+    local cli_missing_count=0
+    if $has_brew; then
+        local cli_status; cli_status=$(check_cli_tools_status)
+        cli_missing_count="${cli_status#*:}"
+        [[ "$cli_missing_count" -gt 0 ]] && missing_cli=$(get_missing_cli_tools)
     fi
 
-    if ! xcode-select -p >/dev/null 2>&1; then
-        if ask_yes_no "Install Xcode Command Line Tools? (required for most tasks)"; then
-            DO_XCODE_TOOLS=true
-        fi
-    else
-        print_success "Xcode Command Line Tools already installed"
+    local missing_gui=""
+    local gui_missing_count=0
+    if $has_brew; then
+        local gui_status; gui_status=$(check_gui_apps_status)
+        gui_missing_count="${gui_status#*:}"
+        [[ "$gui_missing_count" -gt 0 ]] && missing_gui=$(get_missing_gui_apps)
     fi
 
-    # Homebrew and packages
-    if ask_yes_no "Install/update Homebrew and packages?"; then
-        DO_HOMEBREW=true
-        if ask_yes_no "  Install CLI tools (git, lua, stow, etc.)?"; then
+    local has_xcode_app=false
+    [[ -d "/Applications/Xcode.app" ]] && has_xcode_app=true
+
+    local prezto_status; prezto_status=$(check_prezto_status)
+    local stow_status; stow_status=$(check_stow_status)
+    local ssh_count; ssh_count=$(check_ssh_keys_status)
+
+    echo ""
+
+    # --- Force mode: enable everything that's missing ---
+    if [[ "$MODE" == "--force" ]]; then
+        print_header "Force mode: installing all missing components"
+        DO_MACOS_UPDATE=false  # Never force macOS updates
+        $has_xcode_tools || DO_XCODE_TOOLS=true
+        $has_brew || DO_HOMEBREW=true
+        if [[ "$cli_missing_count" -gt 0 ]]; then
             DO_BREW_CLI=true
+            DO_HOMEBREW=true
+            SELECTED_CLI_PACKAGES=("${CLI_PACKAGES[@]}")
         fi
-        if ask_yes_no "  Install GUI apps (Chrome, VLC, Hammerspoon, etc.)?"; then
+        if [[ "$gui_missing_count" -gt 0 ]]; then
             DO_BREW_APPS=true
+            DO_HOMEBREW=true
+            SELECTED_GUI_APPS=("${GUI_APPS[@]}")
         fi
-        if ask_yes_no "  Install Xcode from App Store?"; then
-            DO_XCODE_APP=true
+        $has_xcode_app || DO_XCODE_APP=true
+        [[ "$prezto_status" != "installed" ]] && DO_PREZTO=true
+        [[ "$stow_status" != "ok" ]] && DO_STOW=true
+        save_choices
+        show_summary_and_confirm
+        return
+    fi
+
+    # --- Interactive mode: ask all questions upfront ---
+    print_header "Configuration"
+    echo "Answer all questions, then the script will run unattended."
+    echo ""
+
+    local anything_to_do=false
+
+    # macOS updates - always ask (optional)
+    if ask_yes_no "Check for macOS updates?"; then
+        DO_MACOS_UPDATE=true
+        anything_to_do=true
+    fi
+
+    # Xcode CLI tools
+    if ! $has_xcode_tools; then
+        if ask_yes_no "Install Xcode Command Line Tools? (required for most tasks)" "y"; then
+            DO_XCODE_TOOLS=true
+            anything_to_do=true
         fi
     fi
 
-    # Preferences
-    if ask_yes_no "Apply macOS preferences (Dock, Finder, etc.)?"; then
+    # Homebrew
+    if ! $has_brew; then
+        if ask_yes_no "Install Homebrew? (required for packages)" "y"; then
+            DO_HOMEBREW=true
+            anything_to_do=true
+        fi
+    fi
+
+    # CLI tools - use cached results
+    if [[ "$cli_missing_count" -gt 0 ]]; then
+        echo ""
+        echo "Missing CLI tools: $missing_cli"
+        if ask_yes_no "Install all missing CLI tools?" "y"; then
+            DO_BREW_CLI=true
+            DO_HOMEBREW=true
+            anything_to_do=true
+            SELECTED_CLI_PACKAGES=("${CLI_PACKAGES[@]}")
+        else
+            # Ask about each missing package
+            SELECTED_CLI_PACKAGES=()
+            for pkg in $missing_cli; do
+                if ask_yes_no "  Install $pkg?"; then
+                    SELECTED_CLI_PACKAGES+=("$pkg")
+                    DO_BREW_CLI=true
+                    DO_HOMEBREW=true
+                    anything_to_do=true
+                fi
+            done
+        fi
+    fi
+
+    # GUI apps - use cached results
+    if [[ "$gui_missing_count" -gt 0 ]]; then
+        echo ""
+        echo "Missing GUI apps: $missing_gui"
+        if ask_yes_no "Install all missing GUI apps?" "y"; then
+            DO_BREW_APPS=true
+            DO_HOMEBREW=true
+            anything_to_do=true
+            SELECTED_GUI_APPS=("${GUI_APPS[@]}")
+        else
+            # Ask about each missing app
+            SELECTED_GUI_APPS=()
+            for app in $missing_gui; do
+                if ask_yes_no "  Install $app?"; then
+                    SELECTED_GUI_APPS+=("$app")
+                    DO_BREW_APPS=true
+                    DO_HOMEBREW=true
+                    anything_to_do=true
+                fi
+            done
+        fi
+    fi
+
+    # Xcode from App Store
+    if ! $has_xcode_app; then
+        if ask_yes_no "Install Xcode from App Store?"; then
+            DO_XCODE_APP=true
+            anything_to_do=true
+        fi
+    fi
+
+    # macOS preferences - always ask (can be reapplied)
+    if ask_yes_no "Apply/reapply macOS preferences?"; then
         DO_PREFS=true
+        anything_to_do=true
         if ask_yes_no "  Clear all apps from Dock?"; then
             DO_CLEAR_DOCK=true
         fi
     fi
 
-    # Shell setup
-    if [[ ! -d "${ZDOTDIR:-$HOME}/.zprezto" ]]; then
-        if ask_yes_no "Install Prezto (Zsh framework)?"; then
+    # Prezto - use cached result
+    if [[ "$prezto_status" != "installed" ]]; then
+        if ask_yes_no "Install Prezto (Zsh framework)?" "y"; then
             DO_PREZTO=true
+            anything_to_do=true
         fi
-    else
-        print_success "Prezto already installed"
     fi
 
-    # Terminal theme
-    if ask_yes_no "Install Solarized terminal color scheme?"; then
+    # Terminal theme - always ask (can be reinstalled)
+    if ask_yes_no "Install/reinstall Solarized terminal theme?"; then
         DO_TERMINAL_THEME=true
+        anything_to_do=true
     fi
 
-    # LaTeX
-    if ask_yes_no "Install LaTeX packages (requires BasicTeX)?"; then
+    # LaTeX - always ask
+    if ask_yes_no "Set up LaTeX packages?"; then
         DO_LATEX=true
+        anything_to_do=true
         read -r -p "  Directory for TeX supporting files: " LATEX_DIR
         LATEX_DIR="${LATEX_DIR/#\~/$HOME}"
     fi
 
-    # Battery management
-    if ask_yes_no "Install battery charge limiter (actuallymentor/battery)?"; then
-        DO_BATTERY=true
+    # Dotfiles - use cached result
+    if [[ "$stow_status" != "ok" ]]; then
+        if ask_yes_no "Fix dotfiles symlinks?" "y"; then
+            DO_STOW=true
+            anything_to_do=true
+        fi
+    else
+        # Even if OK, offer to re-stow (might catch new files)
+        if ask_yes_no "Re-check and update dotfiles symlinks?"; then
+            DO_STOW=true
+            anything_to_do=true
+        fi
     fi
 
-    # Dotfiles symlinks
-    if ask_yes_no "Symlink dotfiles with stow?"; then
-        DO_STOW=true
+    # SSH keys - use cached result
+    if [[ "$ssh_count" -eq 0 ]]; then
+        if ask_yes_no "Set up GitHub accounts (SSH keys)?"; then
+            DO_SSH_KEYS=true
+            anything_to_do=true
+            gather_github_accounts
+        fi
+    else
+        if ask_yes_no "Manage GitHub accounts? ($ssh_count currently configured)"; then
+            DO_SSH_KEYS=true
+            anything_to_do=true
+            gather_github_accounts
+        fi
     fi
 
-    # SSH keys for GitHub
-    if ask_yes_no "Set up GitHub accounts (SSH keys & URL rewrites)?"; then
-        DO_SSH_KEYS=true
-        gather_github_accounts
+    if ! $anything_to_do; then
+        echo ""
+        print_success "Everything looks good! Nothing to install."
+        echo ""
+        BOOTSTRAP_SUCCESS=true
+        exit 0
     fi
 
     # Save choices for potential resume
@@ -444,7 +761,6 @@ show_summary_and_confirm() {
     $DO_PREZTO && echo "  • Prezto"
     $DO_TERMINAL_THEME && echo "  • Terminal color scheme"
     $DO_LATEX && echo "  • LaTeX packages${LATEX_DIR:+ (to: $LATEX_DIR)}"
-    $DO_BATTERY && echo "  • Battery charge limiter"
     $DO_STOW && echo "  • Dotfiles symlinks"
     if $DO_SSH_KEYS && [[ ${#GITHUB_ACCOUNTS[@]} -gt 0 ]]; then
         echo "  • GitHub accounts:"
@@ -606,21 +922,13 @@ install_brew_cli() {
         return 1
     fi
 
-    local packages=(
-        git
-        git-extras
-        lua
-        mas
-        par
-        stow
-        ruby
-        trash-cli
-        cscope
-        pandoc
-        rename
-        python3
-        swiftlint
-    )
+    # Use selected packages if set, otherwise use full list
+    local packages=()
+    if [[ ${#SELECTED_CLI_PACKAGES[@]} -gt 0 ]]; then
+        packages=("${SELECTED_CLI_PACKAGES[@]}")
+    else
+        packages=("${CLI_PACKAGES[@]}")
+    fi
 
     for pkg in "${packages[@]}"; do
         if brew list "$pkg" >/dev/null 2>&1; then
@@ -643,37 +951,37 @@ install_brew_apps() {
         return 1
     fi
 
-    local apps=(
-        vlc
-        basictex
-        appcleaner
-        hammerspoon
-        google-chrome
-        the-unarchiver
-    )
+    # Use selected apps if set, otherwise use full list
+    local apps=()
+    if [[ ${#SELECTED_GUI_APPS[@]} -gt 0 ]]; then
+        apps=("${SELECTED_GUI_APPS[@]}")
+    else
+        apps=("${GUI_APPS[@]}")
+    fi
+
+    # Cask apps (installed with --cask)
+    local cask_apps=(vlc basictex appcleaner hammerspoon google-chrome the-unarchiver)
+    # Regular brew apps
+    local brew_apps=(macvim neovim)
 
     for app in "${apps[@]}"; do
-        if brew list --cask "$app" >/dev/null 2>&1; then
-            echo "  $app already installed"
-        else
-            echo "  Installing $app..."
-            brew install --cask "$app" || print_warning "Failed to install $app"
+        # Check if it's a cask app or brew app
+        if [[ " ${cask_apps[*]} " == *" $app "* ]]; then
+            if brew list --cask "$app" >/dev/null 2>&1; then
+                echo "  $app already installed"
+            else
+                echo "  Installing $app..."
+                brew install --cask "$app" || print_warning "Failed to install $app"
+            fi
+        elif [[ " ${brew_apps[*]} " == *" $app "* ]]; then
+            if brew list "$app" >/dev/null 2>&1; then
+                echo "  $app already installed"
+            else
+                echo "  Installing $app..."
+                brew install "$app" || print_warning "Failed to install $app"
+            fi
         fi
     done
-
-    # Install MacVim after ensuring Xcode is ready
-    if brew list macvim >/dev/null 2>&1; then
-        echo "  macvim already installed"
-    else
-        echo "  Installing macvim..."
-        brew install macvim || print_warning "Failed to install macvim"
-    fi
-
-    # Update Vim plugins if vim is available
-    if command_exists vim; then
-        echo "  Updating Vim plugins..."
-        vim +PlugUpdate +qall 2>/dev/null || true
-    fi
 
     brew cleanup || true
 
@@ -809,19 +1117,6 @@ install_latex() {
     fi
 
     print_success "LaTeX setup complete"
-}
-
-install_battery() {
-    print_header "Installing battery charge limiter"
-
-    # Check if already installed
-    if command_exists battery; then
-        print_success "Battery tool already installed"
-        return 0
-    fi
-
-    curl -s https://raw.githubusercontent.com/actuallymentor/battery/main/setup.sh | bash
-    print_success "Battery tool installed"
 }
 
 setup_stow() {
@@ -1006,6 +1301,13 @@ main() {
 
     check_compatibility
 
+    # Handle verify mode - just show status and exit
+    if [[ "$MODE" == "--verify" ]]; then
+        show_system_status
+        echo "Run without --verify to install missing components."
+        exit 0
+    fi
+
     # Check for resume or gather new choices
     if check_resume; then
         # Resuming: show what will be done
@@ -1065,10 +1367,6 @@ main() {
 
     if [[ "$DO_LATEX" == "true" ]]; then
         run_step "LaTeX packages" install_latex
-    fi
-
-    if [[ "$DO_BATTERY" == "true" ]]; then
-        run_step "Battery charge limiter" install_battery
     fi
 
     if [[ "$DO_STOW" == "true" ]]; then
