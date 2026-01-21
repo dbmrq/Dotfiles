@@ -57,7 +57,7 @@ defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}"
 
 # --- Other Apps ---
 echo "  Configuring other apps..."
-defaults write com.apple.iphonesimulator ScreenShotSaveLocation -string "~/Desktop" 2>/dev/null || true
+defaults write com.apple.iphonesimulator ScreenShotSaveLocation -string "$HOME/Desktop" 2>/dev/null || true
 defaults write com.apple.TextEdit RichText -bool false
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 defaults write com.apple.LaunchServices LSQuarantine -bool false

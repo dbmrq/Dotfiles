@@ -33,6 +33,86 @@ print_warn() { echo -e "${YELLOW}!${NC} $1"; }
 print_err() { echo -e "${RED}✗${NC} $1"; }
 print_info() { echo -e "${BLUE}→${NC} $1"; }
 
+# Check if two files are identical (works for files and directories)
+files_identical() {
+    local file1="$1" file2="$2"
+    if [[ -f "$file1" && -f "$file2" ]]; then
+        diff -q "$file1" "$file2" >/dev/null 2>&1
+    elif [[ -d "$file1" && -d "$file2" ]]; then
+        diff -rq "$file1" "$file2" >/dev/null 2>&1
+    else
+        return 1
+    fi
+}
+
+# Check if all conflicting files in a package are identical to repo versions
+# Returns 0 if all identical, 1 if any differ
+check_conflicts_identical() {
+    local pkg="$1"
+    local pkg_dir="$DOTFILES_DIR/$pkg"
+
+    while IFS= read -r -d '' file; do
+        local rel_path="${file#$pkg_dir/}"
+        local home_file="$HOME/$rel_path"
+
+        # Only check actual conflicts (regular files, not symlinks)
+        if [[ -f "$home_file" && ! -L "$home_file" ]]; then
+            if ! files_identical "$file" "$home_file"; then
+                return 1  # Found a difference
+            fi
+        elif [[ -d "$home_file" && ! -L "$home_file" ]]; then
+            if ! files_identical "$file" "$home_file"; then
+                return 1
+            fi
+        fi
+    done < <(find "$pkg_dir" -type f ! -name '.DS_Store' ! -name '.stow-local-ignore' -print0 2>/dev/null)
+
+    return 0  # All identical
+}
+
+# Remove conflicting files that match repo (so stow can create symlinks)
+remove_identical_conflicts() {
+    local pkg="$1"
+    local pkg_dir="$DOTFILES_DIR/$pkg"
+
+    # First collect all files to remove (to handle directories properly)
+    local files_to_remove=()
+    local dirs_to_remove=()
+
+    while IFS= read -r -d '' file; do
+        local rel_path="${file#$pkg_dir/}"
+        local home_file="$HOME/$rel_path"
+
+        if [[ -f "$home_file" && ! -L "$home_file" ]]; then
+            files_to_remove+=("$home_file")
+        fi
+    done < <(find "$pkg_dir" -type f ! -name '.DS_Store' ! -name '.stow-local-ignore' -print0 2>/dev/null)
+
+    # Also check top-level directories
+    while IFS= read -r -d '' dir; do
+        local rel_path="${dir#$pkg_dir/}"
+        local home_dir="$HOME/$rel_path"
+
+        if [[ -d "$home_dir" && ! -L "$home_dir" ]]; then
+            dirs_to_remove+=("$home_dir")
+        fi
+    done < <(find "$pkg_dir" -mindepth 1 -maxdepth 1 -type d ! -name '.git' -print0 2>/dev/null)
+
+    # Remove files
+    if [[ ${#files_to_remove[@]} -gt 0 ]]; then
+        for f in "${files_to_remove[@]}"; do
+            rm -f "$f"
+        done
+    fi
+
+    # Remove now-empty directories
+    if [[ ${#dirs_to_remove[@]} -gt 0 ]]; then
+        for d in "${dirs_to_remove[@]}"; do
+            rm -rf "$d" 2>/dev/null || true
+        done
+    fi
+}
+
 ask_yes_no() {
     local prompt="$1" default="${2:-n}" reply
     [[ "$default" =~ ^[Yy]$ ]] && prompt="$prompt [Y/n] " || prompt="$prompt [y/N] "
@@ -157,10 +237,7 @@ for pkg in "${packages[@]}"; do
             case "$issue" in
                 missing:*) ((missing++)) ;;
                 wrong:*) ((wrong++)) ;;
-                conflict:*)
-                    ((conflicts++))
-                    conflict_file="${issue#conflict:}"
-                    ;;
+                conflict:*) ((conflicts++)) ;;
             esac
         done <<< "$result"
 
@@ -190,22 +267,49 @@ fi
 if $all_ok; then
     print_ok "All symlinks are already correct!"
 else
-    # Show what needs to be done
-    if [[ ${#has_conflicts[@]} -gt 0 ]]; then
-        echo -e "${YELLOW}Conflicts found:${NC}"
-        echo "  These packages have existing files that would be overwritten:"
-        for pkg in "${has_conflicts[@]}"; do
+    # Check conflicts - separate into identical (auto-fixable) and different
+    identical_conflicts=()
+    different_conflicts=()
+
+    for pkg in "${has_conflicts[@]}"; do
+        if check_conflicts_identical "$pkg"; then
+            identical_conflicts+=("$pkg")
+        else
+            different_conflicts+=("$pkg")
+        fi
+    done
+
+    # Auto-fix identical conflicts
+    if [[ ${#identical_conflicts[@]} -gt 0 ]]; then
+        echo -e "${GREEN}Auto-fixing conflicts (files identical to repo):${NC}"
+        for pkg in "${identical_conflicts[@]}"; do
+            echo "  • $pkg"
+        done
+        echo ""
+        print_info "Removing duplicates and creating symlinks..."
+        for pkg in "${identical_conflicts[@]}"; do
+            remove_identical_conflicts "$pkg"
+        done
+        # Add these to the stow list
+        needs_stow+=("${identical_conflicts[@]}")
+    fi
+
+    # Show remaining conflicts that need manual attention
+    if [[ ${#different_conflicts[@]} -gt 0 ]]; then
+        echo -e "${YELLOW}Conflicts found (files differ from repo):${NC}"
+        echo "  These packages have existing files that differ from the repo:"
+        for pkg in "${different_conflicts[@]}"; do
             echo "    • $pkg"
         done
         echo ""
         echo "  Options:"
         echo "    1) Back up conflicting files and remove them, then re-run"
         echo "    2) Use --adopt to move existing files into dotfiles repo:"
-        echo "       stow --adopt --restow -v --target=\"\$HOME\" ${has_conflicts[*]}"
+        echo "       stow --adopt --restow -v --target=\"\$HOME\" ${different_conflicts[*]}"
         echo ""
     fi
 
-    if [[ ${#needs_stow[@]} -gt 0 ]] || [[ ${#has_conflicts[@]} -gt 0 ]]; then
+    if [[ ${#needs_stow[@]} -gt 0 ]] || [[ ${#different_conflicts[@]} -gt 0 ]]; then
         if [[ "$MODE" == "--force" ]]; then
             print_info "Force mode: stowing all packages..."
             stow --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}"
@@ -219,11 +323,11 @@ else
                 fi
             fi
 
-            if [[ ${#has_conflicts[@]} -gt 0 ]]; then
+            if [[ ${#different_conflicts[@]} -gt 0 ]]; then
                 echo ""
-                echo "Packages with conflicts: ${has_conflicts[*]}"
+                echo "Packages with conflicts: ${different_conflicts[*]}"
                 if ask_yes_no "Adopt existing files into dotfiles repo?" "n"; then
-                    stow --adopt --restow -v --target="$HOME" --ignore='\.DS_Store' "${has_conflicts[@]}"
+                    stow --adopt --restow -v --target="$HOME" --ignore='\.DS_Store' "${different_conflicts[@]}"
                     print_ok "Files adopted and packages stowed."
                     print_warn "Check 'git diff' to review adopted files."
                 fi
@@ -248,6 +352,23 @@ else
 
     if $update_plugins; then
         echo "Updating editor plugins..."
+
+        # Ensure vim-plug is installed for Vim
+        vim_plug="$HOME/.vim/autoload/plug.vim"
+        if [[ ! -f "$vim_plug" ]]; then
+            echo "  Installing vim-plug for Vim..."
+            curl -fLo "$vim_plug" --create-dirs \
+                https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        fi
+
+        # Ensure vim-plug is installed for Neovim
+        nvim_plug="$HOME/.local/share/nvim/site/autoload/plug.vim"
+        if [[ ! -f "$nvim_plug" ]]; then
+            echo "  Installing vim-plug for Neovim..."
+            curl -fLo "$nvim_plug" --create-dirs \
+                https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        fi
+
         if command -v vim >/dev/null 2>&1; then
             print_info "Updating Vim plugins..."
             vim +PlugUpdate +qall 2>/dev/null || true

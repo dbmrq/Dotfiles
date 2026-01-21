@@ -38,7 +38,6 @@ if ! command -v brew >/dev/null 2>&1; then
     ensure_brew_in_path
 
     # Add to profile if not already there
-    local brew_path
     brew_path="$(get_brew_path)"
     if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
         echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
