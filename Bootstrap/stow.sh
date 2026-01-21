@@ -16,6 +16,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 MODE="${1:-interactive}"  # interactive, --force, or --verify
 
+# Pre-normalize DOTFILES_DIR for Unicode comparisons (macOS uses NFD, scripts use NFC)
+DOTFILES_DIR_NORMALIZED="$(python3 -c "import unicodedata,sys; print(unicodedata.normalize('NFC',sys.argv[1]),end='')" "$DOTFILES_DIR" 2>/dev/null || printf '%s' "$DOTFILES_DIR")"
+
 # --- Colors ---
 if [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]; then
     RED='\033[0;31m'
@@ -45,8 +48,56 @@ files_identical() {
     fi
 }
 
+# Normalize Unicode path to NFC (for comparing paths from different sources)
+# macOS filesystem returns NFD, script strings are NFC
+normalize_unicode() {
+    python3 -c "import unicodedata,sys; print(unicodedata.normalize('NFC',sys.argv[1]),end='')" "$1" 2>/dev/null || printf '%s' "$1"
+}
+
+# Cache of HOME paths that are symlinks to dotfiles (computed once)
+declare -a DOTFILES_SYMLINKS=()
+
+# Build cache of symlinks in $HOME that point to dotfiles
+_build_symlink_cache() {
+    local link target
+    for link in "$HOME"/.*; do
+        if [[ -L "$link" ]]; then
+            target="$(readlink "$link")"
+            if [[ "$target" == *"Dotfiles"* ]]; then
+                DOTFILES_SYMLINKS+=("$link")
+            fi
+        fi
+    done
+}
+
+# Check if a path resolves to inside the dotfiles directory
+# (to avoid deleting repo files through symlinks)
+is_inside_dotfiles() {
+    local path="$1"
+
+    # Build cache on first call
+    if [[ ${#DOTFILES_SYMLINKS[@]} -eq 0 ]]; then
+        _build_symlink_cache
+    fi
+
+    # Fast path: check if path starts with any cached symlink
+    local symlink
+    for symlink in "${DOTFILES_SYMLINKS[@]}"; do
+        if [[ "$path" == "$symlink" || "$path" == "$symlink/"* ]]; then
+            return 0
+        fi
+    done
+
+    # Slower path: resolve full path and compare with Unicode normalization
+    local real_path
+    real_path="$(normalize_unicode "$(cd "$(dirname "$path")" 2>/dev/null && pwd -P)/$(basename "$path")")"
+
+    # Use pre-computed normalized DOTFILES_DIR
+    [[ "$real_path" == "$DOTFILES_DIR_NORMALIZED/"* ]]
+}
+
 # Check if all conflicting files in a package are identical to repo versions
-# Returns 0 if all identical, 1 if any differ
+# Returns 0 if all identical (or already linked to repo), 1 if any differ
 check_conflicts_identical() {
     local pkg="$1"
     local pkg_dir="$DOTFILES_DIR/$pkg"
@@ -54,6 +105,11 @@ check_conflicts_identical() {
     while IFS= read -r -d '' file; do
         local rel_path="${file#$pkg_dir/}"
         local home_file="$HOME/$rel_path"
+
+        # Skip if it resolves to inside dotfiles (already properly linked)
+        if is_inside_dotfiles "$home_file" 2>/dev/null; then
+            continue
+        fi
 
         # Only check actual conflicts (regular files, not symlinks)
         if [[ -f "$home_file" && ! -L "$home_file" ]]; then
@@ -83,8 +139,11 @@ remove_identical_conflicts() {
         local rel_path="${file#$pkg_dir/}"
         local home_file="$HOME/$rel_path"
 
+        # Only remove if it's a regular file, not a symlink, and NOT inside dotfiles
         if [[ -f "$home_file" && ! -L "$home_file" ]]; then
-            files_to_remove+=("$home_file")
+            if ! is_inside_dotfiles "$home_file"; then
+                files_to_remove+=("$home_file")
+            fi
         fi
     done < <(find "$pkg_dir" -type f ! -name '.DS_Store' ! -name '.stow-local-ignore' -print0 2>/dev/null)
 
@@ -93,8 +152,11 @@ remove_identical_conflicts() {
         local rel_path="${dir#$pkg_dir/}"
         local home_dir="$HOME/$rel_path"
 
+        # Only remove if it's a regular directory, not a symlink, and NOT inside dotfiles
         if [[ -d "$home_dir" && ! -L "$home_dir" ]]; then
-            dirs_to_remove+=("$home_dir")
+            if ! is_inside_dotfiles "$home_dir"; then
+                dirs_to_remove+=("$home_dir")
+            fi
         fi
     done < <(find "$pkg_dir" -mindepth 1 -maxdepth 1 -type d ! -name '.git' -print0 2>/dev/null)
 
@@ -130,13 +192,19 @@ verify_symlink() {
     if [[ ! -e "$link_path" ]] && [[ ! -L "$link_path" ]]; then
         return 1  # Missing
     elif [[ -L "$link_path" ]]; then
-        local actual_target
-        actual_target="$(readlink "$link_path")"
-        if [[ "$actual_target" == "$expected_target" ]]; then
+        # Symlink exists - check if it points to the right place
+        # (handles both relative and absolute symlinks, with Unicode normalization)
+        local actual_dest expected_dest
+        actual_dest="$(normalize_unicode "$(cd "$(dirname "$link_path")" && cd "$(dirname "$(readlink "$link_path")")" 2>/dev/null && pwd -P)/$(basename "$(readlink "$link_path")")")"
+        expected_dest="$(normalize_unicode "$(cd "$(dirname "$expected_target")" 2>/dev/null && pwd -P)/$(basename "$expected_target")")"
+        if [[ "$actual_dest" == "$expected_dest" ]]; then
             return 0  # Correct
         else
             return 2  # Wrong target
         fi
+    elif is_inside_dotfiles "$link_path"; then
+        # File exists and resolves to inside dotfiles (via parent symlink)
+        return 0  # Correct (linked through parent directory)
     else
         return 3  # Regular file (conflict)
     fi
