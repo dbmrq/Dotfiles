@@ -1,29 +1,38 @@
 #!/usr/bin/env bash
 #
-# Install Homebrew and common packages
-# Can be run standalone or called from bootstrap.sh
+# Install Homebrew and packages for selected features
+#
+# Usage:
+#   ./brew.sh                    # Install all packages
+#   ./brew.sh vim git cli        # Install only specified features
+#   ./brew.sh --list             # List available features
 #
 
 set -euo pipefail
 
-# --- Determine Homebrew path based on architecture ---
-get_brew_path() {
-    if [[ "$(uname -m)" == "arm64" ]]; then
-        echo "/opt/homebrew/bin/brew"
-    else
-        echo "/usr/local/bin/brew"
-    fi
-}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
 
-ensure_brew_in_path() {
-    if ! command -v brew >/dev/null 2>&1; then
-        local brew_path
-        brew_path="$(get_brew_path)"
-        if [[ -x "$brew_path" ]]; then
-            eval "$("$brew_path" shellenv)"
-        fi
-    fi
-}
+# Parse arguments
+if [[ "${1:-}" == "--list" ]]; then
+    echo "Available features:"
+    for f in "${FEATURES[@]}"; do
+        name="${f%%:*}"
+        echo "  $name - $(get_feature_name "$name")"
+    done
+    exit 0
+fi
+
+# Determine which features to install
+if [[ $# -gt 0 ]]; then
+    SELECTED_FEATURES=("$@")
+else
+    # Install all features by default
+    SELECTED_FEATURES=()
+    for f in "${FEATURES[@]}"; do
+        SELECTED_FEATURES+=("${f%%:*}")
+    done
+fi
 
 # --- Install/update Homebrew ---
 echo ""
@@ -33,11 +42,8 @@ echo ""
 if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    # Add to current shell
     ensure_brew_in_path
 
-    # Add to profile if not already there
     brew_path="$(get_brew_path)"
     if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
         echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
@@ -47,89 +53,74 @@ else
     brew update
 fi
 
-# --- CLI tools ---
-echo ""
-echo "Installing CLI tools..."
+# Collect all packages to install
+all_packages=()
+all_casks=()
+install_xcode=false
 
-cli_packages=(
-    git
-    git-extras
-    lua
-    mas
-    par
-    stow
-    ruby
-    trash-cli
-    cscope
-    pandoc
-    rename
-    python3
-    swiftlint
-)
+for feature in "${SELECTED_FEATURES[@]}"; do
+    # Get brew packages
+    pkgs=$(get_brew_packages "$feature")
+    for pkg in $pkgs; do
+        [[ -n "$pkg" ]] && all_packages+=("$pkg")
+    done
 
-for pkg in "${cli_packages[@]}"; do
-    if brew list "$pkg" >/dev/null 2>&1; then
-        echo "  $pkg already installed"
-    else
-        echo "  Installing $pkg..."
-        brew install "$pkg" || echo "  Warning: Failed to install $pkg"
+    # Get brew casks
+    casks=$(get_brew_casks "$feature")
+    for cask in $casks; do
+        [[ -n "$cask" ]] && all_casks+=("$cask")
+    done
+
+    # Check for special post-install
+    if [[ "$(get_post_install "$feature")" == "xcode" ]]; then
+        install_xcode=true
     fi
 done
 
-# --- GUI apps ---
-echo ""
-echo "Installing GUI applications..."
+# --- Install CLI packages ---
+if [[ ${#all_packages[@]} -gt 0 ]]; then
+    echo ""
+    echo "Installing CLI packages..."
+    for pkg in "${all_packages[@]}"; do
+        if brew list "$pkg" >/dev/null 2>&1; then
+            echo "  $pkg already installed"
+        else
+            echo "  Installing $pkg..."
+            brew install "$pkg" || echo "  Warning: Failed to install $pkg"
+        fi
+    done
+fi
 
-gui_apps=(
-    vlc
-    basictex
-    appcleaner
-    hammerspoon
-    google-chrome
-    the-unarchiver
-)
-
-for app in "${gui_apps[@]}"; do
-    if brew list --cask "$app" >/dev/null 2>&1; then
-        echo "  $app already installed"
-    else
-        echo "  Installing $app..."
-        brew install --cask "$app" || echo "  Warning: Failed to install $app"
-    fi
-done
+# --- Install GUI apps (casks) ---
+if [[ ${#all_casks[@]} -gt 0 ]]; then
+    echo ""
+    echo "Installing GUI applications..."
+    for cask in "${all_casks[@]}"; do
+        if brew list --cask "$cask" >/dev/null 2>&1; then
+            echo "  $cask already installed"
+        else
+            echo "  Installing $cask..."
+            brew install --cask "$cask" || echo "  Warning: Failed to install $cask"
+        fi
+    done
+fi
 
 # --- Xcode from App Store ---
-echo ""
-echo "Installing Xcode from App Store..."
-
-if command -v mas >/dev/null 2>&1; then
-    if [[ -d "/Applications/Xcode.app" ]]; then
-        echo "  Xcode already installed"
+if $install_xcode; then
+    echo ""
+    echo "Installing Xcode from App Store..."
+    if command -v mas >/dev/null 2>&1; then
+        if [[ -d "/Applications/Xcode.app" ]]; then
+            echo "  Xcode already installed"
+        else
+            mas install 497799835 || echo "  Warning: Failed to install Xcode"
+        fi
+        if [[ -d "/Applications/Xcode.app" ]]; then
+            sudo xcodebuild -license accept 2>/dev/null || true
+        fi
     else
-        mas install 497799835 || echo "  Warning: Failed to install Xcode"
+        echo "  Warning: mas not installed, skipping Xcode"
     fi
-
-    if [[ -d "/Applications/Xcode.app" ]]; then
-        sudo xcodebuild -license accept 2>/dev/null || true
-    fi
-else
-    echo "  Warning: mas not installed, skipping Xcode"
-fi
-
-# --- MacVim and Neovim ---
-echo ""
-echo "Installing Vim editors..."
-
-if brew list macvim >/dev/null 2>&1; then
-    echo "  macvim already installed"
-else
-    brew install macvim || echo "  Warning: Failed to install macvim"
-fi
-
-if brew list neovim >/dev/null 2>&1; then
-    echo "  neovim already installed"
-else
-    brew install neovim || echo "  Warning: Failed to install neovim"
 fi
 
 # --- Cleanup ---

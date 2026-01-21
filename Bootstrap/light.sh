@@ -50,19 +50,25 @@ if [[ -f ~/.gitconfig ]]; then
         echo ""
     fi
 else
+    # Ask for git user info
+    echo ""
+    echo -e "${YELLOW}Git user configuration:${NC}"
+    read -rp "  Your name: " git_name
+    read -rp "  Your email: " git_email
+
     # Create minimal gitconfig that includes essential
-    cat > ~/.gitconfig << 'EOF'
+    cat > ~/.gitconfig << EOF
 # Git configuration - created by light dotfiles installer
-# Add your personal settings below
 
 [include]
     path = ~/.gitconfig-essential
 
 [user]
-    # name = Your Name
-    # email = your@email.com
+    name = $git_name
+    email = $git_email
 EOF
-    echo "Created ~/.gitconfig with essential settings included."
+    echo ""
+    echo "Created ~/.gitconfig with your settings."
 fi
 
 echo ""

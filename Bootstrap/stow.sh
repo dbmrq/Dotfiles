@@ -4,9 +4,11 @@
 # Can be run standalone or called from bootstrap.sh
 #
 # Usage:
-#   ./stow.sh           # Interactive mode - verify and ask before changes
-#   ./stow.sh --force   # Non-interactive - stow everything, fix conflicts
-#   ./stow.sh --verify  # Only verify, don't make changes
+#   ./stow.sh                    # Interactive mode - stow all packages
+#   ./stow.sh Vim Git            # Stow only specified packages
+#   ./stow.sh --force            # Non-interactive - stow everything
+#   ./stow.sh --verify           # Only verify, don't make changes
+#   ./stow.sh --verify Vim       # Verify only specified packages
 #
 
 set -euo pipefail
@@ -14,7 +16,17 @@ set -euo pipefail
 # --- Configuration ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-MODE="${1:-interactive}"  # interactive, --force, or --verify
+
+# Parse arguments - separate flags from package names
+MODE="interactive"
+REQUESTED_PACKAGES=()
+for arg in "$@"; do
+    case "$arg" in
+        --force) MODE="force" ;;
+        --verify) MODE="verify" ;;
+        *) REQUESTED_PACKAGES+=("$arg") ;;
+    esac
+done
 
 # Pre-normalize DOTFILES_DIR for Unicode comparisons (macOS uses NFD, scripts use NFC)
 DOTFILES_DIR_NORMALIZED="$(python3 -c "import unicodedata,sys; print(unicodedata.normalize('NFC',sys.argv[1]),end='')" "$DOTFILES_DIR" 2>/dev/null || printf '%s' "$DOTFILES_DIR")"
@@ -271,12 +283,24 @@ fi
 
 cd "$DOTFILES_DIR"
 
-# Get all packages
+# Get packages to process
 packages=()
-for dir in */; do
-    [[ "$dir" == "Bootstrap/" ]] && continue
-    packages+=("${dir%/}")
-done
+if [[ ${#REQUESTED_PACKAGES[@]} -gt 0 ]]; then
+    # Use only requested packages (validate they exist)
+    for pkg in "${REQUESTED_PACKAGES[@]}"; do
+        if [[ -d "$DOTFILES_DIR/$pkg" ]]; then
+            packages+=("$pkg")
+        else
+            print_warn "Package not found: $pkg"
+        fi
+    done
+else
+    # Use all packages
+    for dir in */; do
+        [[ "$dir" == "Bootstrap/" ]] && continue
+        packages+=("${dir%/}")
+    done
+fi
 
 if [[ ${#packages[@]} -eq 0 ]]; then
     print_warn "No packages found to stow."
@@ -322,7 +346,7 @@ done
 echo ""
 
 # --- Handle results based on mode ---
-if [[ "$MODE" == "--verify" ]]; then
+if [[ "$MODE" == "verify" ]]; then
     if $all_ok; then
         print_ok "All symlinks are correct!"
         exit 0
@@ -378,7 +402,7 @@ else
     fi
 
     if [[ ${#needs_stow[@]} -gt 0 ]] || [[ ${#different_conflicts[@]} -gt 0 ]]; then
-        if [[ "$MODE" == "--force" ]]; then
+        if [[ "$MODE" == "force" ]]; then
             print_info "Force mode: stowing all packages..."
             stow --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}"
         else
@@ -400,50 +424,6 @@ else
                     print_warn "Check 'git diff' to review adopted files."
                 fi
             fi
-        fi
-    fi
-fi
-
-# --- Update Vim/Neovim plugins ---
-echo ""
-if [[ "$MODE" == "--verify" ]]; then
-    echo "Skipping plugin update in verify mode."
-else
-    if [[ "$MODE" == "--force" ]]; then
-        update_plugins=true
-    else
-        update_plugins=false
-        if ask_yes_no "Update Vim/Neovim plugins?" "y"; then
-            update_plugins=true
-        fi
-    fi
-
-    if $update_plugins; then
-        echo "Updating editor plugins..."
-
-        # Ensure vim-plug is installed for Vim
-        vim_plug="$HOME/.vim/autoload/plug.vim"
-        if [[ ! -f "$vim_plug" ]]; then
-            echo "  Installing vim-plug for Vim..."
-            curl -fLo "$vim_plug" --create-dirs \
-                https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-        fi
-
-        # Ensure vim-plug is installed for Neovim
-        nvim_plug="$HOME/.local/share/nvim/site/autoload/plug.vim"
-        if [[ ! -f "$nvim_plug" ]]; then
-            echo "  Installing vim-plug for Neovim..."
-            curl -fLo "$nvim_plug" --create-dirs \
-                https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-        fi
-
-        if command -v vim >/dev/null 2>&1; then
-            print_info "Updating Vim plugins..."
-            vim +PlugUpdate +qall 2>/dev/null || true
-        fi
-        if command -v nvim >/dev/null 2>&1; then
-            print_info "Updating Neovim plugins..."
-            nvim --headless +PlugUpdate +qall 2>/dev/null || true
         fi
     fi
 fi

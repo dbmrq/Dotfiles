@@ -23,22 +23,11 @@ SUDO_PID=""
 BOOTSTRAP_SUCCESS=false
 MODE="${1:-interactive}"  # interactive, --verify, or --force
 
-# --- Colors (with fallback for basic terminals) ---
-if [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    BOLD='\033[1m'
-    NC='\033[0m'
-else
-    RED=''
-    GREEN=''
-    YELLOW=''
-    BLUE=''
-    BOLD=''
-    NC=''
-fi
+# Source shared library for feature definitions
+source "$SCRIPT_DIR/lib.sh"
+
+# Selected features for installation (populated by gather_choices)
+SELECTED_FEATURES=()
 
 # --- Cleanup handler ---
 cleanup() {
@@ -351,6 +340,7 @@ save_choices() {
         echo "CHOICE_LATEX=$DO_LATEX"
         echo "CHOICE_LATEX_DIR=$LATEX_DIR"
         echo "CHOICE_STOW=$DO_STOW"
+        echo "CHOICE_PLUGINS=$DO_PLUGINS"
         echo "CHOICE_SSH_KEYS=$DO_SSH_KEYS"
         echo "CHOICE_SSH_DEFAULT=$DEFAULT_GITHUB_ACCOUNT"
         # Save GitHub accounts array
@@ -381,6 +371,7 @@ load_choices() {
                 CHOICE_LATEX) DO_LATEX="$value" ;;
                 CHOICE_LATEX_DIR) LATEX_DIR="$value" ;;
                 CHOICE_STOW) DO_STOW="$value" ;;
+                CHOICE_PLUGINS) DO_PLUGINS="$value" ;;
                 CHOICE_SSH_KEYS) DO_SSH_KEYS="$value" ;;
                 CHOICE_SSH_DEFAULT) DEFAULT_GITHUB_ACCOUNT="$value" ;;
                 CHOICE_GITHUB_ACCOUNT_COUNT) account_count="$value" ;;
@@ -520,6 +511,7 @@ gather_choices() {
     DO_LATEX=false
     LATEX_DIR=""
     DO_STOW=false
+    DO_PLUGINS=false
     DO_SSH_KEYS=false
     GITHUB_ACCOUNTS=()
     SELECTED_CLI_PACKAGES=()
@@ -583,6 +575,8 @@ gather_choices() {
         $has_xcode_app || DO_XCODE_APP=true
         [[ "$prezto_status" != "installed" ]] && DO_PREZTO=true
         [[ "$stow_status" != "ok" ]] && DO_STOW=true
+        # Update plugins if vim/neovim are installed
+        (command_exists vim || command_exists nvim) && DO_PLUGINS=true
         save_choices
         show_summary_and_confirm
         return
@@ -712,6 +706,14 @@ gather_choices() {
         # Even if OK, offer to re-stow (might catch new files)
         if ask_yes_no "Re-check and update dotfiles symlinks?"; then
             DO_STOW=true
+            anything_to_do=true
+        fi
+    fi
+
+    # Vim/Neovim plugins - only ask if vim or neovim selected/installed
+    if command_exists vim || command_exists nvim; then
+        if ask_yes_no "Update Vim/Neovim plugins?"; then
+            DO_PLUGINS=true
             anything_to_do=true
         fi
     fi
@@ -1130,13 +1132,23 @@ setup_stow() {
 
     cd "$DOTFILES_DIR"
 
-    # Get all directories (package folders for stow)
+    # Get stow packages from selected features
     local packages=()
-    for dir in */; do
-        # Skip Bootstrap directory
-        [[ "$dir" == "Bootstrap/" ]] && continue
-        packages+=("${dir%/}")
-    done
+    if [[ ${#SELECTED_FEATURES[@]} -gt 0 ]]; then
+        for feature in "${SELECTED_FEATURES[@]}"; do
+            local stow_pkg
+            stow_pkg=$(get_stow_package "$feature")
+            if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
+                packages+=("$stow_pkg")
+            fi
+        done
+    else
+        # Fallback: stow all packages if no features selected
+        for dir in */; do
+            [[ "$dir" == "Bootstrap/" ]] && continue
+            packages+=("${dir%/}")
+        done
+    fi
 
     if [[ ${#packages[@]} -eq 0 ]]; then
         print_warning "No packages found to stow"
@@ -1145,34 +1157,19 @@ setup_stow() {
 
     echo "Stowing: ${packages[*]}"
 
-    # First, check for conflicts using --no (dry-run) mode
-    local conflicts
-    if ! conflicts=$(stow --no --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}" 2>&1); then
-        if echo "$conflicts" | grep -q "cannot stow"; then
-            print_warning "Conflicts detected with existing files:"
-            echo "$conflicts" | grep "cannot stow" | while read -r line; do
-                # Extract just the target filename
-                local target
-                target=$(echo "$line" | sed 's/.*over existing target //' | sed 's/ since.*//')
-                echo "  • ~/$target"
-            done
-            echo ""
-            echo "To resolve, either:"
-            echo "  1) Back up and remove the conflicting files, then re-run"
-            echo "  2) Run: cd $DOTFILES_DIR && stow --adopt --restow -v --target=\"\$HOME\" ${packages[*]}"
-            echo "     (This will move existing files into the dotfiles repo)"
-            print_warning "Stow skipped due to conflicts"
-            return 1
-        fi
-    fi
+    # Call the stow.sh script with the selected packages
+    "$SCRIPT_DIR/stow.sh" --force "${packages[@]}"
 
-    # No conflicts, proceed with stow
-    if stow --restow -v --target="$HOME" --ignore='\.DS_Store' "${packages[@]}"; then
-        print_success "Dotfiles symlinked"
-    else
-        print_error "Stow failed"
-        return 1
-    fi
+    print_success "Dotfiles symlinked"
+}
+
+setup_plugins() {
+    print_header "Updating Vim/Neovim plugins"
+
+    # Call the plugins.sh script
+    "$SCRIPT_DIR/plugins.sh" --force
+
+    print_success "Plugins updated"
 }
 
 setup_ssh_keys() {
@@ -1373,6 +1370,10 @@ main() {
 
     if [[ "$DO_STOW" == "true" ]]; then
         run_step "Dotfiles symlinks" setup_stow
+    fi
+
+    if [[ "$DO_PLUGINS" == "true" ]]; then
+        run_step "Vim/Neovim plugins" setup_plugins
     fi
 
     if [[ "$DO_SSH_KEYS" == "true" ]]; then
