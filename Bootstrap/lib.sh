@@ -287,10 +287,12 @@ is_feature_installed() {
         if [[ -d "$pkg_dir" ]]; then
             # Check if at least the top-level items are symlinked
             for item in "$pkg_dir"/.*; do
-                [[ "$(basename "$item")" == "." || "$(basename "$item")" == ".." ]] && continue
-                [[ "$(basename "$item")" == ".DS_Store" ]] && continue
-                [[ "$(basename "$item")" == ".stow-local-ignore" ]] && continue
-                local home_item="$HOME/$(basename "$item")"
+                local base_name
+                base_name="$(basename "$item")"
+                [[ "$base_name" == "." || "$base_name" == ".." ]] && continue
+                [[ "$base_name" == ".DS_Store" ]] && continue
+                [[ "$base_name" == ".stow-local-ignore" ]] && continue
+                local home_item="$HOME/$base_name"
                 if [[ ! -L "$home_item" && ! -e "$home_item" ]]; then
                     return 1
                 fi
