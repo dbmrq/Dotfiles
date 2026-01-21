@@ -64,19 +64,19 @@ else
 fi
 
 # Test stow.sh in verify mode (safe, read-only)
-if ./Bootstrap/stow.sh --verify >/dev/null 2>&1; then
+if ! command -v stow >/dev/null 2>&1; then
+    warn "stow.sh: skipped (stow not installed)"
+elif ./Bootstrap/stow.sh --verify >/dev/null 2>&1; then
     pass "stow.sh: --verify mode works"
 else
-    # May fail if stow not installed, that's OK
-    if ! command -v stow >/dev/null 2>&1; then
-        warn "stow.sh: skipped (stow not installed)"
-    else
-        fail "stow.sh: --verify mode fails"
-    fi
+    fail "stow.sh: --verify mode fails"
 fi
 
 # Test bootstrap.sh in verify mode (safe, read-only)
-if ./Bootstrap/bootstrap.sh --verify >/dev/null 2>&1; then
+# This test requires brew and other tools, so skip in CI environments
+if [[ -n "${CI:-}" ]]; then
+    warn "bootstrap.sh: skipped in CI (requires local environment)"
+elif ./Bootstrap/bootstrap.sh --verify >/dev/null 2>&1; then
     pass "bootstrap.sh: --verify mode works"
 else
     fail "bootstrap.sh: --verify mode fails"
