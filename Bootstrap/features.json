@@ -1,0 +1,73 @@
+{
+  "features": {
+    "vim": {
+      "name": "Vim/Neovim",
+      "brew_packages": ["macvim", "neovim"],
+      "brew_casks": [],
+      "stow_package": "Vim",
+      "post_install": "plugins"
+    },
+    "git": {
+      "name": "Git",
+      "brew_packages": ["git", "git-extras"],
+      "brew_casks": [],
+      "stow_package": "Git",
+      "post_install": null
+    },
+    "hammerspoon": {
+      "name": "Hammerspoon",
+      "brew_packages": [],
+      "brew_casks": ["hammerspoon"],
+      "stow_package": "Hammerspoon",
+      "post_install": null
+    },
+    "ssh": {
+      "name": "SSH",
+      "brew_packages": [],
+      "brew_casks": [],
+      "stow_package": "SSH",
+      "post_install": null
+    },
+    "tex": {
+      "name": "TeX/LaTeX",
+      "brew_packages": [],
+      "brew_casks": ["basictex"],
+      "stow_package": "TeX",
+      "post_install": "tlmgr"
+    },
+    "zsh": {
+      "name": "Zsh",
+      "brew_packages": [],
+      "brew_casks": [],
+      "stow_package": "Zsh",
+      "post_install": null
+    },
+    "cli": {
+      "name": "CLI Tools",
+      "brew_packages": ["lua", "mas", "par", "stow", "ruby", "trash-cli", "cscope", "pandoc", "rename", "python3", "swiftlint"],
+      "brew_casks": [],
+      "stow_package": null,
+      "post_install": null
+    },
+    "gui": {
+      "name": "GUI Apps",
+      "brew_packages": [],
+      "brew_casks": ["vlc", "appcleaner", "google-chrome", "the-unarchiver"],
+      "stow_package": null,
+      "post_install": null
+    },
+    "xcode": {
+      "name": "Xcode",
+      "brew_packages": [],
+      "brew_casks": [],
+      "stow_package": null,
+      "post_install": "xcode"
+    }
+  },
+  "cli_packages": ["git", "git-extras", "lua", "mas", "par", "stow", "ruby", "trash-cli", "cscope", "pandoc", "rename", "python3", "swiftlint"],
+  "gui_apps": {
+    "casks": ["vlc", "basictex", "appcleaner", "hammerspoon", "google-chrome", "the-unarchiver"],
+    "formulas": ["macvim", "neovim"]
+  }
+}
+

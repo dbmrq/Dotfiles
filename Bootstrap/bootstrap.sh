@@ -7,9 +7,10 @@
 # - Idempotent: safe to run multiple times
 #
 # Usage:
-#   ./bootstrap.sh           # Interactive mode - detect, verify, ask
-#   ./bootstrap.sh --verify  # Only check status, don't make changes
-#   ./bootstrap.sh --force   # Install everything without asking
+#   ./bootstrap.sh            # Interactive mode - detect, verify, ask
+#   ./bootstrap.sh --verify   # Only check status, don't make changes
+#   ./bootstrap.sh --force    # Install everything without asking
+#   ./bootstrap.sh --dry-run  # Show what would be done without doing it
 #
 
 set -euo pipefail
@@ -21,13 +22,41 @@ STATE_FILE="$SCRIPT_DIR/.bootstrap_state"
 TEMP_FILES=()
 SUDO_PID=""
 BOOTSTRAP_SUCCESS=false
-MODE="${1:-interactive}"  # interactive, --verify, or --force
+DRY_RUN=false
+MODE="${1:-interactive}"  # interactive, --verify, --force, or --dry-run
 
-# Source shared library for feature definitions
+# Handle --dry-run flag
+if [[ "$MODE" == "--dry-run" ]]; then
+    DRY_RUN=true
+    MODE="--force"  # Dry-run acts like force mode but doesn't execute
+fi
+
+# Source shared library for feature definitions and common functions
 source "$SCRIPT_DIR/lib.sh"
 
 # Selected features for installation (populated by gather_choices)
 SELECTED_FEATURES=()
+
+# --- Dry-run wrapper ---
+# Wraps a command: in dry-run mode, prints it; otherwise, executes it
+run_cmd() {
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} $*"
+        return 0
+    else
+        "$@"
+    fi
+}
+
+# Same as run_cmd but for sudo commands
+run_sudo() {
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} sudo $*"
+        return 0
+    else
+        sudo "$@"
+    fi
+}
 
 # --- Cleanup handler ---
 cleanup() {
@@ -77,158 +106,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # --- Helper functions ---
-print_header() {
-    echo ""
-    echo -e "${BLUE}${BOLD}==> $1${NC}"
-}
-
-print_success() {
-    echo -e "${GREEN}✓ $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}! $1${NC}"
-}
-
-print_error() {
-    echo -e "${RED}✗ $1${NC}"
-}
-
-ask_yes_no() {
-    local prompt="$1"
-    local default="${2:-n}"
-    local reply
-
-    if [[ "$default" =~ ^[Yy]$ ]]; then
-        prompt="$prompt [Y/n] "
-    else
-        prompt="$prompt [y/N] "
-    fi
-
-    read -r -p "$prompt" reply
-    reply="${reply:-$default}"
-    [[ "$reply" =~ ^[Yy]$ ]]
-}
-
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Determine Homebrew path based on architecture
-get_brew_path() {
-    if [[ "$(uname -m)" == "arm64" ]]; then
-        echo "/opt/homebrew/bin/brew"
-    else
-        echo "/usr/local/bin/brew"
-    fi
-}
-
-ensure_brew_in_path() {
-    if ! command_exists brew; then
-        local brew_path
-        brew_path="$(get_brew_path)"
-        if [[ -x "$brew_path" ]]; then
-            eval "$("$brew_path" shellenv)"
-        fi
-    fi
-}
-
-# --- Status checking functions ---
-# These check if components are installed/configured correctly
-
-# Check if a brew package is installed
-brew_pkg_installed() {
-    local pkg="$1"
-    ensure_brew_in_path
-    command_exists brew && brew list "$pkg" >/dev/null 2>&1
-}
-
-# Check if a brew cask is installed
-brew_cask_installed() {
-    local cask="$1"
-    ensure_brew_in_path
-    command_exists brew && brew list --cask "$cask" >/dev/null 2>&1
-}
-
-# CLI tools list
-CLI_PACKAGES=(git git-extras lua mas par stow ruby trash-cli cscope pandoc rename python3 swiftlint)
-# GUI apps list
-GUI_APPS=(vlc basictex appcleaner hammerspoon google-chrome the-unarchiver macvim neovim)
-
-# Check status of all CLI tools
-check_cli_tools_status() {
-    local installed=0 missing=0
-    for pkg in "${CLI_PACKAGES[@]}"; do
-        if brew_pkg_installed "$pkg"; then
-            ((installed++))
-        else
-            ((missing++))
-        fi
-    done
-    echo "$installed:$missing"
-}
-
-# Get list of missing CLI tools
-get_missing_cli_tools() {
-    local missing=()
-    for pkg in "${CLI_PACKAGES[@]}"; do
-        if ! brew_pkg_installed "$pkg"; then
-            missing+=("$pkg")
-        fi
-    done
-    echo "${missing[*]}"
-}
-
-# Check status of all GUI apps
-check_gui_apps_status() {
-    local installed=0 missing_count=0
-    for app in "${GUI_APPS[@]}"; do
-        if brew_cask_installed "$app" || brew_pkg_installed "$app"; then
-            ((installed++))
-        else
-            ((missing_count++))
-        fi
-    done
-    echo "$installed:$missing_count"
-}
-
-# Get list of missing GUI apps
-get_missing_gui_apps() {
-    local missing=()
-    for app in "${GUI_APPS[@]}"; do
-        if ! brew_cask_installed "$app" && ! brew_pkg_installed "$app"; then
-            missing+=("$app")
-        fi
-    done
-    echo "${missing[*]}"
-}
-
-# Check if dotfiles are properly symlinked
-check_stow_status() {
-    if [[ -x "$SCRIPT_DIR/stow.sh" ]]; then
-        if "$SCRIPT_DIR/stow.sh" --verify >/dev/null 2>&1; then
-            echo "ok"
-        else
-            echo "needs_attention"
-        fi
-    else
-        echo "unknown"
-    fi
-}
-
-# Check if SSH keys exist for GitHub
-check_ssh_keys_status() {
-    local count=0
-    for key in ~/.ssh/id_ed25519_github_*; do
-        [[ -f "$key" ]] && ((count++))
-    done
-    echo "$count"
-}
-
-# Check prezto status
-check_prezto_status() {
-    [[ -d "${ZDOTDIR:-$HOME}/.zprezto" ]] && echo "installed" || echo "missing"
-}
+# (Most helper functions are now in lib.sh)
 
 # Display full system status
 show_system_status() {
@@ -565,12 +443,12 @@ gather_choices() {
         if [[ "$cli_missing_count" -gt 0 ]]; then
             DO_BREW_CLI=true
             DO_HOMEBREW=true
-            SELECTED_CLI_PACKAGES=("${CLI_PACKAGES[@]}")
+            read -ra SELECTED_CLI_PACKAGES <<< "$(get_all_cli_packages)"
         fi
         if [[ "$gui_missing_count" -gt 0 ]]; then
             DO_BREW_APPS=true
             DO_HOMEBREW=true
-            SELECTED_GUI_APPS=("${GUI_APPS[@]}")
+            read -ra SELECTED_GUI_APPS <<< "$(get_all_gui_casks) $(get_all_gui_formulas)"
         fi
         $has_xcode_app || DO_XCODE_APP=true
         [[ "$prezto_status" != "installed" ]] && DO_PREZTO=true
@@ -619,7 +497,7 @@ gather_choices() {
             DO_BREW_CLI=true
             DO_HOMEBREW=true
             anything_to_do=true
-            SELECTED_CLI_PACKAGES=("${CLI_PACKAGES[@]}")
+            read -ra SELECTED_CLI_PACKAGES <<< "$(get_all_cli_packages)"
         else
             # Ask about each missing package
             SELECTED_CLI_PACKAGES=()
@@ -642,7 +520,7 @@ gather_choices() {
             DO_BREW_APPS=true
             DO_HOMEBREW=true
             anything_to_do=true
-            SELECTED_GUI_APPS=("${GUI_APPS[@]}")
+            read -ra SELECTED_GUI_APPS <<< "$(get_all_gui_casks) $(get_all_gui_formulas)"
         else
             # Ask about each missing app
             SELECTED_GUI_APPS=()
@@ -780,6 +658,12 @@ show_summary_and_confirm() {
     fi
     echo ""
 
+    # In dry-run mode, auto-confirm
+    if $DRY_RUN; then
+        echo "Proceeding with dry run..."
+        return
+    fi
+
     if ! ask_yes_no "Proceed with installation?" "y"; then
         rm -f "$STATE_FILE"
         echo "Aborted."
@@ -846,13 +730,17 @@ run_step() {
     local step_name="$1"
     local step_func="$2"
 
-    if step_completed "$step_name"; then
+    # In dry-run mode, don't check/mark completion
+    if ! $DRY_RUN && step_completed "$step_name"; then
         print_success "$step_name (already completed)"
         return 0
     fi
 
     if $step_func; then
-        mark_step_complete "$step_name"
+        # Don't mark complete in dry-run mode
+        if ! $DRY_RUN; then
+            mark_step_complete "$step_name"
+        fi
         return 0
     else
         return 1
@@ -861,7 +749,7 @@ run_step() {
 
 install_macos_updates() {
     print_header "Updating macOS"
-    sudo softwareupdate -i -a || print_warning "Some updates may require a restart"
+    run_sudo softwareupdate -i -a || print_warning "Some updates may require a restart"
     print_success "macOS updates complete"
 }
 
@@ -871,6 +759,12 @@ install_xcode_tools() {
     # Already installed? Skip.
     if xcode-select -p >/dev/null 2>&1; then
         print_success "Xcode Command Line Tools already installed"
+        return 0
+    fi
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} xcode-select --install"
+        print_success "Xcode Command Line Tools would be installed"
         return 0
     fi
 
@@ -896,20 +790,24 @@ install_homebrew() {
 
     if ! command_exists brew; then
         echo "Installing Homebrew..."
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        if $DRY_RUN; then
+            echo -e "  ${BLUE}[dry-run]${NC} /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        else
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        # Add to current shell
-        ensure_brew_in_path
+            # Add to current shell
+            ensure_brew_in_path
 
-        # Add to profile if not already there
-        local brew_path
-        brew_path="$(get_brew_path)"
-        if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
-            echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
+            # Add to profile if not already there
+            local brew_path
+            brew_path="$(get_brew_path)"
+            if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
+                echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
+            fi
         fi
     else
         echo "Homebrew already installed. Updating..."
-        brew update || print_warning "brew update failed, continuing anyway"
+        run_cmd brew update || print_warning "brew update failed, continuing anyway"
     fi
 
     print_success "Homebrew ready"
@@ -919,25 +817,26 @@ install_brew_cli() {
     print_header "Installing CLI tools"
 
     ensure_brew_in_path
-    if ! command_exists brew; then
+    if ! command_exists brew && ! $DRY_RUN; then
         print_warning "Homebrew not available, skipping CLI tools"
         return 1
     fi
 
-    # Use selected packages if set, otherwise use full list
-    local packages=()
+    # Use selected packages if set, otherwise get from JSON
+    local packages
     if [[ ${#SELECTED_CLI_PACKAGES[@]} -gt 0 ]]; then
         packages=("${SELECTED_CLI_PACKAGES[@]}")
     else
-        packages=("${CLI_PACKAGES[@]}")
+        # Read from JSON
+        read -ra packages <<< "$(get_all_cli_packages)"
     fi
 
     for pkg in "${packages[@]}"; do
-        if brew list "$pkg" >/dev/null 2>&1; then
+        if ! $DRY_RUN && brew list "$pkg" >/dev/null 2>&1; then
             echo "  $pkg already installed"
         else
             echo "  Installing $pkg..."
-            brew install "$pkg" || print_warning "Failed to install $pkg"
+            run_cmd brew install "$pkg" || print_warning "Failed to install $pkg"
         fi
     done
 
@@ -948,44 +847,52 @@ install_brew_apps() {
     print_header "Installing GUI applications"
 
     ensure_brew_in_path
-    if ! command_exists brew; then
+    if ! command_exists brew && ! $DRY_RUN; then
         print_warning "Homebrew not available, skipping GUI apps"
         return 1
     fi
 
-    # Use selected apps if set, otherwise use full list
-    local apps=()
+    # Use selected apps if set, otherwise get from JSON
+    local apps
     if [[ ${#SELECTED_GUI_APPS[@]} -gt 0 ]]; then
         apps=("${SELECTED_GUI_APPS[@]}")
     else
-        apps=("${GUI_APPS[@]}")
+        # Read all GUI apps from JSON (casks + formulas)
+        local casks=() formulas=()
+        local casks_str formulas_str
+        casks_str="$(get_all_gui_casks)"
+        formulas_str="$(get_all_gui_formulas)"
+        [[ -n "$casks_str" ]] && read -ra casks <<< "$casks_str"
+        [[ -n "$formulas_str" ]] && read -ra formulas <<< "$formulas_str"
+        apps=()
+        [[ ${#casks[@]} -gt 0 ]] && apps+=("${casks[@]}")
+        [[ ${#formulas[@]} -gt 0 ]] && apps+=("${formulas[@]}")
     fi
 
-    # Cask apps (installed with --cask)
-    local cask_apps=(vlc basictex appcleaner hammerspoon google-chrome the-unarchiver)
-    # Regular brew apps
-    local brew_apps=(macvim neovim)
+    # Get cask list from JSON for type checking
+    local cask_list
+    cask_list="$(get_all_gui_casks)"
 
     for app in "${apps[@]}"; do
-        # Check if it's a cask app or brew app
-        if [[ " ${cask_apps[*]} " == *" $app "* ]]; then
-            if brew list --cask "$app" >/dev/null 2>&1; then
+        # Check if it's a cask app or brew formula
+        if [[ " $cask_list " == *" $app "* ]]; then
+            if ! $DRY_RUN && brew list --cask "$app" >/dev/null 2>&1; then
                 echo "  $app already installed"
             else
                 echo "  Installing $app..."
-                brew install --cask "$app" || print_warning "Failed to install $app"
+                run_cmd brew install --cask "$app" || print_warning "Failed to install $app"
             fi
-        elif [[ " ${brew_apps[*]} " == *" $app "* ]]; then
-            if brew list "$app" >/dev/null 2>&1; then
+        else
+            if ! $DRY_RUN && brew list "$app" >/dev/null 2>&1; then
                 echo "  $app already installed"
             else
                 echo "  Installing $app..."
-                brew install "$app" || print_warning "Failed to install $app"
+                run_cmd brew install "$app" || print_warning "Failed to install $app"
             fi
         fi
     done
 
-    brew cleanup || true
+    run_cmd brew cleanup || true
 
     print_success "GUI applications installed"
 }
@@ -994,7 +901,7 @@ install_xcode_app() {
     print_header "Installing Xcode from App Store"
 
     ensure_brew_in_path
-    if ! command_exists mas; then
+    if ! command_exists mas && ! $DRY_RUN; then
         print_warning "mas not installed, skipping Xcode App Store install"
         return 0  # Not a failure, just skipped
     fi
@@ -1004,12 +911,12 @@ install_xcode_app() {
         print_success "Xcode already installed"
     else
         echo "Installing Xcode (this may take a while)..."
-        mas install 497799835 || print_warning "Failed to install Xcode"
+        run_cmd mas install 497799835 || print_warning "Failed to install Xcode"
     fi
 
     # Accept license
-    if [[ -d "/Applications/Xcode.app" ]]; then
-        sudo xcodebuild -license accept 2>/dev/null || true
+    if [[ -d "/Applications/Xcode.app" ]] || $DRY_RUN; then
+        run_sudo xcodebuild -license accept 2>/dev/null || true
     fi
 
     print_success "Xcode setup complete"
@@ -1017,6 +924,12 @@ install_xcode_app() {
 
 apply_preferences() {
     print_header "Applying macOS preferences"
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} /bin/bash $SCRIPT_DIR/prefs.sh"
+        print_success "Preferences would be applied"
+        return 0
+    fi
 
     # Close System Preferences/Settings to prevent conflicts
     osascript -e 'tell application "System Preferences" to quit' 2>/dev/null || true
@@ -1029,9 +942,9 @@ apply_preferences() {
 
 clear_dock() {
     print_header "Clearing Dock"
-    defaults write com.apple.dock persistent-apps -array
-    defaults write com.apple.dock persistent-others -array
-    killall Dock || true
+    run_cmd defaults write com.apple.dock persistent-apps -array
+    run_cmd defaults write com.apple.dock persistent-others -array
+    run_cmd killall Dock || true
     print_success "Dock cleared"
 }
 
@@ -1045,12 +958,20 @@ install_prezto() {
         return 0
     fi
 
-    git clone --recursive https://github.com/sorin-ionescu/prezto.git "$prezto_dir"
+    run_cmd git clone --recursive https://github.com/sorin-ionescu/prezto.git "$prezto_dir"
     print_success "Prezto installed"
 }
 
 install_terminal_theme() {
     print_header "Installing Terminal color scheme"
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} git clone https://github.com/dbmrq/terminal-solarized.git /tmp/..."
+        echo -e "  ${BLUE}[dry-run]${NC} open Solarized Dark.terminal"
+        echo -e "  ${BLUE}[dry-run]${NC} open Solarized Light.terminal"
+        print_success "Terminal color scheme would be installed"
+        return 0
+    fi
 
     local temp_dir
     temp_dir="$(mktemp -d)"
@@ -1079,43 +1000,43 @@ install_latex() {
         export PATH="/Library/TeX/texbin:$PATH"
     fi
 
-    if ! command_exists tlmgr; then
+    if ! command_exists tlmgr && ! $DRY_RUN; then
         print_warning "tlmgr not found. Install BasicTeX first."
         return 0  # Not a fatal error
     fi
 
     echo "Updating TeX Live..."
-    sudo tlmgr update --self --all || true
+    run_sudo tlmgr update --self --all || true
 
     echo "Installing TeX packages..."
-    sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
+    run_sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
         collection-langother collection-latexextra collection-pictures logreq \
         biblatex biber || print_warning "Some packages may have failed"
 
     # Set up directories (idempotent - mkdir -p and ln -sf are safe to repeat)
     if [[ -n "${LATEX_DIR:-}" ]]; then
-        mkdir -p "${LATEX_DIR}/Classes"
-        mkdir -p "${LATEX_DIR}/Packages"
-        mkdir -p "${LATEX_DIR}/Bibliography"
-        mkdir -p ~/Library/texmf/tex/latex
-        mkdir -p ~/Library/texmf/bibtex
+        run_cmd mkdir -p "${LATEX_DIR}/Classes"
+        run_cmd mkdir -p "${LATEX_DIR}/Packages"
+        run_cmd mkdir -p "${LATEX_DIR}/Bibliography"
+        run_cmd mkdir -p ~/Library/texmf/tex/latex
+        run_cmd mkdir -p ~/Library/texmf/bibtex
 
         # Clone repositories (only if not exists)
-        if [[ ! -d "${LATEX_DIR}/Classes/dbmrq" ]]; then
-            git clone https://github.com/dbmrq/tex-dbmrq.git "${LATEX_DIR}/Classes/dbmrq"
+        if [[ ! -d "${LATEX_DIR}/Classes/dbmrq" ]] || $DRY_RUN; then
+            run_cmd git clone https://github.com/dbmrq/tex-dbmrq.git "${LATEX_DIR}/Classes/dbmrq"
         else
             echo "  dbmrq already cloned"
         fi
-        if [[ ! -d "${LATEX_DIR}/Packages/biblatex-abnt" ]]; then
-            git clone https://github.com/abntex/biblatex-abnt.git "${LATEX_DIR}/Packages/biblatex-abnt"
+        if [[ ! -d "${LATEX_DIR}/Packages/biblatex-abnt" ]] || $DRY_RUN; then
+            run_cmd git clone https://github.com/abntex/biblatex-abnt.git "${LATEX_DIR}/Packages/biblatex-abnt"
         else
             echo "  biblatex-abnt already cloned"
         fi
 
         # Create symlinks (idempotent with -sf)
-        ln -sf "${LATEX_DIR}/Classes" ~/Library/texmf/tex/latex/classes
-        ln -sf "${LATEX_DIR}/Packages" ~/Library/texmf/tex/latex/packages
-        ln -sf "${LATEX_DIR}/Bibliography" ~/Library/texmf/bibtex/bib
+        run_cmd ln -sf "${LATEX_DIR}/Classes" ~/Library/texmf/tex/latex/classes
+        run_cmd ln -sf "${LATEX_DIR}/Packages" ~/Library/texmf/tex/latex/packages
+        run_cmd ln -sf "${LATEX_DIR}/Bibliography" ~/Library/texmf/bibtex/bib
     fi
 
     print_success "LaTeX setup complete"
@@ -1125,7 +1046,7 @@ setup_stow() {
     print_header "Symlinking dotfiles"
 
     ensure_brew_in_path
-    if ! command_exists stow; then
+    if ! command_exists stow && ! $DRY_RUN; then
         print_warning "stow not installed, skipping dotfiles"
         return 0  # Not a fatal error
     fi
@@ -1157,8 +1078,12 @@ setup_stow() {
 
     echo "Stowing: ${packages[*]}"
 
-    # Call the stow.sh script with the selected packages
-    "$SCRIPT_DIR/stow.sh" --force "${packages[@]}"
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} $SCRIPT_DIR/stow.sh --force ${packages[*]}"
+    else
+        # Call the stow.sh script with the selected packages
+        "$SCRIPT_DIR/stow.sh" --force "${packages[@]}"
+    fi
 
     print_success "Dotfiles symlinked"
 }
@@ -1166,8 +1091,12 @@ setup_stow() {
 setup_plugins() {
     print_header "Updating Vim/Neovim plugins"
 
-    # Call the plugins.sh script
-    "$SCRIPT_DIR/plugins.sh" --force
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} $SCRIPT_DIR/plugins.sh --force"
+    else
+        # Call the plugins.sh script
+        "$SCRIPT_DIR/plugins.sh" --force
+    fi
 
     print_success "Plugins updated"
 }
@@ -1177,6 +1106,20 @@ setup_ssh_keys() {
 
     if [[ ${#GITHUB_ACCOUNTS[@]} -eq 0 ]]; then
         print_warning "No GitHub accounts configured, skipping SSH setup"
+        return 0
+    fi
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} Would configure ${#GITHUB_ACCOUNTS[@]} GitHub account(s)"
+        for account in "${GITHUB_ACCOUNTS[@]}"; do
+            local name username
+            name=$(echo "$account" | cut -d'|' -f1)
+            username=$(echo "$account" | cut -d'|' -f2)
+            echo -e "  ${BLUE}[dry-run]${NC}   - $name ($username)"
+        done
+        echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.ssh/config.local"
+        echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.gitconfig.local"
+        print_success "GitHub accounts would be configured"
         return 0
     fi
 
@@ -1235,17 +1178,20 @@ Host $host_alias
 "
 
         # Add URL rewrites for each mapping
-        IFS=',' read -ra mapping_array <<< "$mappings"
-        for mapping in "${mapping_array[@]}"; do
-            mapping=$(echo "$mapping" | xargs)  # trim whitespace
-            if [[ -n "$mapping" ]]; then
-                git_config+="[url \"git@$host_alias:$mapping/\"]
+        if [[ -n "$mappings" ]]; then
+            local mapping_array=()
+            IFS=',' read -ra mapping_array <<< "$mappings"
+            for mapping in "${mapping_array[@]}"; do
+                mapping=$(echo "$mapping" | xargs)  # trim whitespace
+                if [[ -n "$mapping" ]]; then
+                    git_config+="[url \"git@$host_alias:$mapping/\"]
     insteadOf = git@github.com:$mapping/
     insteadOf = https://github.com/$mapping/
 
 "
-            fi
-        done
+                fi
+            done
+        fi
 
         # Track the default account
         if [[ "$i" -eq "${DEFAULT_GITHUB_ACCOUNT:-0}" ]]; then
@@ -1296,6 +1242,9 @@ main() {
     echo -e "${BOLD}╔════════════════════════════════════════╗${NC}"
     echo -e "${BOLD}║     macOS Bootstrap Script             ║${NC}"
     echo -e "${BOLD}╚════════════════════════════════════════╝${NC}"
+    if $DRY_RUN; then
+        echo -e "${YELLOW}${BOLD}         (DRY RUN - no changes will be made)${NC}"
+    fi
     echo ""
 
     check_compatibility
@@ -1316,11 +1265,15 @@ main() {
         gather_choices
     fi
 
-    # Request sudo upfront and keep it alive
-    print_header "Requesting administrator access"
-    sudo -v
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-    SUDO_PID=$!
+    # Request sudo upfront and keep it alive (skip in dry-run mode)
+    if ! $DRY_RUN; then
+        print_header "Requesting administrator access"
+        sudo -v
+        while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+        SUDO_PID=$!
+    else
+        print_header "Dry run - skipping sudo"
+    fi
 
     # Run selected installations with step tracking
     # Each step checks if already completed and marks itself done

@@ -17,6 +17,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Source shared library for common functions
+source "$SCRIPT_DIR/lib.sh"
+
 # Parse arguments - separate flags from package names
 MODE="interactive"
 REQUESTED_PACKAGES=()
@@ -31,22 +34,8 @@ done
 # Pre-normalize DOTFILES_DIR for Unicode comparisons (macOS uses NFD, scripts use NFC)
 DOTFILES_DIR_NORMALIZED="$(python3 -c "import unicodedata,sys; print(unicodedata.normalize('NFC',sys.argv[1]),end='')" "$DOTFILES_DIR" 2>/dev/null || printf '%s' "$DOTFILES_DIR")"
 
-# --- Colors ---
-if [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]; then
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    BOLD='\033[1m'
-    NC='\033[0m'
-else
-    RED='' GREEN='' YELLOW='' BLUE='' BOLD='' NC=''
-fi
-
-print_ok() { echo -e "${GREEN}✓${NC} $1"; }
-print_warn() { echo -e "${YELLOW}!${NC} $1"; }
-print_err() { echo -e "${RED}✗${NC} $1"; }
-print_info() { echo -e "${BLUE}→${NC} $1"; }
+# Alias for backward compatibility (print_err -> print_error)
+print_err() { print_error "$1"; }
 
 # Check if two files are identical (works for files and directories)
 files_identical() {
@@ -87,18 +76,21 @@ _build_symlink_cache() {
 is_inside_dotfiles() {
     local path="$1"
 
-    # Build cache on first call
-    if [[ ${#DOTFILES_SYMLINKS[@]} -eq 0 ]]; then
+    # Build cache on first call (use special marker to indicate cache is built)
+    if [[ -z "${SYMLINKS_CACHE_BUILT:-}" ]]; then
         _build_symlink_cache
+        SYMLINKS_CACHE_BUILT=true
     fi
 
     # Fast path: check if path starts with any cached symlink
-    local symlink
-    for symlink in "${DOTFILES_SYMLINKS[@]}"; do
-        if [[ "$path" == "$symlink" || "$path" == "$symlink/"* ]]; then
-            return 0
-        fi
-    done
+    if [[ ${#DOTFILES_SYMLINKS[@]} -gt 0 ]]; then
+        local symlink
+        for symlink in "${DOTFILES_SYMLINKS[@]}"; do
+            if [[ "$path" == "$symlink" || "$path" == "$symlink/"* ]]; then
+                return 0
+            fi
+        done
+    fi
 
     # Slower path: resolve full path and compare with Unicode normalization
     local real_path
@@ -185,14 +177,6 @@ remove_identical_conflicts() {
             rm -rf "$d" 2>/dev/null || true
         done
     fi
-}
-
-ask_yes_no() {
-    local prompt="$1" default="${2:-n}" reply
-    [[ "$default" =~ ^[Yy]$ ]] && prompt="$prompt [Y/n] " || prompt="$prompt [y/N] "
-    read -r -p "$prompt" reply
-    reply="${reply:-$default}"
-    [[ "$reply" =~ ^[Yy]$ ]]
 }
 
 # --- Verify a single symlink ---
@@ -363,13 +347,15 @@ else
     identical_conflicts=()
     different_conflicts=()
 
-    for pkg in "${has_conflicts[@]}"; do
-        if check_conflicts_identical "$pkg"; then
-            identical_conflicts+=("$pkg")
-        else
-            different_conflicts+=("$pkg")
-        fi
-    done
+    if [[ ${#has_conflicts[@]} -gt 0 ]]; then
+        for pkg in "${has_conflicts[@]}"; do
+            if check_conflicts_identical "$pkg"; then
+                identical_conflicts+=("$pkg")
+            else
+                different_conflicts+=("$pkg")
+            fi
+        done
+    fi
 
     # Auto-fix identical conflicts
     if [[ ${#identical_conflicts[@]} -gt 0 ]]; then
