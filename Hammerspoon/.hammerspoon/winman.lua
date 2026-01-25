@@ -35,6 +35,13 @@ local hotkeys = winmanHotkeys or {
     snapToGrid         = "/", -- Snap windows to the grid
     maximizeWindow     = ";", -- Expand current window to take up whole grid
 
+    -- Multi-monitor support
+    moveToNextScreen   = "N", -- Move window to next screen
+    moveToPrevScreen   = "P", -- Move window to previous screen
+    moveToScreen1      = "1", -- Move window to screen 1
+    moveToScreen2      = "2", -- Move window to screen 2
+    moveToScreen3      = "3", -- Move window to screen 3
+
     -- Only useful if you plan on using more than two windows per column/row:
     -- moveUp = "Up", -- Move window up one cell
     -- moveDown = "Down", -- Move window down one cell
@@ -616,5 +623,110 @@ end)
 
 -- }}}2
 
--- }}}1
+-- Multi-monitor support {{{2
 
+-- Move window to a specific screen, preserving relative position
+local function moveToScreen(win, screen)
+    if not win or not screen then return end
+
+    local currentScreen = win:screen()
+    if currentScreen:id() == screen:id() then return end
+
+    local currentFrame = currentScreen:frame()
+    local targetFrame = screen:frame()
+    local winFrame = win:frame()
+
+    -- Calculate relative position (0-1 range)
+    local relX = (winFrame.x - currentFrame.x) / currentFrame.w
+    local relY = (winFrame.y - currentFrame.y) / currentFrame.h
+    local relW = winFrame.w / currentFrame.w
+    local relH = winFrame.h / currentFrame.h
+
+    -- Apply to new screen
+    local newFrame = {
+        x = targetFrame.x + (relX * targetFrame.w),
+        y = targetFrame.y + (relY * targetFrame.h),
+        w = relW * targetFrame.w,
+        h = relH * targetFrame.h,
+    }
+
+    win:setFrame(newFrame)
+end
+
+-- Get all screens sorted by position (left to right, top to bottom)
+local function getSortedScreens()
+    local screens = hs.screen.allScreens()
+    table.sort(screens, function(a, b)
+        local aFrame = a:frame()
+        local bFrame = b:frame()
+        if aFrame.x ~= bFrame.x then
+            return aFrame.x < bFrame.x
+        end
+        return aFrame.y < bFrame.y
+    end)
+    return screens
+end
+
+-- Find screen index in sorted list
+local function getScreenIndex(screen, screens)
+    for i, s in ipairs(screens) do
+        if s:id() == screen:id() then
+            return i
+        end
+    end
+    return 1
+end
+
+-- Move to next screen
+if hotkeys["moveToNextScreen"] then
+    hs.hotkey.bind(super, hotkeys["moveToNextScreen"], function()
+        local win = hs.window.focusedWindow()
+        if not win then return end
+
+        local screens = getSortedScreens()
+        if #screens < 2 then return end
+
+        local currentIndex = getScreenIndex(win:screen(), screens)
+        local nextIndex = (currentIndex % #screens) + 1
+        moveToScreen(win, screens[nextIndex])
+    end)
+end
+
+-- Move to previous screen
+if hotkeys["moveToPrevScreen"] then
+    hs.hotkey.bind(super, hotkeys["moveToPrevScreen"], function()
+        local win = hs.window.focusedWindow()
+        if not win then return end
+
+        local screens = getSortedScreens()
+        if #screens < 2 then return end
+
+        local currentIndex = getScreenIndex(win:screen(), screens)
+        local prevIndex = ((currentIndex - 2) % #screens) + 1
+        moveToScreen(win, screens[prevIndex])
+    end)
+end
+
+-- Move to specific screen by number
+local function bindScreenNumber(num)
+    local key = "moveToScreen" .. num
+    if hotkeys[key] then
+        hs.hotkey.bind(super, hotkeys[key], function()
+            local win = hs.window.focusedWindow()
+            if not win then return end
+
+            local screens = getSortedScreens()
+            if num <= #screens then
+                moveToScreen(win, screens[num])
+            end
+        end)
+    end
+end
+
+bindScreenNumber(1)
+bindScreenNumber(2)
+bindScreenNumber(3)
+
+-- }}}2
+
+-- }}}1

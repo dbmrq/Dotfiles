@@ -112,22 +112,54 @@ trap cleanup EXIT INT TERM
 show_system_status() {
     print_header "System Status"
 
-    # Xcode CLI tools
-    if xcode-select -p >/dev/null 2>&1; then
-        print_success "Xcode Command Line Tools"
+    if is_macos; then
+        # Xcode CLI tools (macOS only)
+        if xcode-select -p >/dev/null 2>&1; then
+            print_success "Xcode Command Line Tools"
+        else
+            print_warning "Xcode Command Line Tools: not installed"
+        fi
+
+        # Homebrew
+        ensure_brew_in_path
+        if command_exists brew; then
+            print_success "Homebrew"
+        else
+            print_warning "Homebrew: not installed"
+        fi
+
+        # GUI apps (macOS only)
+        local gui_status
+        gui_status=$(check_gui_apps_status)
+        local gui_installed="${gui_status%:*}"
+        local gui_missing="${gui_status#*:}"
+        if [[ "$gui_missing" -eq 0 ]]; then
+            print_success "GUI applications ($gui_installed apps)"
+        else
+            print_warning "GUI applications: $gui_installed installed, $gui_missing missing"
+        fi
+
+        # Xcode app (macOS only)
+        if [[ -d "/Applications/Xcode.app" ]]; then
+            print_success "Xcode (App Store)"
+        else
+            print_warning "Xcode (App Store): not installed"
+        fi
+
+        # Prezto (macOS only)
+        if [[ "$(check_prezto_status)" == "installed" ]]; then
+            print_success "Prezto"
+        else
+            print_warning "Prezto: not installed"
+        fi
     else
-        print_warning "Xcode Command Line Tools: not installed"
+        # Linux: show package manager
+        local pm
+        pm="$(get_package_manager)"
+        print_success "Package manager: $pm"
     fi
 
-    # Homebrew
-    ensure_brew_in_path
-    if command_exists brew; then
-        print_success "Homebrew"
-    else
-        print_warning "Homebrew: not installed"
-    fi
-
-    # CLI tools
+    # CLI tools (both platforms)
     local cli_status
     cli_status=$(check_cli_tools_status)
     local cli_installed="${cli_status%:*}"
@@ -138,32 +170,7 @@ show_system_status() {
         print_warning "CLI tools: $cli_installed installed, $cli_missing missing"
     fi
 
-    # GUI apps
-    local gui_status
-    gui_status=$(check_gui_apps_status)
-    local gui_installed="${gui_status%:*}"
-    local gui_missing="${gui_status#*:}"
-    if [[ "$gui_missing" -eq 0 ]]; then
-        print_success "GUI applications ($gui_installed apps)"
-    else
-        print_warning "GUI applications: $gui_installed installed, $gui_missing missing"
-    fi
-
-    # Xcode app
-    if [[ -d "/Applications/Xcode.app" ]]; then
-        print_success "Xcode (App Store)"
-    else
-        print_warning "Xcode (App Store): not installed"
-    fi
-
-    # Prezto
-    if [[ "$(check_prezto_status)" == "installed" ]]; then
-        print_success "Prezto"
-    else
-        print_warning "Prezto: not installed"
-    fi
-
-    # Dotfiles
+    # Dotfiles (both platforms)
     local stow_status
     stow_status=$(check_stow_status)
     if [[ "$stow_status" == "ok" ]]; then
@@ -172,7 +179,7 @@ show_system_status() {
         print_warning "Dotfiles: some symlinks need attention"
     fi
 
-    # SSH keys
+    # SSH keys (both platforms)
     local ssh_count
     ssh_count=$(check_ssh_keys_status)
     if [[ "$ssh_count" -gt 0 ]]; then
@@ -265,32 +272,49 @@ load_choices() {
 check_compatibility() {
     print_header "Checking system compatibility"
 
-    # Check macOS
-    if [[ "$(uname)" != "Darwin" ]]; then
-        print_error "This script only runs on macOS"
-        exit 1
-    fi
+    if is_macos; then
+        # Get macOS version
+        local macos_version
+        macos_version="$(sw_vers -productVersion)"
+        local major_version
+        major_version="$(echo "$macos_version" | cut -d. -f1)"
 
-    # Get macOS version
-    local macos_version
-    macos_version="$(sw_vers -productVersion)"
-    local major_version
-    major_version="$(echo "$macos_version" | cut -d. -f1)"
+        print_success "macOS $macos_version detected"
 
-    print_success "macOS $macos_version detected"
+        # Check architecture
+        local arch
+        arch="$(uname -m)"
+        if [[ "$arch" == "arm64" ]]; then
+            print_success "Apple Silicon (arm64) detected"
+        else
+            print_success "Intel ($arch) detected"
+        fi
 
-    # Check architecture
-    local arch
-    arch="$(uname -m)"
-    if [[ "$arch" == "arm64" ]]; then
-        print_success "Apple Silicon (arm64) detected"
+        # Warn about older macOS versions
+        if [[ "$major_version" -lt 11 ]]; then
+            print_warning "macOS 11+ recommended. Some features may not work."
+        fi
+    elif is_linux; then
+        print_success "Linux detected"
+
+        # Show distribution
+        local distro
+        distro="$LINUX_DISTRO"
+        if [[ "$distro" != "unknown" ]]; then
+            print_success "Distribution: $distro"
+        fi
+
+        # Show package manager
+        local pm
+        pm="$(get_package_manager)"
+        if [[ "$pm" != "unknown" ]]; then
+            print_success "Package manager: $pm"
+        else
+            print_warning "No supported package manager found"
+        fi
     else
-        print_success "Intel ($arch) detected"
-    fi
-
-    # Warn about older macOS versions
-    if [[ "$major_version" -lt 11 ]]; then
-        print_warning "macOS 11+ recommended. Some features may not work."
+        print_error "Unsupported operating system"
+        exit 1
     fi
 
     echo ""
@@ -300,7 +324,8 @@ check_compatibility() {
 gather_github_accounts() {
     echo ""
     echo "  Add GitHub accounts one at a time. For each account, you'll specify:"
-    echo "    - A name (e.g., 'personal', 'work')"
+    echo "    - A label (e.g., 'personal', 'work')"
+    echo "    - Your display name for commits"
     echo "    - The GitHub username"
     echo "    - Email for commits"
     echo "    - Usernames/orgs to map to this account"
@@ -315,13 +340,19 @@ gather_github_accounts() {
         fi
 
         echo ""
-        read -r -p "  Account name (e.g., personal, work, enterprise): " account_name
+        read -r -p "  Account label (e.g., personal, work): " account_name
         if [[ -z "$account_name" ]]; then
-            echo "  Skipping empty account name"
+            echo "  Skipping empty label"
             continue
         fi
         # Normalize to lowercase, no spaces
         account_name=$(echo "$account_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+
+        read -r -p "  Your name (for commits): " display_name
+        if [[ -z "$display_name" ]]; then
+            echo "  Skipping - name required"
+            continue
+        fi
 
         read -r -p "  GitHub username: " github_username
         if [[ -z "$github_username" ]]; then
@@ -346,8 +377,8 @@ gather_github_accounts() {
             all_mappings="$github_username,$extra_mappings"
         fi
 
-        # Store as "name|username|email|mappings"
-        GITHUB_ACCOUNTS+=("$account_name|$github_username|$account_email|$all_mappings")
+        # Store as "label|displayname|username|email|mappings"
+        GITHUB_ACCOUNTS+=("$account_name|$display_name|$github_username|$account_email|$all_mappings")
         ((account_count++))
         print_success "  Added account: $account_name ($github_username)"
     done
@@ -358,10 +389,10 @@ gather_github_accounts() {
         echo "  Which account should be the default for other repos?"
         local i=1
         for account in "${GITHUB_ACCOUNTS[@]}"; do
-            local name username
-            name=$(echo "$account" | cut -d'|' -f1)
-            username=$(echo "$account" | cut -d'|' -f2)
-            echo "    $i) $name ($username)"
+            local label username
+            label=$(echo "$account" | cut -d'|' -f1)
+            username=$(echo "$account" | cut -d'|' -f3)
+            echo "    $i) $label ($username)"
             ((i++))
         done
         read -r -p "  Choose [1-${#GITHUB_ACCOUNTS[@]}]: " default_choice
@@ -401,34 +432,40 @@ gather_choices() {
 
     # --- Run all status checks UPFRONT (slow operations) ---
     echo "Checking system state..."
-    ensure_brew_in_path
 
     local has_xcode_tools=false
-    xcode-select -p >/dev/null 2>&1 && has_xcode_tools=true
-
     local has_brew=false
-    command_exists brew && has_brew=true
-
     local missing_cli=""
     local cli_missing_count=0
-    if $has_brew; then
+    local missing_gui=""
+    local gui_missing_count=0
+    local has_xcode_app=false
+    local prezto_status="missing"
+
+    if is_macos; then
+        ensure_brew_in_path
+        xcode-select -p >/dev/null 2>&1 && has_xcode_tools=true
+        command_exists brew && has_brew=true
+
+        if $has_brew; then
+            local cli_status; cli_status=$(check_cli_tools_status)
+            cli_missing_count="${cli_status#*:}"
+            [[ "$cli_missing_count" -gt 0 ]] && missing_cli=$(get_missing_cli_tools)
+
+            local gui_status; gui_status=$(check_gui_apps_status)
+            gui_missing_count="${gui_status#*:}"
+            [[ "$gui_missing_count" -gt 0 ]] && missing_gui=$(get_missing_gui_apps)
+        fi
+
+        [[ -d "/Applications/Xcode.app" ]] && has_xcode_app=true
+        prezto_status=$(check_prezto_status)
+    else
+        # Linux: check CLI tools directly
         local cli_status; cli_status=$(check_cli_tools_status)
         cli_missing_count="${cli_status#*:}"
         [[ "$cli_missing_count" -gt 0 ]] && missing_cli=$(get_missing_cli_tools)
     fi
 
-    local missing_gui=""
-    local gui_missing_count=0
-    if $has_brew; then
-        local gui_status; gui_status=$(check_gui_apps_status)
-        gui_missing_count="${gui_status#*:}"
-        [[ "$gui_missing_count" -gt 0 ]] && missing_gui=$(get_missing_gui_apps)
-    fi
-
-    local has_xcode_app=false
-    [[ -d "/Applications/Xcode.app" ]] && has_xcode_app=true
-
-    local prezto_status; prezto_status=$(check_prezto_status)
     local stow_status; stow_status=$(check_stow_status)
     local ssh_count; ssh_count=$(check_ssh_keys_status)
 
@@ -437,21 +474,23 @@ gather_choices() {
     # --- Force mode: enable everything that's missing ---
     if [[ "$MODE" == "--force" ]]; then
         print_header "Force mode: installing all missing components"
-        DO_MACOS_UPDATE=false  # Never force macOS updates
-        $has_xcode_tools || DO_XCODE_TOOLS=true
-        $has_brew || DO_HOMEBREW=true
+        if is_macos; then
+            DO_MACOS_UPDATE=false  # Never force macOS updates
+            $has_xcode_tools || DO_XCODE_TOOLS=true
+            $has_brew || DO_HOMEBREW=true
+            if [[ "$gui_missing_count" -gt 0 ]]; then
+                DO_BREW_APPS=true
+                DO_HOMEBREW=true
+                read -ra SELECTED_GUI_APPS <<< "$(get_all_gui_casks) $(get_all_gui_formulas)"
+            fi
+            $has_xcode_app || DO_XCODE_APP=true
+            [[ "$prezto_status" != "installed" ]] && DO_PREZTO=true
+        fi
         if [[ "$cli_missing_count" -gt 0 ]]; then
             DO_BREW_CLI=true
-            DO_HOMEBREW=true
+            is_macos && DO_HOMEBREW=true
             read -ra SELECTED_CLI_PACKAGES <<< "$(get_all_cli_packages)"
         fi
-        if [[ "$gui_missing_count" -gt 0 ]]; then
-            DO_BREW_APPS=true
-            DO_HOMEBREW=true
-            read -ra SELECTED_GUI_APPS <<< "$(get_all_gui_casks) $(get_all_gui_formulas)"
-        fi
-        $has_xcode_app || DO_XCODE_APP=true
-        [[ "$prezto_status" != "installed" ]] && DO_PREZTO=true
         [[ "$stow_status" != "ok" ]] && DO_STOW=true
         # Update plugins if vim/neovim are installed
         (command_exists vim || command_exists nvim) && DO_PLUGINS=true
@@ -467,22 +506,22 @@ gather_choices() {
 
     local anything_to_do=false
 
-    # macOS updates - always ask (optional)
-    if ask_yes_no "Check for macOS updates?"; then
+    # macOS updates - ask only on macOS
+    if is_macos && ask_yes_no "Check for macOS updates?"; then
         DO_MACOS_UPDATE=true
         anything_to_do=true
     fi
 
-    # Xcode CLI tools
-    if ! $has_xcode_tools; then
+    # Xcode CLI tools (macOS only)
+    if is_macos && ! $has_xcode_tools; then
         if ask_yes_no "Install Xcode Command Line Tools? (required for most tasks)" "y"; then
             DO_XCODE_TOOLS=true
             anything_to_do=true
         fi
     fi
 
-    # Homebrew
-    if ! $has_brew; then
+    # Homebrew (macOS only)
+    if is_macos && ! $has_brew; then
         if ask_yes_no "Install Homebrew? (required for packages)" "y"; then
             DO_HOMEBREW=true
             anything_to_do=true
@@ -495,7 +534,7 @@ gather_choices() {
         echo "Missing CLI tools: $missing_cli"
         if ask_yes_no "Install all missing CLI tools?" "y"; then
             DO_BREW_CLI=true
-            DO_HOMEBREW=true
+            is_macos && DO_HOMEBREW=true
             anything_to_do=true
             read -ra SELECTED_CLI_PACKAGES <<< "$(get_all_cli_packages)"
         else
@@ -505,15 +544,15 @@ gather_choices() {
                 if ask_yes_no "  Install $pkg?"; then
                     SELECTED_CLI_PACKAGES+=("$pkg")
                     DO_BREW_CLI=true
-                    DO_HOMEBREW=true
+                    is_macos && DO_HOMEBREW=true
                     anything_to_do=true
                 fi
             done
         fi
     fi
 
-    # GUI apps - use cached results
-    if [[ "$gui_missing_count" -gt 0 ]]; then
+    # GUI apps - macOS only
+    if is_macos && [[ "$gui_missing_count" -gt 0 ]]; then
         echo ""
         echo "Missing GUI apps: $missing_gui"
         if ask_yes_no "Install all missing GUI apps?" "y"; then
@@ -535,16 +574,16 @@ gather_choices() {
         fi
     fi
 
-    # Xcode from App Store
-    if ! $has_xcode_app; then
+    # Xcode from App Store (macOS only)
+    if is_macos && ! $has_xcode_app; then
         if ask_yes_no "Install Xcode from App Store?"; then
             DO_XCODE_APP=true
             anything_to_do=true
         fi
     fi
 
-    # macOS preferences - always ask (can be reapplied)
-    if ask_yes_no "Apply/reapply macOS preferences?"; then
+    # macOS preferences (macOS only)
+    if is_macos && ask_yes_no "Apply/reapply macOS preferences?"; then
         DO_PREFS=true
         anything_to_do=true
         if ask_yes_no "  Clear all apps from Dock?"; then
@@ -552,22 +591,22 @@ gather_choices() {
         fi
     fi
 
-    # Prezto - use cached result
-    if [[ "$prezto_status" != "installed" ]]; then
+    # Prezto (macOS only - Zsh configuration)
+    if is_macos && [[ "$prezto_status" != "installed" ]]; then
         if ask_yes_no "Install Prezto (Zsh framework)?" "y"; then
             DO_PREZTO=true
             anything_to_do=true
         fi
     fi
 
-    # Terminal theme - always ask (can be reinstalled)
-    if ask_yes_no "Install/reinstall Solarized terminal theme?"; then
+    # Terminal theme (macOS only)
+    if is_macos && ask_yes_no "Install/reinstall Solarized terminal theme?"; then
         DO_TERMINAL_THEME=true
         anything_to_do=true
     fi
 
-    # LaTeX - always ask
-    if ask_yes_no "Set up LaTeX packages?"; then
+    # LaTeX (macOS only for now)
+    if is_macos && ask_yes_no "Set up LaTeX packages?"; then
         DO_LATEX=true
         anything_to_do=true
         read -r -p "  Directory for TeX supporting files: " LATEX_DIR
@@ -633,7 +672,13 @@ show_summary_and_confirm() {
     $DO_MACOS_UPDATE && echo "  • macOS updates"
     $DO_XCODE_TOOLS && echo "  • Xcode Command Line Tools"
     $DO_HOMEBREW && echo "  • Homebrew"
-    $DO_BREW_CLI && echo "  • CLI tools via Homebrew"
+    if $DO_BREW_CLI; then
+        if is_macos; then
+            echo "  • CLI tools via Homebrew"
+        else
+            echo "  • CLI tools via package manager"
+        fi
+    fi
     $DO_BREW_APPS && echo "  • GUI apps via Homebrew"
     $DO_XCODE_APP && echo "  • Xcode from App Store"
     $DO_PREFS && echo "  • macOS preferences"
@@ -646,13 +691,13 @@ show_summary_and_confirm() {
         echo "  • GitHub accounts:"
         for i in "${!GITHUB_ACCOUNTS[@]}"; do
             local account="${GITHUB_ACCOUNTS[$i]}"
-            local name username
-            name=$(echo "$account" | cut -d'|' -f1)
-            username=$(echo "$account" | cut -d'|' -f2)
+            local label username
+            label=$(echo "$account" | cut -d'|' -f1)
+            username=$(echo "$account" | cut -d'|' -f3)
             if [[ "$i" -eq "${DEFAULT_GITHUB_ACCOUNT:-0}" ]]; then
-                echo "      - $name ($username) [default]"
+                echo "      - $label ($username) [default]"
             else
-                echo "      - $name ($username)"
+                echo "      - $label ($username)"
             fi
         done
     fi
@@ -816,29 +861,52 @@ install_homebrew() {
 install_brew_cli() {
     print_header "Installing CLI tools"
 
-    ensure_brew_in_path
-    if ! command_exists brew && ! $DRY_RUN; then
-        print_warning "Homebrew not available, skipping CLI tools"
-        return 1
-    fi
-
     # Use selected packages if set, otherwise get from JSON
     local packages
     if [[ ${#SELECTED_CLI_PACKAGES[@]} -gt 0 ]]; then
         packages=("${SELECTED_CLI_PACKAGES[@]}")
     else
-        # Read from JSON
+        # Read from JSON (get_all_cli_packages returns OS-appropriate list)
         read -ra packages <<< "$(get_all_cli_packages)"
     fi
 
-    for pkg in "${packages[@]}"; do
-        if ! $DRY_RUN && brew list "$pkg" >/dev/null 2>&1; then
-            echo "  $pkg already installed"
-        else
-            echo "  Installing $pkg..."
-            run_cmd brew install "$pkg" || print_warning "Failed to install $pkg"
+    if is_macos; then
+        ensure_brew_in_path
+        if ! command_exists brew && ! $DRY_RUN; then
+            print_warning "Homebrew not available, skipping CLI tools"
+            return 1
         fi
-    done
+
+        for pkg in "${packages[@]}"; do
+            if ! $DRY_RUN && brew list "$pkg" >/dev/null 2>&1; then
+                echo "  $pkg already installed"
+            else
+                echo "  Installing $pkg..."
+                run_cmd brew install "$pkg" || print_warning "Failed to install $pkg"
+            fi
+        done
+    else
+        # Linux: use system package manager
+        local pm
+        pm="$(get_package_manager)"
+        if [[ "$pm" == "unknown" ]]; then
+            print_warning "No supported package manager found"
+            return 1
+        fi
+
+        for pkg in "${packages[@]}"; do
+            if ! $DRY_RUN && pkg_installed "$pkg"; then
+                echo "  $pkg already installed"
+            else
+                echo "  Installing $pkg..."
+                if $DRY_RUN; then
+                    echo -e "  ${BLUE}[dry-run]${NC} pkg_install $pkg"
+                else
+                    pkg_install "$pkg" || print_warning "Failed to install $pkg"
+                fi
+            fi
+        done
+    fi
 
     print_success "CLI tools installed"
 }
@@ -1045,7 +1113,9 @@ install_latex() {
 setup_stow() {
     print_header "Symlinking dotfiles"
 
-    ensure_brew_in_path
+    if is_macos; then
+        ensure_brew_in_path
+    fi
     if ! command_exists stow && ! $DRY_RUN; then
         print_warning "stow not installed, skipping dotfiles"
         return 0  # Not a fatal error
@@ -1053,21 +1123,33 @@ setup_stow() {
 
     cd "$DOTFILES_DIR"
 
-    # Get stow packages from selected features
+    # Get stow packages from selected features (only those that apply to this OS)
     local packages=()
     if [[ ${#SELECTED_FEATURES[@]} -gt 0 ]]; then
         for feature in "${SELECTED_FEATURES[@]}"; do
-            local stow_pkg
-            stow_pkg=$(get_stow_package "$feature")
-            if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
-                packages+=("$stow_pkg")
+            if feature_applies_to_os "$feature"; then
+                local stow_pkg
+                stow_pkg=$(get_stow_package "$feature")
+                if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
+                    packages+=("$stow_pkg")
+                fi
             fi
         done
     else
-        # Fallback: stow all packages if no features selected
-        for dir in */; do
-            [[ "$dir" == "Bootstrap/" ]] && continue
-            packages+=("${dir%/}")
+        # Fallback: stow packages that apply to this OS
+        local features
+        features=$(get_feature_keys)
+        for feature in $features; do
+            if feature_applies_to_os "$feature"; then
+                local stow_pkg
+                stow_pkg=$(get_stow_package "$feature")
+                if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
+                    # Avoid duplicates
+                    if [[ ! " ${packages[*]} " =~ " $stow_pkg " ]]; then
+                        packages+=("$stow_pkg")
+                    fi
+                fi
+            fi
         done
     fi
 
@@ -1112,10 +1194,10 @@ setup_ssh_keys() {
     if $DRY_RUN; then
         echo -e "  ${BLUE}[dry-run]${NC} Would configure ${#GITHUB_ACCOUNTS[@]} GitHub account(s)"
         for account in "${GITHUB_ACCOUNTS[@]}"; do
-            local name username
-            name=$(echo "$account" | cut -d'|' -f1)
-            username=$(echo "$account" | cut -d'|' -f2)
-            echo -e "  ${BLUE}[dry-run]${NC}   - $name ($username)"
+            local label username
+            label=$(echo "$account" | cut -d'|' -f1)
+            username=$(echo "$account" | cut -d'|' -f3)
+            echo -e "  ${BLUE}[dry-run]${NC}   - $label ($username)"
         done
         echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.ssh/config.local"
         echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.gitconfig.local"
@@ -1138,37 +1220,62 @@ setup_ssh_keys() {
 
 "
 
+    # Get the default account info for user settings
+    # Format: label|displayname|username|email|mappings
+    local default_account="${GITHUB_ACCOUNTS[${DEFAULT_GITHUB_ACCOUNT:-0}]}"
+    local default_name default_email default_username
+    default_name=$(echo "$default_account" | cut -d'|' -f2)
+    default_username=$(echo "$default_account" | cut -d'|' -f3)
+    default_email=$(echo "$default_account" | cut -d'|' -f4)
+
     # Start building the gitconfig
     local git_config
-    git_config="# Machine-specific Git config for GitHub accounts
+    git_config="# Machine-specific Git config
 # Generated by bootstrap script on $(date)
 # Do not edit manually - rerun bootstrap to regenerate
 
+[user]
+    name = $default_name
+    email = $default_email
+
+[github]
+    user = $default_username
+"
+    # Add credential helper (macOS only)
+    if is_macos; then
+        git_config+="
+[credential]
+    helper = osxkeychain
+"
+    fi
+
+    git_config+="
 "
 
     # Process each account
+    # Format: label|displayname|username|email|mappings
     for i in "${!GITHUB_ACCOUNTS[@]}"; do
         local account="${GITHUB_ACCOUNTS[$i]}"
-        local name username email mappings
-        name=$(echo "$account" | cut -d'|' -f1)
-        username=$(echo "$account" | cut -d'|' -f2)
-        email=$(echo "$account" | cut -d'|' -f3)
-        mappings=$(echo "$account" | cut -d'|' -f4)
+        local label username email mappings
+        label=$(echo "$account" | cut -d'|' -f1)
+        username=$(echo "$account" | cut -d'|' -f3)
+        email=$(echo "$account" | cut -d'|' -f4)
+        mappings=$(echo "$account" | cut -d'|' -f5)
 
-        local key_file="$HOME/.ssh/id_ed25519_github_$name"
-        local host_alias="github-$name"
+        local key_file="$HOME/.ssh/id_ed25519_github_$label"
+        local host_alias="github-$label"
 
         # Generate SSH key if it doesn't exist
         if [[ ! -f "$key_file" ]]; then
-            echo "Generating SSH key for $name ($username)..."
+            echo "Generating SSH key for $label ($username)..."
             ssh-keygen -t ed25519 -C "$email" -f "$key_file" -N ""
-            new_keys+=("$name|$username|$key_file")
+            new_keys+=("$label|$username|$key_file")
         else
-            echo "  Key for $name already exists"
+            echo "  Key for $label already exists"
         fi
 
         # Add SSH host alias
-        ssh_config+="# --- $name ($username) ---
+        ssh_config+="# --- $label ($username) ---
 Host $host_alias
     HostName github.com
     User git
@@ -1195,7 +1302,7 @@ Host $host_alias
 
         # Track the default account
         if [[ "$i" -eq "${DEFAULT_GITHUB_ACCOUNT:-0}" ]]; then
-            default_account_name="$name"
+            default_account_name="$label"
             default_identity_file="$key_file"
         fi
     done
@@ -1221,16 +1328,24 @@ Host github.com
     if [[ ${#new_keys[@]} -gt 0 ]]; then
         echo ""
         print_warning "New SSH keys generated! Add these public keys to GitHub:"
+        echo ""
+        echo "For each account below:"
+        echo "  1. Go to the URL shown"
+        echo "  2. Click 'New SSH key'"
+        echo "  3. Give it a name (e.g., your machine name)"
+        echo "  4. Paste the public key"
+        echo ""
         for key_info in "${new_keys[@]}"; do
-            local name username key_file
-            name=$(echo "$key_info" | cut -d'|' -f1)
+            local label username key_file
+            label=$(echo "$key_info" | cut -d'|' -f1)
             username=$(echo "$key_info" | cut -d'|' -f2)
             key_file=$(echo "$key_info" | cut -d'|' -f3)
-            echo ""
-            echo "=== $name ($username) - https://github.com/settings/keys ==="
+            echo "=== $label ($username) ==="
+            echo "URL: https://github.com/settings/keys"
+            echo "Key:"
             cat "${key_file}.pub"
+            echo ""
         done
-        echo ""
     fi
 
     print_success "GitHub accounts setup complete (default: $default_account_name)"
@@ -1239,9 +1354,15 @@ Host github.com
 # --- Main execution ---
 main() {
     echo ""
-    echo -e "${BOLD}╔════════════════════════════════════════╗${NC}"
-    echo -e "${BOLD}║     macOS Bootstrap Script             ║${NC}"
-    echo -e "${BOLD}╚════════════════════════════════════════╝${NC}"
+    if is_macos; then
+        echo -e "${BOLD}╔════════════════════════════════════════╗${NC}"
+        echo -e "${BOLD}║     macOS Bootstrap Script             ║${NC}"
+        echo -e "${BOLD}╚════════════════════════════════════════╝${NC}"
+    else
+        echo -e "${BOLD}╔════════════════════════════════════════╗${NC}"
+        echo -e "${BOLD}║     Linux Bootstrap Script             ║${NC}"
+        echo -e "${BOLD}╚════════════════════════════════════════╝${NC}"
+    fi
     if $DRY_RUN; then
         echo -e "${YELLOW}${BOLD}         (DRY RUN - no changes will be made)${NC}"
     fi

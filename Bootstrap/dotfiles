@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+#
+# Dotfiles CLI - manage your dotfiles easily
+#
+# Usage:
+#   dotfiles sync      Pull latest changes and restow
+#   dotfiles status    Show stow status and git status
+#   dotfiles edit      Open dotfiles in $EDITOR
+#   dotfiles update    Pull latest and run bootstrap --verify
+#   dotfiles stow      Restow all packages
+#   dotfiles prefs     Check macOS preferences status
+#   dotfiles help      Show this help
+#
+# Installation:
+#   Add to your PATH or create a symlink:
+#   ln -sf ~/Dotfiles/Bootstrap/dotfiles /usr/local/bin/dotfiles
+#
+
+set -euo pipefail
+
+# Find dotfiles directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Source shared library
+source "$SCRIPT_DIR/lib.sh"
+
+cd "$DOTFILES_DIR"
+
+show_help() {
+    echo ""
+    echo -e "${BOLD}Dotfiles CLI${NC}"
+    echo ""
+    echo "Usage: dotfiles <command>"
+    echo ""
+    echo "Commands:"
+    echo "  sync      Pull latest changes and restow all packages"
+    echo "  status    Show stow status and git status"
+    echo "  edit      Open dotfiles directory in \$EDITOR"
+    echo "  update    Pull latest and verify installation"
+    echo "  stow      Restow all packages"
+    echo "  prefs     Check macOS preferences status"
+    echo "  cd        Print the dotfiles directory (use: cd \$(dotfiles cd))"
+    echo "  help      Show this help"
+    echo ""
+}
+
+cmd_sync() {
+    print_header "Syncing dotfiles..."
+
+    # Pull latest
+    print_info "Pulling latest changes..."
+    if git pull --rebase; then
+        print_ok "Repository updated"
+    else
+        print_error "Failed to pull changes"
+        return 1
+    fi
+
+    # Restow
+    print_info "Restowing packages..."
+    "$SCRIPT_DIR/stow.sh" --force
+    print_ok "Sync complete"
+}
+
+cmd_status() {
+    echo ""
+    echo -e "${BOLD}Dotfiles Status${NC}"
+    echo "Directory: $DOTFILES_DIR"
+    echo ""
+
+    # Git status
+    print_header "Git Status"
+    if git diff --quiet && git diff --cached --quiet; then
+        print_ok "Working tree clean"
+    else
+        git status --short
+    fi
+
+    # Check for unpushed commits
+    local ahead
+    ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")
+    if [[ "$ahead" -gt 0 ]]; then
+        print_warn "$ahead commit(s) ahead of remote"
+    fi
+
+    # Stow status
+    print_header "Stow Status"
+    "$SCRIPT_DIR/stow.sh" --verify || true
+}
+
+cmd_edit() {
+    local editor="${EDITOR:-vim}"
+    print_info "Opening $DOTFILES_DIR in $editor..."
+    cd "$DOTFILES_DIR"
+    $editor .
+}
+
+cmd_update() {
+    print_header "Updating dotfiles..."
+
+    # Pull latest
+    print_info "Pulling latest changes..."
+    git pull --rebase || true
+
+    # Run bootstrap verify
+    print_info "Verifying installation..."
+    "$SCRIPT_DIR/bootstrap.sh" --verify
+}
+
+cmd_stow() {
+    print_header "Restowing packages..."
+    "$SCRIPT_DIR/stow.sh" --force
+}
+
+cmd_prefs() {
+    if [[ "$(uname -s)" != "Darwin" ]]; then
+        print_error "Preferences check is only available on macOS"
+        return 1
+    fi
+    "$SCRIPT_DIR/prefs-export.sh"
+}
+
+cmd_cd() {
+    echo "$DOTFILES_DIR"
+}
+
+# Main
+case "${1:-help}" in
+    sync)   cmd_sync ;;
+    status) cmd_status ;;
+    edit)   cmd_edit ;;
+    update) cmd_update ;;
+    stow)   cmd_stow ;;
+    prefs)  cmd_prefs ;;
+    cd)     cmd_cd ;;
+    help|--help|-h) show_help ;;
+    *)
+        print_error "Unknown command: $1"
+        show_help
+        exit 1
+        ;;
+esac

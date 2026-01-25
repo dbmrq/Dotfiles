@@ -3,11 +3,22 @@
 # Test bootstrap scripts for common issues
 # Run from the Dotfiles directory: ./Bootstrap/test-scripts.sh
 #
+# Tests:
+#   1. Syntax checks for all shell scripts
+#   2. Unbound variable checks (set -u compatibility)
+#   3. Common shell pattern checks
+#   4. features.json validation
+#   5. Stow symlink verification (functional test)
+#   6. Light install simulation
+#   7. Feature detection logic
+#   8. Dotfiles CLI commands
+#
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR/.."
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$DOTFILES_DIR"
 
 # Colors
 RED='\033[0;31m'
@@ -17,10 +28,18 @@ NC='\033[0m'
 
 ERRORS=0
 WARNINGS=0
+TEMP_DIR=""
 
 pass() { echo -e "${GREEN}✓${NC} $1"; }
-fail() { echo -e "${RED}✗${NC} $1"; ((ERRORS++)); }
-warn() { echo -e "${YELLOW}!${NC} $1"; ((WARNINGS++)); }
+fail() { echo -e "${RED}✗${NC} $1"; ((ERRORS++)) || true; }
+warn() { echo -e "${YELLOW}!${NC} $1"; ((WARNINGS++)) || true; }
+
+cleanup() {
+    if [[ -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
+        rm -rf "$TEMP_DIR"
+    fi
+}
+trap cleanup EXIT
 
 echo "Bootstrap Scripts Test Suite"
 echo "============================="
@@ -125,8 +144,160 @@ if [[ -f Bootstrap/features.json ]]; then
     else
         fail "features.json: invalid JSON"
     fi
+
+    # Validate structure
+    if python3 -c "
+import json
+with open('Bootstrap/features.json') as f:
+    data = json.load(f)
+assert 'features' in data, 'Missing features key'
+for key, feat in data['features'].items():
+    assert 'name' in feat, f'Feature {key} missing name'
+" 2>/dev/null; then
+        pass "features.json: structure valid"
+    else
+        fail "features.json: invalid structure"
+    fi
 else
     fail "features.json: file not found"
+fi
+echo ""
+
+# --- Test 5: Stow symlink functional test ---
+echo "5. Stow symlink functional test"
+TEMP_DIR=$(mktemp -d)
+
+# Create a test package structure
+mkdir -p "$TEMP_DIR/TestPkg"
+echo "test content" > "$TEMP_DIR/TestPkg/.testrc"
+mkdir -p "$TEMP_DIR/TestPkg/.config/testapp"
+echo "config content" > "$TEMP_DIR/TestPkg/.config/testapp/config"
+
+# Create a fake home
+FAKE_HOME="$TEMP_DIR/home"
+mkdir -p "$FAKE_HOME"
+
+# Test stow creates correct symlinks
+if command -v stow >/dev/null 2>&1; then
+    cd "$TEMP_DIR"
+    if stow --target="$FAKE_HOME" TestPkg 2>/dev/null; then
+        # Verify file symlink
+        if [[ -L "$FAKE_HOME/.testrc" ]]; then
+            pass "stow: creates file symlinks correctly"
+        else
+            fail "stow: failed to create file symlink"
+        fi
+
+        # Verify nested structure (stow symlinks the top-level directory)
+        if [[ -L "$FAKE_HOME/.config" ]]; then
+            pass "stow: creates directory symlinks correctly"
+        else
+            fail "stow: failed to create directory symlink"
+        fi
+
+        # Verify symlink targets point to correct location
+        if [[ "$(readlink "$FAKE_HOME/.testrc")" == *"TestPkg/.testrc" ]]; then
+            pass "stow: symlink targets are correct"
+        else
+            fail "stow: symlink target incorrect"
+        fi
+    else
+        fail "stow: command failed"
+    fi
+    cd "$DOTFILES_DIR"
+else
+    warn "stow not installed, skipping functional test"
+fi
+echo ""
+
+# --- Test 6: Feature detection logic ---
+echo "6. Feature detection logic"
+source Bootstrap/lib.sh
+
+# Test get_feature_keys returns something
+keys=$(get_feature_keys)
+if [[ -n "$keys" ]]; then
+    pass "get_feature_keys: returns feature list"
+else
+    fail "get_feature_keys: returns empty"
+fi
+
+# Test get_feature_name
+name=$(get_feature_name "vim")
+if [[ "$name" == "Vim/Neovim" ]]; then
+    pass "get_feature_name: returns correct name"
+else
+    fail "get_feature_name: expected 'Vim/Neovim', got '$name'"
+fi
+
+# Test get_stow_package
+stow_pkg=$(get_stow_package "vim")
+if [[ "$stow_pkg" == "Vim" ]]; then
+    pass "get_stow_package: returns correct package"
+else
+    fail "get_stow_package: expected 'Vim', got '$stow_pkg'"
+fi
+echo ""
+
+# --- Test 7: Dotfiles CLI ---
+echo "7. Dotfiles CLI"
+if [[ -x Bootstrap/dotfiles ]]; then
+    # Test help command
+    if ./Bootstrap/dotfiles help >/dev/null 2>&1; then
+        pass "dotfiles: help command works"
+    else
+        fail "dotfiles: help command failed"
+    fi
+
+    # Test cd command
+    dir=$(./Bootstrap/dotfiles cd)
+    if [[ "$dir" == "$DOTFILES_DIR" ]]; then
+        pass "dotfiles: cd command returns correct directory"
+    else
+        fail "dotfiles: cd returned '$dir', expected '$DOTFILES_DIR'"
+    fi
+else
+    warn "dotfiles CLI not found or not executable"
+fi
+echo ""
+
+# --- Test 8: Neovim Lua config syntax ---
+echo "8. Neovim Lua config"
+if command -v nvim >/dev/null 2>&1; then
+    lua_errors=0
+    for lua_file in Vim/.config/nvim/lua/**/*.lua; do
+        if [[ -f "$lua_file" ]]; then
+            if nvim --headless -c "luafile $lua_file" -c "q" 2>/dev/null; then
+                pass "$lua_file: syntax OK"
+            else
+                # Try with luac if available
+                if command -v luac >/dev/null 2>&1; then
+                    if luac -p "$lua_file" 2>/dev/null; then
+                        pass "$lua_file: syntax OK (luac)"
+                    else
+                        fail "$lua_file: syntax error"
+                        ((lua_errors++))
+                    fi
+                else
+                    warn "$lua_file: could not verify"
+                fi
+            fi
+        fi
+    done
+else
+    if command -v luac >/dev/null 2>&1; then
+        for lua_file in Vim/.config/nvim/lua/**/*.lua; do
+            if [[ -f "$lua_file" ]]; then
+                if luac -p "$lua_file" 2>/dev/null; then
+                    pass "$lua_file: syntax OK"
+                else
+                    fail "$lua_file: syntax error"
+                fi
+            fi
+        done
+    else
+        warn "Neither nvim nor luac available, skipping Lua syntax check"
+    fi
 fi
 echo ""
 
@@ -141,4 +312,3 @@ else
     [[ $WARNINGS -gt 0 ]] && echo "  ($WARNINGS warnings)"
     exit 1
 fi
-

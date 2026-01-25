@@ -54,7 +54,153 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# --- Homebrew Helpers ---
+# --- OS Detection ---
+# Returns: "macos", "linux", or "unknown"
+detect_os() {
+    case "$(uname -s)" in
+        Darwin) echo "macos" ;;
+        Linux)  echo "linux" ;;
+        *)      echo "unknown" ;;
+    esac
+}
+
+# Cache OS detection result
+OS="${OS:-$(detect_os)}"
+
+# Check if running on macOS
+is_macos() {
+    [[ "$OS" == "macos" ]]
+}
+
+# Check if running on Linux
+is_linux() {
+    [[ "$OS" == "linux" ]]
+}
+
+# Get Linux distribution name (lowercase)
+# Returns: debian, ubuntu, fedora, arch, rhel, centos, opensuse, alpine, or "unknown"
+get_linux_distro() {
+    if ! is_linux; then
+        echo "none"
+        return
+    fi
+
+    if [[ -f /etc/os-release ]]; then
+        # shellcheck source=/dev/null
+        . /etc/os-release
+        case "${ID:-}" in
+            debian|ubuntu|linuxmint|pop) echo "debian" ;;
+            fedora) echo "fedora" ;;
+            rhel|centos|rocky|alma) echo "rhel" ;;
+            arch|manjaro|endeavouros) echo "arch" ;;
+            opensuse*|sles) echo "opensuse" ;;
+            alpine) echo "alpine" ;;
+            *) echo "${ID:-unknown}" ;;
+        esac
+    elif command_exists lsb_release; then
+        lsb_release -is 2>/dev/null | tr '[:upper:]' '[:lower:]'
+    else
+        echo "unknown"
+    fi
+}
+
+# Cache distro detection result (only on Linux)
+if is_linux; then
+    LINUX_DISTRO="${LINUX_DISTRO:-$(get_linux_distro)}"
+else
+    LINUX_DISTRO="none"
+fi
+
+# --- Package Manager Detection (Linux) ---
+# Returns the appropriate package manager command for the current system
+get_package_manager() {
+    if is_macos; then
+        echo "brew"
+    elif command_exists apt-get; then
+        echo "apt"
+    elif command_exists dnf; then
+        echo "dnf"
+    elif command_exists yum; then
+        echo "yum"
+    elif command_exists pacman; then
+        echo "pacman"
+    elif command_exists zypper; then
+        echo "zypper"
+    elif command_exists apk; then
+        echo "apk"
+    else
+        echo "unknown"
+    fi
+}
+
+# Install packages using the appropriate package manager
+# Usage: pkg_install pkg1 pkg2 ...
+pkg_install() {
+    local pm
+    pm="$(get_package_manager)"
+
+    case "$pm" in
+        brew)
+            brew install "$@"
+            ;;
+        apt)
+            sudo apt-get update -qq
+            sudo apt-get install -y "$@"
+            ;;
+        dnf)
+            sudo dnf install -y "$@"
+            ;;
+        yum)
+            sudo yum install -y "$@"
+            ;;
+        pacman)
+            sudo pacman -S --noconfirm "$@"
+            ;;
+        zypper)
+            sudo zypper install -y "$@"
+            ;;
+        apk)
+            sudo apk add "$@"
+            ;;
+        *)
+            print_error "Unknown package manager"
+            return 1
+            ;;
+    esac
+}
+
+# Check if a package is installed (Linux package managers)
+pkg_installed() {
+    local pkg="$1"
+    local pm
+    pm="$(get_package_manager)"
+
+    case "$pm" in
+        brew)
+            brew list "$pkg" >/dev/null 2>&1
+            ;;
+        apt)
+            dpkg -l "$pkg" 2>/dev/null | grep -q "^ii"
+            ;;
+        dnf|yum)
+            rpm -q "$pkg" >/dev/null 2>&1
+            ;;
+        pacman)
+            pacman -Qi "$pkg" >/dev/null 2>&1
+            ;;
+        zypper)
+            rpm -q "$pkg" >/dev/null 2>&1
+            ;;
+        apk)
+            apk info -e "$pkg" >/dev/null 2>&1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+# --- Homebrew Helpers (macOS-specific) ---
 get_brew_path() {
     if [[ "$(uname -m)" == "arm64" ]]; then
         echo "/opt/homebrew/bin/brew"
@@ -121,6 +267,38 @@ get_brew_casks() {
     _json_query "print(' '.join(data['features'].get('$feature', {}).get('brew_casks', [])))"
 }
 
+# Get Linux packages for a feature (space-separated)
+get_linux_packages() {
+    local feature="$1"
+    _json_query "print(' '.join(data['features'].get('$feature', {}).get('linux_packages', [])))"
+}
+
+# Check if a feature is macOS only
+is_feature_macos_only() {
+    local feature="$1"
+    local result
+    result=$(_json_query "print('yes' if data['features'].get('$feature', {}).get('macos_only', False) else 'no')")
+    [[ "$result" == "yes" ]]
+}
+
+# Check if a feature is Linux only
+is_feature_linux_only() {
+    local feature="$1"
+    local result
+    result=$(_json_query "print('yes' if data['features'].get('$feature', {}).get('linux_only', False) else 'no')")
+    [[ "$result" == "yes" ]]
+}
+
+# Check if a feature applies to the current OS
+feature_applies_to_os() {
+    local feature="$1"
+    if is_macos; then
+        ! is_feature_linux_only "$feature"
+    else
+        ! is_feature_macos_only "$feature"
+    fi
+}
+
 # Get stow package for a feature
 get_stow_package() {
     local feature="$1"
@@ -133,9 +311,25 @@ get_post_install() {
     _json_query "print(data['features'].get('$feature', {}).get('post_install') or '')"
 }
 
-# Get all CLI packages (space-separated)
+# Get all CLI packages for current OS (space-separated)
 get_all_cli_packages() {
-    _json_query "print(' '.join(data.get('cli_packages', [])))"
+    if is_macos; then
+        _json_query "
+cli = data.get('cli_packages', {})
+if isinstance(cli, dict):
+    print(' '.join(cli.get('macos', [])))
+else:
+    print(' '.join(cli))
+"
+    else
+        _json_query "
+cli = data.get('cli_packages', {})
+if isinstance(cli, dict):
+    print(' '.join(cli.get('linux', [])))
+else:
+    print(' '.join(cli))
+"
+    fi
 }
 
 # Get all GUI casks (space-separated)
@@ -150,13 +344,23 @@ get_all_gui_formulas() {
 
 # --- Status Checking Functions ---
 
+# Check if a CLI package is installed (works on both macOS and Linux)
+cli_pkg_installed() {
+    local pkg="$1"
+    if is_macos; then
+        brew_pkg_installed "$pkg"
+    else
+        pkg_installed "$pkg"
+    fi
+}
+
 # Check status of CLI tools: returns "installed:missing" counts
 check_cli_tools_status() {
     local installed=0 missing=0
     local packages
     packages=$(get_all_cli_packages)
     for pkg in $packages; do
-        if brew_pkg_installed "$pkg"; then
+        if cli_pkg_installed "$pkg"; then
             ((installed++))
         else
             ((missing++))
@@ -171,15 +375,21 @@ get_missing_cli_tools() {
     local packages
     packages=$(get_all_cli_packages)
     for pkg in $packages; do
-        if ! brew_pkg_installed "$pkg"; then
+        if ! cli_pkg_installed "$pkg"; then
             missing+=("$pkg")
         fi
     done
     echo "${missing[*]}"
 }
 
-# Check status of GUI apps: returns "installed:missing" counts
+# Check status of GUI apps: returns "installed:missing" counts (macOS only)
 check_gui_apps_status() {
+    # GUI apps only on macOS
+    if ! is_macos; then
+        echo "0:0"
+        return
+    fi
+
     local installed=0 missing_count=0
     local casks formulas
     casks=$(get_all_gui_casks)
@@ -204,8 +414,14 @@ check_gui_apps_status() {
     echo "$installed:$missing_count"
 }
 
-# Get list of missing GUI apps (space-separated)
+# Get list of missing GUI apps (space-separated, macOS only)
 get_missing_gui_apps() {
+    # GUI apps only on macOS
+    if ! is_macos; then
+        echo ""
+        return
+    fi
+
     local missing=()
     local casks formulas
     casks=$(get_all_gui_casks)
@@ -259,29 +475,46 @@ check_prezto_status() {
 # Returns 0 if installed, 1 if missing something
 is_feature_installed() {
     local feature="$1"
-    local brew_pkgs brew_casks stow_pkg
+    local stow_pkg
 
-    ensure_brew_in_path
+    # Skip features that don't apply to this OS
+    if ! feature_applies_to_os "$feature"; then
+        return 0  # Consider it "installed" if it doesn't apply
+    fi
 
-    brew_pkgs=$(get_brew_packages "$feature")
-    brew_casks=$(get_brew_casks "$feature")
-    stow_pkg=$(get_stow_package "$feature")
+    if is_macos; then
+        ensure_brew_in_path
 
-    # Check brew packages
-    for pkg in $brew_pkgs; do
-        if ! brew_pkg_installed "$pkg"; then
-            return 1
-        fi
-    done
+        local brew_pkgs brew_casks
+        brew_pkgs=$(get_brew_packages "$feature")
+        brew_casks=$(get_brew_casks "$feature")
 
-    # Check brew casks
-    for cask in $brew_casks; do
-        if ! brew_cask_installed "$cask"; then
-            return 1
-        fi
-    done
+        # Check brew packages
+        for pkg in $brew_pkgs; do
+            if ! brew_pkg_installed "$pkg"; then
+                return 1
+            fi
+        done
+
+        # Check brew casks
+        for cask in $brew_casks; do
+            if ! brew_cask_installed "$cask"; then
+                return 1
+            fi
+        done
+    else
+        # Linux: check Linux packages
+        local linux_pkgs
+        linux_pkgs=$(get_linux_packages "$feature")
+        for pkg in $linux_pkgs; do
+            if ! pkg_installed "$pkg"; then
+                return 1
+            fi
+        done
+    fi
 
     # Check stow package (just check if main symlinks exist)
+    stow_pkg=$(get_stow_package "$feature")
     if [[ -n "$stow_pkg" ]]; then
         local pkg_dir="$DOTFILES_DIR/$stow_pkg"
         if [[ -d "$pkg_dir" ]]; then
@@ -300,23 +533,26 @@ is_feature_installed() {
         fi
     fi
 
-    # Special checks
-    case "$feature" in
-        xcode)
-            [[ -d "/Applications/Xcode.app" ]] || return 1
-            ;;
-    esac
+    # Special checks (macOS only)
+    if is_macos; then
+        case "$feature" in
+            xcode)
+                [[ -d "/Applications/Xcode.app" ]] || return 1
+                ;;
+        esac
+    fi
 
     return 0
 }
 
-# Get list of missing features (space-separated)
+# Get list of missing features for current OS (space-separated)
 get_missing_features() {
     local missing=()
     local features
     features=$(get_feature_keys)
     for name in $features; do
-        if ! is_feature_installed "$name"; then
+        # Only check features that apply to this OS
+        if feature_applies_to_os "$name" && ! is_feature_installed "$name"; then
             missing+=("$name")
         fi
     done

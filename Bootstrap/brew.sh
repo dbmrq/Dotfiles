@@ -1,134 +1,194 @@
 #!/usr/bin/env bash
 #
-# Install Homebrew and packages for selected features
+# Interactive Homebrew package installer
+# Allows selecting which package categories to install
 #
 # Usage:
-#   ./brew.sh                    # Install all packages
-#   ./brew.sh vim git cli        # Install only specified features
-#   ./brew.sh --list             # List available features
+#   ./brew.sh              Interactive mode - select categories
+#   ./brew.sh --all        Install everything from Brewfile
+#   ./brew.sh --list       List available categories
+#   ./brew.sh --category cli_essential   Install specific category
 #
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BREWFILE="$SCRIPT_DIR/Brewfile"
+
+# Source shared library
 source "$SCRIPT_DIR/lib.sh"
 
-# Parse arguments
-if [[ "${1:-}" == "--list" ]]; then
-    echo "Available features:"
-    for f in "${FEATURES[@]}"; do
-        name="${f%%:*}"
-        echo "  $name - $(get_feature_name "$name")"
-    done
-    exit 0
-fi
-
-# Determine which features to install
-if [[ $# -gt 0 ]]; then
-    SELECTED_FEATURES=("$@")
-else
-    # Install all features by default
-    SELECTED_FEATURES=()
-    for f in "${FEATURES[@]}"; do
-        SELECTED_FEATURES+=("${f%%:*}")
-    done
-fi
-
-# --- Install/update Homebrew ---
-echo ""
-echo "Setting up Homebrew..."
-echo ""
-
+# Check for Homebrew
+ensure_brew_in_path
 if ! command -v brew >/dev/null 2>&1; then
-    echo "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    ensure_brew_in_path
-
-    brew_path="$(get_brew_path)"
-    if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
-        echo "eval \"\$(${brew_path} shellenv)\"" >> "$HOME/.zprofile"
-    fi
-else
-    echo "Homebrew already installed. Updating..."
-    brew update
+    print_error "Homebrew is not installed."
+    echo "Install it with:"
+    echo '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+    exit 1
 fi
 
-# Collect all packages to install
-all_packages=()
-all_casks=()
-install_xcode=false
+# Parse Brewfile and extract categories
+declare -A CATEGORIES
+declare -A CATEGORY_NAMES
+declare -A CATEGORY_PACKAGES
 
-for feature in "${SELECTED_FEATURES[@]}"; do
-    # Get brew packages
-    pkgs=$(get_brew_packages "$feature")
+parse_brewfile() {
+    local current_category=""
+    local current_name=""
+
+    while IFS= read -r line; do
+        # Check for category comment
+        if [[ "$line" =~ ^#[[:space:]]*category:[[:space:]]*(.+)$ ]]; then
+            current_category="${BASH_REMATCH[1]}"
+            CATEGORIES["$current_category"]=1
+        # Check for section header (for display name)
+        elif [[ "$line" =~ ^#[[:space:]]*=+$ ]]; then
+            continue
+        elif [[ "$line" =~ ^#[[:space:]]*([^=].+[^=])[[:space:]]*$ ]] && [[ -n "$current_category" ]]; then
+            if [[ -z "${CATEGORY_NAMES[$current_category]:-}" ]]; then
+                CATEGORY_NAMES["$current_category"]="${BASH_REMATCH[1]}"
+            fi
+        # Check for brew/cask line
+        elif [[ "$line" =~ ^(brew|cask)[[:space:]]+\"([^\"]+)\" ]] && [[ -n "$current_category" ]]; then
+            local pkg="${BASH_REMATCH[2]}"
+            CATEGORY_PACKAGES["$current_category"]+="$pkg "
+        fi
+    done < "$BREWFILE"
+}
+
+list_categories() {
+    echo ""
+    echo -e "${BOLD}Available Categories:${NC}"
+    echo ""
+    for cat in "${!CATEGORIES[@]}"; do
+        local name="${CATEGORY_NAMES[$cat]:-$cat}"
+        local pkgs="${CATEGORY_PACKAGES[$cat]:-}"
+        local count=$(echo "$pkgs" | wc -w | tr -d ' ')
+        echo -e "  ${GREEN}$cat${NC}: $name ($count packages)"
+        if [[ -n "$pkgs" ]]; then
+            echo "    Packages: $pkgs"
+        fi
+    done
+    echo ""
+}
+
+install_category() {
+    local category="$1"
+    local pkgs="${CATEGORY_PACKAGES[$category]:-}"
+
+    if [[ -z "$pkgs" ]]; then
+        print_warn "No packages found for category: $category"
+        return
+    fi
+
+    print_header "Installing $category packages..."
+
     for pkg in $pkgs; do
-        [[ -n "$pkg" ]] && all_packages+=("$pkg")
+        # Check if it's a cask or formula
+        if grep -q "^cask \"$pkg\"" "$BREWFILE"; then
+            if brew_cask_installed "$pkg"; then
+                print_ok "$pkg (already installed)"
+            else
+                print_info "Installing cask: $pkg"
+                brew install --cask "$pkg" || print_warn "Failed to install $pkg"
+            fi
+        else
+            if brew_pkg_installed "$pkg"; then
+                print_ok "$pkg (already installed)"
+            else
+                print_info "Installing: $pkg"
+                brew install "$pkg" || print_warn "Failed to install $pkg"
+            fi
+        fi
+    done
+}
+
+interactive_select() {
+    echo ""
+    echo -e "${BOLD}Homebrew Package Installer${NC}"
+    echo "Select which categories to install:"
+    echo ""
+
+    local selected=()
+    local i=1
+    local cat_array=()
+
+    for cat in "${!CATEGORIES[@]}"; do
+        cat_array+=("$cat")
+        local name="${CATEGORY_NAMES[$cat]:-$cat}"
+        local pkgs="${CATEGORY_PACKAGES[$cat]:-}"
+        local count=$(echo "$pkgs" | wc -w | tr -d ' ')
+        echo "  $i) $name ($count packages)"
+        ((i++))
     done
 
-    # Get brew casks
-    casks=$(get_brew_casks "$feature")
-    for cask in $casks; do
-        [[ -n "$cask" ]] && all_casks+=("$cask")
-    done
+    echo ""
+    echo "  a) Install all"
+    echo "  q) Quit"
+    echo ""
+    read -rp "Enter numbers separated by spaces (e.g., 1 3 5): " choices
 
-    # Check for special post-install
-    if [[ "$(get_post_install "$feature")" == "xcode" ]]; then
-        install_xcode=true
+    if [[ "$choices" == "q" ]]; then
+        echo "Cancelled."
+        exit 0
     fi
-done
 
-# --- Install CLI packages ---
-if [[ ${#all_packages[@]} -gt 0 ]]; then
-    echo ""
-    echo "Installing CLI packages..."
-    for pkg in "${all_packages[@]}"; do
-        if brew list "$pkg" >/dev/null 2>&1; then
-            echo "  $pkg already installed"
-        else
-            echo "  Installing $pkg..."
-            brew install "$pkg" || echo "  Warning: Failed to install $pkg"
-        fi
-    done
-fi
-
-# --- Install GUI apps (casks) ---
-if [[ ${#all_casks[@]} -gt 0 ]]; then
-    echo ""
-    echo "Installing GUI applications..."
-    for cask in "${all_casks[@]}"; do
-        if brew list --cask "$cask" >/dev/null 2>&1; then
-            echo "  $cask already installed"
-        else
-            echo "  Installing $cask..."
-            brew install --cask "$cask" || echo "  Warning: Failed to install $cask"
-        fi
-    done
-fi
-
-# --- Xcode from App Store ---
-if $install_xcode; then
-    echo ""
-    echo "Installing Xcode from App Store..."
-    if command -v mas >/dev/null 2>&1; then
-        if [[ -d "/Applications/Xcode.app" ]]; then
-            echo "  Xcode already installed"
-        else
-            mas install 497799835 || echo "  Warning: Failed to install Xcode"
-        fi
-        if [[ -d "/Applications/Xcode.app" ]]; then
-            sudo xcodebuild -license accept 2>/dev/null || true
-        fi
+    if [[ "$choices" == "a" ]]; then
+        selected=("${cat_array[@]}")
     else
-        echo "  Warning: mas not installed, skipping Xcode"
+        for choice in $choices; do
+            if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#cat_array[@]} )); then
+                selected+=("${cat_array[$((choice-1))]}")
+            fi
+        done
     fi
-fi
 
-# --- Cleanup ---
-echo ""
-echo "Cleaning up..."
-brew cleanup
-brew doctor || true
+    if [[ ${#selected[@]} -eq 0 ]]; then
+        print_warn "No categories selected."
+        exit 0
+    fi
 
-echo ""
-echo "Done."
-echo ""
+    echo ""
+    echo -e "${BOLD}Selected categories:${NC}"
+    for cat in "${selected[@]}"; do
+        echo "  - ${CATEGORY_NAMES[$cat]:-$cat}"
+    done
+    echo ""
+
+    if ask_yes_no "Proceed with installation?" "y"; then
+        for cat in "${selected[@]}"; do
+            install_category "$cat"
+        done
+        echo ""
+        print_ok "Installation complete!"
+    fi
+}
+
+# Parse the Brewfile
+parse_brewfile
+
+# Main
+case "${1:-interactive}" in
+    --all)
+        print_header "Installing all packages from Brewfile..."
+        brew bundle --file="$BREWFILE"
+        ;;
+    --list)
+        list_categories
+        ;;
+    --category)
+        if [[ -z "${2:-}" ]]; then
+            print_error "Please specify a category"
+            list_categories
+            exit 1
+        fi
+        install_category "$2"
+        ;;
+    interactive|"")
+        interactive_select
+        ;;
+    *)
+        echo "Usage: $0 [--all|--list|--category <name>]"
+        exit 1
+        ;;
+esac

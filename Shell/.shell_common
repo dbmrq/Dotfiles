@@ -1,0 +1,90 @@
+# Common shell configuration
+# Sourced by both .zshrc and .bash_aliases
+# This is the single source of truth for cross-shell settings
+
+# =============================================================================
+# Navigation
+# =============================================================================
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+# =============================================================================
+# Utilities
+# =============================================================================
+alias mkdir='mkdir -pv'
+alias ll='ls -lah'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Make zip archives easier
+alias zipr='f() { zip -r "$1.zip" "$1"; }; f'
+
+# Quick file search
+alias ff='find . -name'
+
+# Disk usage
+alias duh='du -h --max-depth=1 2>/dev/null | sort -h'
+
+# =============================================================================
+# Safety prompts
+# =============================================================================
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+
+# =============================================================================
+# Colorize output
+# =============================================================================
+# Use appropriate ls color flag based on OS
+if ls --color=auto / >/dev/null 2>&1; then
+    alias ls='ls --color=auto'  # GNU ls (Linux)
+else
+    alias ls='ls -G'  # BSD ls (macOS)
+fi
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias diff='diff --color=auto'
+
+# =============================================================================
+# PATH additions
+# =============================================================================
+export PATH="$PATH:$HOME/.local/bin"
+
+# Dotfiles CLI
+[[ -d "$HOME/Dotfiles/Bootstrap" ]] && export PATH="$HOME/Dotfiles/Bootstrap:$PATH"
+
+# macOS-specific
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+    export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+    export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
+fi
+
+# =============================================================================
+# Editor
+# =============================================================================
+export EDITOR='vim'
+export VISUAL='vim'
+
+# Use nvim if available
+if command -v nvim >/dev/null 2>&1; then
+    alias vim='nvim'
+    alias vi='nvim'
+    export EDITOR='nvim'
+    export VISUAL='nvim'
+fi
+
+# =============================================================================
+# Git shortcuts (supplement gitconfig aliases)
+# =============================================================================
+alias g='git'
+alias ga='git add'
+alias gd='git diff'
+alias gst='git status'
+alias gco='git checkout'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gl='git pull'

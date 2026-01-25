@@ -1,0 +1,58 @@
+# EditorConfig
+# https://editorconfig.org
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Shell scripts and config files
+[*.sh]
+indent_style = space
+indent_size = 4
+
+[{.shell_common,.bash_aliases,.bashrc,.zshrc,.zprofile}]
+indent_style = space
+indent_size = 4
+
+# Lua (Neovim/Hammerspoon)
+[*.lua]
+indent_style = space
+indent_size = 4
+
+# Vim
+[{*.vim,vimrc}]
+indent_style = space
+indent_size = 4
+
+# JSON
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
+
+# YAML
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Makefile
+[Makefile]
+indent_style = tab
+
+# Git
+[.gitconfig]
+indent_style = tab
+
+# Brewfile
+[Brewfile]
+indent_style = space
+indent_size = 2

@@ -1,0 +1,82 @@
+# Brewfile - Homebrew Bundle
+# Install with: brew bundle --file=Brewfile
+# Or use: ./brew.sh for interactive selection
+#
+# Categories are marked with comments for the interactive installer
+
+# =============================================================================
+# Taps
+# =============================================================================
+tap "homebrew/bundle"
+tap "homebrew/services"
+
+# =============================================================================
+# CLI Tools (Essential)
+# =============================================================================
+# category: cli_essential
+brew "git"                    # Version control
+brew "git-extras"             # Extra git commands
+brew "stow"                   # Symlink manager for dotfiles
+
+# =============================================================================
+# CLI Tools (Development)
+# =============================================================================
+# category: cli_dev
+brew "python3"                # Python interpreter
+brew "lua"                    # Lua interpreter
+brew "ruby"                   # Ruby interpreter
+brew "swiftlint"              # Swift linter
+brew "cscope"                 # Code navigation
+
+# =============================================================================
+# CLI Tools (Utilities)
+# =============================================================================
+# category: cli_utils
+brew "mas"                    # Mac App Store CLI
+brew "par"                    # Paragraph reformatter
+brew "trash-cli"              # Safe rm alternative
+brew "pandoc"                 # Document converter
+brew "rename"                 # Batch file renaming
+brew "ripgrep"                # Fast grep alternative
+brew "fd"                     # Fast find alternative
+brew "fzf"                    # Fuzzy finder
+brew "bat"                    # Cat with syntax highlighting
+brew "eza"                    # Modern ls replacement
+brew "jq"                     # JSON processor
+brew "htop"                   # Process viewer
+brew "tree"                   # Directory tree viewer
+
+# =============================================================================
+# Editors
+# =============================================================================
+# category: editors
+brew "macvim"                 # MacVim with GUI
+brew "neovim"                 # Modern Vim fork
+
+# =============================================================================
+# GUI Apps (Productivity)
+# =============================================================================
+# category: gui_productivity
+cask "hammerspoon"            # macOS automation
+cask "appcleaner"             # App uninstaller
+cask "the-unarchiver"         # Archive extractor
+
+# =============================================================================
+# GUI Apps (Browsers & Media)
+# =============================================================================
+# category: gui_media
+cask "google-chrome"          # Web browser
+cask "vlc"                    # Media player
+
+# =============================================================================
+# GUI Apps (Development)
+# =============================================================================
+# category: gui_dev
+cask "iterm2"                 # Terminal emulator
+cask "visual-studio-code"     # Code editor
+
+# =============================================================================
+# TeX/LaTeX
+# =============================================================================
+# category: tex
+cask "basictex"               # Minimal TeX distribution
