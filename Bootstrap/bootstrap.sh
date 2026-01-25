@@ -1145,7 +1145,8 @@ setup_stow() {
                 stow_pkg=$(get_stow_package "$feature")
                 if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
                     # Avoid duplicates
-                    if [[ ! " ${packages[*]} " =~ " $stow_pkg " ]]; then
+                    local pattern=" $stow_pkg "
+                    if [[ ! " ${packages[*]} " =~ $pattern ]]; then
                         packages+=("$stow_pkg")
                     fi
                 fi
