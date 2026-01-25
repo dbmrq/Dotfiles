@@ -34,7 +34,6 @@ declare -A CATEGORY_PACKAGES
 
 parse_brewfile() {
     local current_category=""
-    local current_name=""
 
     while IFS= read -r line; do
         # Check for category comment
@@ -63,7 +62,8 @@ list_categories() {
     for cat in "${!CATEGORIES[@]}"; do
         local name="${CATEGORY_NAMES[$cat]:-$cat}"
         local pkgs="${CATEGORY_PACKAGES[$cat]:-}"
-        local count=$(echo "$pkgs" | wc -w | tr -d ' ')
+        local count
+        count=$(echo "$pkgs" | wc -w | tr -d ' ')
         echo -e "  ${GREEN}$cat${NC}: $name ($count packages)"
         if [[ -n "$pkgs" ]]; then
             echo "    Packages: $pkgs"
@@ -117,7 +117,8 @@ interactive_select() {
         cat_array+=("$cat")
         local name="${CATEGORY_NAMES[$cat]:-$cat}"
         local pkgs="${CATEGORY_PACKAGES[$cat]:-}"
-        local count=$(echo "$pkgs" | wc -w | tr -d ' ')
+        local count
+        count=$(echo "$pkgs" | wc -w | tr -d ' ')
         echo "  $i) $name ($count packages)"
         ((i++))
     done
