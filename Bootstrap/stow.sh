@@ -261,8 +261,13 @@ echo "Directory: $DOTFILES_DIR"
 echo ""
 
 if ! command -v stow >/dev/null 2>&1; then
-    print_err "stow is not installed. Run: brew install stow"
-    exit 1
+    print_info "stow is not installed. Installing..."
+    if pkg_install stow; then
+        print_ok "stow installed successfully"
+    else
+        print_err "Failed to install stow"
+        exit 1
+    fi
 fi
 
 cd "$DOTFILES_DIR"
