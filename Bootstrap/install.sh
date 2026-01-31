@@ -92,13 +92,34 @@ install_essentials_for_user() {
 
     echo "  Installing essentials for ${BOLD}$username${NC}..."
 
-    # Create vim directory
+    # Create vim and neovim directories
     mkdir -p "$home_dir/.vim"
+    mkdir -p "$home_dir/.config/nvim"
 
     # Download Vim files
     curl -fsSL "$BASE_URL/Vim/.vimrc" -o "$home_dir/.vimrc"
     curl -fsSL "$BASE_URL/Vim/.vim/settings-essential.vim" -o "$home_dir/.vim/settings-essential.vim"
     curl -fsSL "$BASE_URL/Vim/.vim/mappings-essential.vim" -o "$home_dir/.vim/mappings-essential.vim"
+
+    # Create neovim init.vim that sources the vim config
+    # Only create if it doesn't exist (don't overwrite existing nvim config)
+    if [[ ! -f "$home_dir/.config/nvim/init.vim" ]] && [[ ! -f "$home_dir/.config/nvim/init.lua" ]]; then
+        cat > "$home_dir/.config/nvim/init.vim" << 'NVIM_INIT'
+" Neovim config - sources shared vim configuration
+" Created by dotfiles installer
+
+if filereadable(expand('~/.vimrc'))
+    source ~/.vimrc
+endif
+
+" Neovim-specific settings
+if has('nvim')
+    tnoremap <Esc> <C-\><C-n>
+    tnoremap jk <C-\><C-n>
+    tnoremap kj <C-\><C-n>
+endif
+NVIM_INIT
+    fi
 
     # Download shell aliases
     curl -fsSL "$BASE_URL/Shell/.shell_common" -o "$home_dir/.shell_common"
@@ -118,7 +139,8 @@ install_essentials_for_user() {
     # Fix ownership if installing for another user
     if [[ "$username" != "root" ]]; then
         chown -R "$username:" "$home_dir/.vim" "$home_dir/.vimrc" \
-            "$home_dir/.shell_common" "$home_dir/.bash_aliases" 2>/dev/null || true
+            "$home_dir/.config/nvim" "$home_dir/.shell_common" \
+            "$home_dir/.bash_aliases" 2>/dev/null || true
     fi
 }
 
@@ -280,12 +302,33 @@ case "$choice" in
 
         # Create directories
         mkdir -p ~/.vim
+        mkdir -p ~/.config/nvim
 
         # Download Vim files
         echo "Downloading Vim configuration..."
         curl -fsSL "$BASE_URL/Vim/.vimrc" -o ~/.vimrc
         curl -fsSL "$BASE_URL/Vim/.vim/settings-essential.vim" -o ~/.vim/settings-essential.vim
         curl -fsSL "$BASE_URL/Vim/.vim/mappings-essential.vim" -o ~/.vim/mappings-essential.vim
+
+        # Create neovim init.vim that sources the vim config
+        # Only create if it doesn't exist (don't overwrite existing nvim config)
+        if [[ ! -f ~/.config/nvim/init.vim ]] && [[ ! -f ~/.config/nvim/init.lua ]]; then
+            cat > ~/.config/nvim/init.vim << 'NVIM_INIT'
+" Neovim config - sources shared vim configuration
+" Created by dotfiles installer
+
+if filereadable(expand('~/.vimrc'))
+    source ~/.vimrc
+endif
+
+" Neovim-specific settings
+if has('nvim')
+    tnoremap <Esc> <C-\><C-n>
+    tnoremap jk <C-\><C-n>
+    tnoremap kj <C-\><C-n>
+endif
+NVIM_INIT
+        fi
 
         # Download Git config
         echo "Downloading Git configuration..."
@@ -351,13 +394,14 @@ EOF
         echo "  ~/.vimrc"
         echo "  ~/.vim/settings-essential.vim"
         echo "  ~/.vim/mappings-essential.vim"
+        echo "  ~/.config/nvim/init.vim (sources ~/.vimrc)"
         echo "  ~/.gitconfig-essential"
         if [[ "$OS" == "linux" ]]; then
             echo "  ~/.shell_common"
             echo "  ~/.bash_aliases"
         fi
         echo ""
-        echo "Essential Vim features: jk/kj escape, H/L for line start/end, space as leader"
+        echo "Essential Vim/Neovim features: jk/kj escape, H/L for line start/end, space as leader"
         echo "Essential Git aliases: co, ci, st, br, tug, sync, lg, and more"
         echo ""
         ;;
