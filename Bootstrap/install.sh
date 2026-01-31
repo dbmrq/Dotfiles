@@ -328,14 +328,17 @@ EOF
         # Download shell aliases for Linux
         if [[ "$OS" == "linux" ]]; then
             echo "Downloading shell configuration..."
+            curl -fsSL "$BASE_URL/Shell/.shell_common" -o ~/.shell_common
             curl -fsSL "$BASE_URL/Bash/.bash_aliases" -o ~/.bash_aliases
 
             # Source in .bashrc if not already
             if [[ -f ~/.bashrc ]]; then
                 if ! grep -q "\.bash_aliases" ~/.bashrc 2>/dev/null; then
-                    echo "" >> ~/.bashrc
-                    echo "# Load custom aliases" >> ~/.bashrc
-                    echo "if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi" >> ~/.bashrc
+                    {
+                        echo ""
+                        echo "# Load custom aliases"
+                        echo "if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi"
+                    } >> ~/.bashrc
                     echo "Added .bash_aliases sourcing to .bashrc"
                 fi
             fi
@@ -349,7 +352,10 @@ EOF
         echo "  ~/.vim/settings-essential.vim"
         echo "  ~/.vim/mappings-essential.vim"
         echo "  ~/.gitconfig-essential"
-        [[ "$OS" == "linux" ]] && echo "  ~/.bash_aliases"
+        if [[ "$OS" == "linux" ]]; then
+            echo "  ~/.shell_common"
+            echo "  ~/.bash_aliases"
+        fi
         echo ""
         echo "Essential Vim features: jk/kj escape, H/L for line start/end, space as leader"
         echo "Essential Git aliases: co, ci, st, br, tug, sync, lg, and more"
