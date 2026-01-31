@@ -145,6 +145,7 @@ if $IS_ROOT; then
     echo ""
     read_input "Choose [1/2/3]: " root_choice
 
+    # shellcheck disable=SC2154
     case "$root_choice" in
         1)
             echo ""
@@ -177,6 +178,7 @@ if $IS_ROOT; then
             # Ask about other users
             echo ""
             read_input "Install essentials for other users? [y/N]: " install_others
+            # shellcheck disable=SC2154
             if [[ "$install_others" =~ ^[Yy]$ ]]; then
                 # List regular users (UID >= 1000, with home directories)
                 echo ""
@@ -194,6 +196,7 @@ if $IS_ROOT; then
                 else
                     echo ""
                     read_input "Install for all listed users? [Y/n]: " install_all
+                    # shellcheck disable=SC2154
                     if [[ ! "$install_all" =~ ^[Nn]$ ]]; then
                         for user_entry in "${users[@]}"; do
                             username="${user_entry%%:*}"
@@ -267,6 +270,7 @@ echo ""
 
 read_input "Choose [1/2/3]: " choice
 
+# shellcheck disable=SC2154
 case "$choice" in
     1)
         # Light installation
@@ -306,6 +310,7 @@ case "$choice" in
             read_input "  Your name: " git_name
             read_input "  Your email: " git_email
 
+            # shellcheck disable=SC2154
             cat > ~/.gitconfig << EOF
 # Git configuration - created by dotfiles installer
 
