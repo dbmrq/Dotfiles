@@ -37,6 +37,4 @@ PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 # =============================================================================
 # Docker helpers (homelab)
 # =============================================================================
-if [[ -f "$HOME/.docker-helpers/docker-helpers.sh" ]]; then
-    source "$HOME/.docker-helpers/docker-helpers.sh"
-fi
+# Sourced from ~/.bashrc: /home/daniel/docker/scripts/docker-helpers.sh
