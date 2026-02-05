@@ -38,3 +38,9 @@ alias rmdsstore="find . -name '*.DS_Store' -type f -delete"
 # Completions
 # =============================================================================
 autoload -U compinit && compinit
+
+# =============================================================================
+# Machine-specific configuration
+# =============================================================================
+# Source local config if it exists (for machine-specific settings like uv, etc.)
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

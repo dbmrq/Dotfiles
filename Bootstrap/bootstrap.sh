@@ -226,6 +226,10 @@ save_choices() {
         echo "CHOICE_LATEX_DIR=$LATEX_DIR"
         echo "CHOICE_STOW=$DO_STOW"
         echo "CHOICE_PLUGINS=$DO_PLUGINS"
+        echo "CHOICE_GIT_IDENTITY=$DO_GIT_IDENTITY"
+        echo "CHOICE_GIT_USER_NAME=$GIT_USER_NAME"
+        echo "CHOICE_GIT_USER_EMAIL=$GIT_USER_EMAIL"
+        echo "CHOICE_SHELL_LOCAL=$DO_SHELL_LOCAL"
         echo "CHOICE_SSH_KEYS=$DO_SSH_KEYS"
         echo "CHOICE_SSH_DEFAULT=$DEFAULT_GITHUB_ACCOUNT"
         # Save GitHub accounts array
@@ -257,6 +261,10 @@ load_choices() {
                 CHOICE_LATEX_DIR) LATEX_DIR="$value" ;;
                 CHOICE_STOW) DO_STOW="$value" ;;
                 CHOICE_PLUGINS) DO_PLUGINS="$value" ;;
+                CHOICE_GIT_IDENTITY) DO_GIT_IDENTITY="$value" ;;
+                CHOICE_GIT_USER_NAME) GIT_USER_NAME="$value" ;;
+                CHOICE_GIT_USER_EMAIL) GIT_USER_EMAIL="$value" ;;
+                CHOICE_SHELL_LOCAL) DO_SHELL_LOCAL="$value" ;;
                 CHOICE_SSH_KEYS) DO_SSH_KEYS="$value" ;;
                 CHOICE_SSH_DEFAULT) DEFAULT_GITHUB_ACCOUNT="$value" ;;
                 CHOICE_GITHUB_ACCOUNT_COUNT) account_count="$value" ;;
@@ -318,6 +326,42 @@ check_compatibility() {
     fi
 
     echo ""
+}
+
+# --- Gather git identity ---
+gather_git_identity() {
+    echo ""
+    echo "  This will be used for all git commits on this machine."
+    echo ""
+
+    # Try to get existing values as defaults
+    local default_name default_email
+    default_name=$(git config --global user.name 2>/dev/null || echo "")
+    default_email=$(git config --global user.email 2>/dev/null || echo "")
+
+    if [[ -n "$default_name" ]]; then
+        read -r -p "  Your name [$default_name]: " GIT_USER_NAME
+        GIT_USER_NAME="${GIT_USER_NAME:-$default_name}"
+    else
+        read -r -p "  Your name: " GIT_USER_NAME
+        while [[ -z "$GIT_USER_NAME" ]]; do
+            echo "  Name is required."
+            read -r -p "  Your name: " GIT_USER_NAME
+        done
+    fi
+
+    if [[ -n "$default_email" ]]; then
+        read -r -p "  Your email [$default_email]: " GIT_USER_EMAIL
+        GIT_USER_EMAIL="${GIT_USER_EMAIL:-$default_email}"
+    else
+        read -r -p "  Your email: " GIT_USER_EMAIL
+        while [[ -z "$GIT_USER_EMAIL" ]]; do
+            echo "  Email is required."
+            read -r -p "  Your email: " GIT_USER_EMAIL
+        done
+    fi
+
+    print_success "  Git identity: $GIT_USER_NAME <$GIT_USER_EMAIL>"
 }
 
 # --- Gather GitHub account configuration ---
@@ -421,6 +465,10 @@ gather_choices() {
     LATEX_DIR=""
     DO_STOW=false
     DO_PLUGINS=false
+    DO_GIT_IDENTITY=false
+    GIT_USER_NAME=""
+    GIT_USER_EMAIL=""
+    DO_SHELL_LOCAL=false
     DO_SSH_KEYS=false
     GITHUB_ACCOUNTS=()
     SELECTED_CLI_PACKAGES=()
@@ -635,6 +683,25 @@ gather_choices() {
         fi
     fi
 
+    # Git identity - check if ~/.gitconfig.local exists with user info
+    if [[ ! -f "$HOME/.gitconfig.local" ]] || ! grep -q '^\[user\]' "$HOME/.gitconfig.local" 2>/dev/null; then
+        echo ""
+        echo "Git needs your identity for commits (name and email)."
+        if ask_yes_no "Configure git identity?" "y"; then
+            DO_GIT_IDENTITY=true
+            anything_to_do=true
+            gather_git_identity
+        fi
+    fi
+
+    # Shell local config - check if ~/.zshrc.local exists
+    if [[ ! -f "$HOME/.zshrc.local" ]]; then
+        if ask_yes_no "Create shell local config file (~/.zshrc.local)?"; then
+            DO_SHELL_LOCAL=true
+            anything_to_do=true
+        fi
+    fi
+
     # SSH keys - use cached result
     if [[ "$ssh_count" -eq 0 ]]; then
         if ask_yes_no "Set up GitHub accounts (SSH keys)?"; then
@@ -687,6 +754,8 @@ show_summary_and_confirm() {
     $DO_TERMINAL_THEME && echo "  • Terminal color scheme"
     $DO_LATEX && echo "  • LaTeX packages${LATEX_DIR:+ (to: $LATEX_DIR)}"
     $DO_STOW && echo "  • Dotfiles symlinks"
+    $DO_GIT_IDENTITY && echo "  • Git identity ($GIT_USER_NAME <$GIT_USER_EMAIL>)"
+    $DO_SHELL_LOCAL && echo "  • Shell local config (~/.zshrc.local)"
     if $DO_SSH_KEYS && [[ ${#GITHUB_ACCOUNTS[@]} -gt 0 ]]; then
         echo "  • GitHub accounts:"
         for i in "${!GITHUB_ACCOUNTS[@]}"; do
@@ -1184,6 +1253,101 @@ setup_plugins() {
     print_success "Plugins updated"
 }
 
+setup_git_identity() {
+    print_header "Configuring git identity"
+
+    if [[ -z "$GIT_USER_NAME" || -z "$GIT_USER_EMAIL" ]]; then
+        print_warning "Git identity not provided, skipping"
+        return 0
+    fi
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.gitconfig.local with:"
+        echo -e "  ${BLUE}[dry-run]${NC}   name = $GIT_USER_NAME"
+        echo -e "  ${BLUE}[dry-run]${NC}   email = $GIT_USER_EMAIL"
+        print_success "Git identity would be configured"
+        return 0
+    fi
+
+    # Create or update ~/.gitconfig.local
+    local git_config_local="$HOME/.gitconfig.local"
+
+    # If file exists, try to update just the user section
+    if [[ -f "$git_config_local" ]]; then
+        # Check if [user] section exists
+        if grep -q '^\[user\]' "$git_config_local"; then
+            # Update existing user section using git config
+            git config --file "$git_config_local" user.name "$GIT_USER_NAME"
+            git config --file "$git_config_local" user.email "$GIT_USER_EMAIL"
+        else
+            # Append user section
+            {
+                echo ""
+                echo "[user]"
+                echo "    name = $GIT_USER_NAME"
+                echo "    email = $GIT_USER_EMAIL"
+            } >> "$git_config_local"
+        fi
+    else
+        # Create new file
+        cat > "$git_config_local" << EOF
+# Machine-specific Git config
+# Generated by bootstrap script on $(date)
+# You can edit this file manually
+
+[user]
+    name = $GIT_USER_NAME
+    email = $GIT_USER_EMAIL
+EOF
+        # Add credential helper on macOS
+        if is_macos; then
+            cat >> "$git_config_local" << EOF
+
+[credential]
+    helper = osxkeychain
+EOF
+        fi
+    fi
+
+    print_success "Git identity configured in ~/.gitconfig.local"
+}
+
+setup_shell_local() {
+    print_header "Creating shell local config"
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.zshrc.local"
+        print_success "Shell local config would be created"
+        return 0
+    fi
+
+    local zshrc_local="$HOME/.zshrc.local"
+
+    if [[ -f "$zshrc_local" ]]; then
+        print_success "~/.zshrc.local already exists"
+        return 0
+    fi
+
+    # Create the file with helpful comments
+    cat > "$zshrc_local" << 'EOF'
+# Machine-specific zsh configuration
+# This file is sourced by .zshrc and is NOT tracked in the dotfiles repo
+#
+# Add machine-specific settings here, such as:
+# - Tool-specific paths (uv, nvm, rbenv, etc.)
+# - API keys and tokens
+# - Work-specific aliases
+# - Local overrides
+
+# Example: uv (Python package manager)
+# [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+EOF
+
+    print_success "Created ~/.zshrc.local"
+    echo "  Add machine-specific shell config to this file."
+}
+
 setup_ssh_keys() {
     print_header "Setting up GitHub accounts"
 
@@ -1201,7 +1365,7 @@ setup_ssh_keys() {
             echo -e "  ${BLUE}[dry-run]${NC}   - $label ($username)"
         done
         echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.ssh/config.local"
-        echo -e "  ${BLUE}[dry-run]${NC} Would create ~/.gitconfig.local"
+        echo -e "  ${BLUE}[dry-run]${NC} Would update ~/.gitconfig.local with URL rewrites"
         print_success "GitHub accounts would be configured"
         return 0
     fi
@@ -1221,37 +1385,14 @@ setup_ssh_keys() {
 
 "
 
-    # Get the default account info for user settings
+    # Get the default account info
     # Format: label|displayname|username|email|mappings
     local default_account="${GITHUB_ACCOUNTS[${DEFAULT_GITHUB_ACCOUNT:-0}]}"
-    local default_name default_email default_username
-    default_name=$(echo "$default_account" | cut -d'|' -f2)
+    local default_username
     default_username=$(echo "$default_account" | cut -d'|' -f3)
-    default_email=$(echo "$default_account" | cut -d'|' -f4)
 
-    # Start building the gitconfig
-    local git_config
-    git_config="# Machine-specific Git config
-# Generated by bootstrap script on $(date)
-# Do not edit manually - rerun bootstrap to regenerate
-
-[user]
-    name = $default_name
-    email = $default_email
-
-[github]
-    user = $default_username
-"
-    # Add credential helper (macOS only)
-    if is_macos; then
-        git_config+="
-[credential]
-    helper = osxkeychain
-"
-    fi
-
-    git_config+="
-"
+    # Build URL rewrites for gitconfig (will be appended to existing file)
+    local git_url_rewrites=""
 
     # Process each account
     # Format: label|displayname|username|email|mappings
@@ -1292,7 +1433,7 @@ Host $host_alias
             for mapping in "${mapping_array[@]}"; do
                 mapping=$(echo "$mapping" | xargs)  # trim whitespace
                 if [[ -n "$mapping" ]]; then
-                    git_config+="[url \"git@$host_alias:$mapping/\"]
+                    git_url_rewrites+="[url \"git@$host_alias:$mapping/\"]
     insteadOf = git@github.com:$mapping/
     insteadOf = https://github.com/$mapping/
 
@@ -1317,13 +1458,49 @@ Host github.com
     IdentitiesOnly yes
 "
 
-    # Write the configs
+    # Write SSH config
     echo "$ssh_config" > ~/.ssh/config.local
     chmod 600 ~/.ssh/config.local
     print_success "SSH config created (~/.ssh/config.local)"
 
-    echo "$git_config" > ~/.gitconfig.local
-    print_success "Git config created (~/.gitconfig.local)"
+    # Update gitconfig.local - preserve existing content, add/update GitHub settings
+    local git_config_local="$HOME/.gitconfig.local"
+
+    # Ensure the file exists (setup_git_identity should have created it)
+    if [[ ! -f "$git_config_local" ]]; then
+        # Create minimal file if it doesn't exist
+        cat > "$git_config_local" << EOF
+# Machine-specific Git config
+# Generated by bootstrap script on $(date)
+
+EOF
+    fi
+
+    # Add github user if not present
+    if ! grep -q '^\[github\]' "$git_config_local"; then
+        cat >> "$git_config_local" << EOF
+
+[github]
+    user = $default_username
+EOF
+    else
+        # Update existing github user
+        git config --file "$git_config_local" github.user "$default_username"
+    fi
+
+    # Remove old URL rewrites (between markers) and add new ones
+    # For simplicity, we'll append new rewrites - they'll override any duplicates
+    if [[ -n "$git_url_rewrites" ]]; then
+        # Add a marker comment and the URL rewrites
+        cat >> "$git_config_local" << EOF
+
+# --- GitHub account URL rewrites ---
+# Generated by bootstrap script on $(date)
+$git_url_rewrites
+EOF
+    fi
+
+    print_success "Git config updated (~/.gitconfig.local)"
 
     # Show public keys for new accounts
     if [[ ${#new_keys[@]} -gt 0 ]]; then
@@ -1449,6 +1626,14 @@ main() {
 
     if [[ "$DO_PLUGINS" == "true" ]]; then
         run_step "Vim/Neovim plugins" setup_plugins
+    fi
+
+    if [[ "$DO_GIT_IDENTITY" == "true" ]]; then
+        run_step "Git identity" setup_git_identity
+    fi
+
+    if [[ "$DO_SHELL_LOCAL" == "true" ]]; then
+        run_step "Shell local config" setup_shell_local
     fi
 
     if [[ "$DO_SSH_KEYS" == "true" ]]; then

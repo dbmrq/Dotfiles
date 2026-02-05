@@ -20,5 +20,9 @@ SSH/.ssh/known_hosts*
 # GitHub CLI (contains auth tokens and user preferences)
 Vim/.config/gh/
 
+# uv (Python package manager - machine-specific)
+Vim/.config/uv/
+Vim/.config/fish/
+
 # macOS
 .DS_Store

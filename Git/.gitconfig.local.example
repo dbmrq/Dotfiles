@@ -1,0 +1,26 @@
+# Machine-specific Git configuration
+# Copy this file to ~/.gitconfig.local and fill in your details
+#
+# This file is included by .gitconfig and contains settings that
+# vary per machine (user info, credentials, etc.)
+#
+# The bootstrap script can also generate this file for you.
+
+[user]
+    name = Your Name
+    email = your.email@example.com
+
+# Optional: GitHub username for hub/gh CLI tools
+# [github]
+#     user = yourusername
+
+# Optional: macOS keychain credential helper
+# [credential]
+#     helper = osxkeychain
+
+# Optional: GPG signing
+# [user]
+#     signingkey = YOUR_GPG_KEY_ID
+# [commit]
+#     gpgsign = true
+

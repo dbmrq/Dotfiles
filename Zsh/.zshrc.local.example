@@ -1,0 +1,22 @@
+# Machine-specific zsh configuration
+# Copy this file to ~/.zshrc.local and customize as needed
+#
+# This file is sourced at the end of .zshrc and is for settings
+# that vary per machine (tool-specific paths, API keys, etc.)
+
+# Example: uv (Python package manager)
+# [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+# Example: nvm (Node Version Manager)
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Example: rbenv (Ruby version manager)
+# eval "$(rbenv init - zsh)"
+
+# Example: Work-specific aliases
+# alias vpn='networksetup -connectpppoeservice "Work VPN"'
+
+# Example: API keys (be careful with these!)
+# export OPENAI_API_KEY="sk-..."
+
