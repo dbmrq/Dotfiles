@@ -38,7 +38,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'romainl/vim-cool'
     Plug 'google/vim-searchindex'
     Plug 'nelstrom/vim-visual-star-search'
-    Plug 'altercation/vim-colors-solarized'
+    " Plug 'altercation/vim-colors-solarized' " Disabled: using terminal colors instead
     Plug 'dbmrq/vim-chalk'
     Plug 'dbmrq/vim-howdy'
     Plug 'dbmrq/vim-bucky'
@@ -60,8 +60,9 @@ let g:strip_whitespace_on_save=1
 let g:show_spaces_that_precede_tabs=1
 
 " Goyo
-autocmd! User GoyoEnter hi! EndOfBuffer guifg=#fdf6e3 guibg=#fdf6e3
-autocmd! User GoyoLeave hi! EndOfBuffer guifg=#f8f1dd guibg=#f8f1dd
+" Hide EndOfBuffer ~ characters by matching them to background
+autocmd! User GoyoEnter hi! EndOfBuffer ctermfg=bg ctermbg=bg guifg=bg guibg=bg
+autocmd! User GoyoLeave hi! EndOfBuffer ctermfg=bg ctermbg=bg guifg=bg guibg=bg
 
 " visual-split
 xmap <leader>s <Plug>(Visual-Split-VSSplit)
@@ -84,8 +85,8 @@ let g:SignatureIncludeMarkers = ')⚑@#$%ˆ&*('
 au ColorScheme * hi! link SignatureMarkLine CursorLine
 au ColorScheme * hi! link SignatureMarkerLine CursorLine
 au ColorScheme * hi! link SignColumn FoldColumn
-au ColorScheme * hi! SignatureMarkText guibg=NONE guifg=#2aa198 gui=bold
-au ColorScheme * hi! SignatureMarkerText guibg=NONE guifg=#6c71c4 gui=bold
+au ColorScheme * hi! SignatureMarkText ctermbg=NONE ctermfg=Cyan cterm=bold guibg=NONE guifg=Cyan gui=bold
+au ColorScheme * hi! SignatureMarkerText ctermbg=NONE ctermfg=Magenta cterm=bold guibg=NONE guifg=Magenta gui=bold
 " MUcomplete
 function! MyThesaurus()
     let s:saved_ut = &ut
@@ -203,8 +204,9 @@ let g:targets_aiAI = '  ai'
 " vim-rsi
 let g:rsi_no_meta = 1
 
-" Solarized
-colorscheme solarized
+" Use terminal colors instead of a vim colorscheme
+" The terminal (Ghostty) sets the theme via ANSI colors
+" colorscheme solarized  " Disabled: using terminal colors
 
 " delimitMate
 let delimitMate_expand_space = 1

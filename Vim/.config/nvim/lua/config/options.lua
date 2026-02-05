@@ -7,7 +7,9 @@ end
 
 local opt = vim.opt
 
-opt.termguicolors = true
+-- Use terminal colors instead of 24-bit GUI colors
+-- This lets the terminal (Ghostty) control the colorscheme
+opt.termguicolors = false
 opt.number = true
 opt.relativenumber = true
 opt.signcolumn = 'yes'

@@ -13,7 +13,8 @@ else
     set background=dark
 endif
 
-au ColorScheme * hi! EndOfBuffer guifg=#f8f1dd guibg=#f8f1dd
+" Hide EndOfBuffer ~ characters by matching them to background
+au ColorScheme * hi! EndOfBuffer ctermfg=bg ctermbg=bg guifg=bg guibg=bg
 
 " Status line customization
 set laststatus=0
