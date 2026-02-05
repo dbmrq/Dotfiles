@@ -59,7 +59,7 @@ function prompt_dbmrq_setup {
     zstyle ':prezto:module:editor:info:keymap:alternate' format "%(!.>>.<)"
 
     # Define prompts.
-    PROMPT='${SSH_TTY:+"%F{3}%m:%f "}${path_color}%2~%f${vcs_info_msg_0_} ${editor_info[keymap]} '
+    PROMPT='%B%F{cyan}${SSH_TTY:+%m: }${path_color}%2~%F{cyan}${vcs_info_msg_0_} ${editor_info[keymap]}%f%b '
     RPROMPT=''
 }
 
