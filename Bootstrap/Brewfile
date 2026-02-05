@@ -72,7 +72,7 @@ cask "vlc"                    # Media player
 # GUI Apps (Development)
 # =============================================================================
 # category: gui_dev
-cask "iterm2"                 # Terminal emulator
+cask "ghostty"                # Terminal emulator
 cask "visual-studio-code"     # Code editor
 
 # =============================================================================

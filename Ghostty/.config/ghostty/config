@@ -1,0 +1,13 @@
+theme = TokyoNight Night
+
+font-family = "SF Mono"
+font-size = 16
+adjust-cell-height = 20%
+
+window-padding-x = 8
+window-padding-y = 8
+window-padding-balance = true
+
+macos-dock-drop-behavior = window
+macos-icon = retro
+

@@ -25,6 +25,14 @@
       "macos_only": true,
       "post_install": null
     },
+    "ghostty": {
+      "name": "Ghostty",
+      "brew_packages": [],
+      "brew_casks": ["ghostty"],
+      "linux_packages": ["ghostty"],
+      "stow_package": "Ghostty",
+      "post_install": null
+    },
     "ssh": {
       "name": "SSH",
       "brew_packages": [],
@@ -100,7 +108,7 @@
     "linux": ["git", "vim", "neovim", "stow", "trash-cli", "curl", "wget", "htop", "tree", "fzf", "tmux"]
   },
   "gui_apps": {
-    "casks": ["vlc", "basictex", "appcleaner", "hammerspoon", "google-chrome", "the-unarchiver"],
+    "casks": ["vlc", "basictex", "appcleaner", "hammerspoon", "ghostty", "google-chrome", "the-unarchiver"],
     "formulas": ["macvim", "neovim"]
   }
 }
