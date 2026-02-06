@@ -42,8 +42,7 @@ inoremap : :<C-g>u
 " Yank to end of line (consistent with D and C)
 nnoremap Y y$
 
-" Switch windows and buffers
-nnoremap <leader>w <c-w><c-w>
+" Switch to alternate buffer (Ctrl+W handled by Ghostty for splits)
 nnoremap <leader>b :b#<cr>
 
 " Registers - delete/change without yanking
@@ -121,25 +120,32 @@ function! ShowCheatSheet()
         \ '  *          Search word (stay)     gV        Select last paste   ',
         \ '  gj / gk    Actual line up/down    < / >     Indent (keep sel)   ',
         \ '',
-        \ '  NORMAL MODE                        INSERT MODE                   ',
+        \ '  NORMAL MODE                        GHOSTTY SPLITS (Ctrl+W prefix)',
         \ '  ─────────────────────────────────  ───────────────────────────── ',
-        \ '  Q          Repeat last macro      jk / kj   Exit to normal      ',
-        \ '  <leader>f  Toggle fold            <C-a/e>   Line start/end      ',
-        \ '  <leader>w  Next window                                          ',
-        \ '  <leader>b  Alternate buffer       COMMAND LINE                  ',
-        \ '  ;q / ;x    Quit / Save+quit       ───────────────────────────── ',
-        \ '  <leader>ev Edit vimrc             <C-a/e>   Line start/end      ',
+        \ '  Q          Repeat last macro      s/v       Split horiz/vert    ',
+        \ '  <leader>f  Toggle fold            h/j/k/l   Navigate splits     ',
+        \ '  <leader>b  Alternate buffer       c/q       Close split         ',
+        \ '  ;q / ;x    Quit / Save+quit       o         Zoom split          ',
+        \ '  <leader>ev Edit vimrc             =         Equalize splits     ',
+        \ '                                    t/n/p     Tab new/next/prev   ',
+        \ '  INSERT MODE                        ?         Show keybinds      ',
+        \ '  ─────────────────────────────────                                ',
+        \ '  jk / kj    Exit to normal         MARKS                         ',
+        \ '  <C-a/e>    Line start/end         ───────────────────────────── ',
+        \ "                                    '         Jump to mark (exact)",
+        \ "  COMMAND LINE                      `         Jump to mark (line) ",
+        \ '  ─────────────────────────────────  (swapped for easier exact)   ',
+        \ '  <C-a/e>    Line start/end                                       ',
         \ '',
-        \ '  MARKS                              VIM DEFAULTS TO REMEMBER      ',
+        \ '  LEADERS                            VIM DEFAULTS TO REMEMBER      ',
         \ '  ─────────────────────────────────  ───────────────────────────── ',
-        \ "  '          Jump to mark (exact)   J         Join lines          ",
-        \ "  `          Jump to mark (line)    K         Keyword lookup      ",
-        \ '  (swapped for easier exact jump)   <CR>      Move down           ',
+        \ '  <Space>    Leader                 J         Join lines          ',
+        \ '  ;          Local leader           K         Keyword lookup      ',
         \ '                                    g;/g,     Jump changelist     ',
-        \ '  LEADERS                            gi        Resume insert      ',
-        \ '  ─────────────────────────────────  gv        Reselect visual    ',
-        \ '  <Space>    Leader                 gf        Go to file          ',
-        \ '  ;          Local leader           zt/zz/zb  Scroll top/mid/bot  ',
+        \ '                                    gi        Resume insert       ',
+        \ '                                    gv        Reselect visual     ',
+        \ '                                    gf        Go to file          ',
+        \ '                                    zt/zz/zb  Scroll top/mid/bot  ',
         \ '',
         \ '═══════════════════════════════════════════════════════════════════',
         \ '  Press q or <Esc> to close                                        ',

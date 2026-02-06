@@ -11,3 +11,54 @@ window-padding-balance = true
 macos-dock-drop-behavior = window
 macos-icon = retro
 
+# ═══════════════════════════════════════════════════════════════════
+# Vim-like keybindings with Ctrl+W prefix
+# ═══════════════════════════════════════════════════════════════════
+# Note: These capture Ctrl+W at the terminal level, so vim's native
+# Ctrl+W commands won't work. Use Ghostty splits instead of vim splits.
+
+# Split creation (vim: Ctrl+W s/v or :sp/:vs)
+keybind = ctrl+w>s=new_split:down
+keybind = ctrl+w>v=new_split:right
+
+# Split navigation (vim: Ctrl+W h/j/k/l)
+keybind = ctrl+w>h=goto_split:left
+keybind = ctrl+w>j=goto_split:down
+keybind = ctrl+w>k=goto_split:up
+keybind = ctrl+w>l=goto_split:right
+
+# Also support Ctrl+W Ctrl+h/j/k/l (vim supports both forms)
+keybind = ctrl+w>ctrl+h=goto_split:left
+keybind = ctrl+w>ctrl+j=goto_split:down
+keybind = ctrl+w>ctrl+k=goto_split:up
+keybind = ctrl+w>ctrl+l=goto_split:right
+
+# Cycle through splits (vim: Ctrl+W w or Ctrl+W Ctrl+W)
+keybind = ctrl+w>w=goto_split:next
+keybind = ctrl+w>ctrl+w=goto_split:next
+
+# Close split (vim: Ctrl+W c or Ctrl+W q)
+keybind = ctrl+w>c=close_surface
+keybind = ctrl+w>q=close_surface
+
+# Zoom/maximize split (vim: Ctrl+W o for :only)
+keybind = ctrl+w>o=toggle_split_zoom
+
+# Equalize splits (vim: Ctrl+W =)
+keybind = ctrl+w>equal=equalize_splits
+
+# Resize splits (vim: Ctrl+W +/-/</>)
+keybind = ctrl+w>plus=resize_split:up,10
+keybind = ctrl+w>minus=resize_split:down,10
+keybind = ctrl+w>shift+comma=resize_split:left,10
+keybind = ctrl+w>shift+period=resize_split:right,10
+
+# Tab navigation (using Ctrl+W prefix for consistency)
+keybind = ctrl+w>t=new_tab
+keybind = ctrl+w>n=next_tab
+keybind = ctrl+w>p=previous_tab
+
+# Quick reference: press Ctrl+W then ? to see bindings
+# (shows command palette which lists available keybindings)
+keybind = ctrl+w>shift+slash=show_keybinds
+
