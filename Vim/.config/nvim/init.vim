@@ -10,6 +10,7 @@ if has('nvim')
         lua require('config.options')
         lua require('config.keymaps')
         lua require('config.lazy')
+        lua require('config.lsp')
     else
         " Fallback: source the main vimrc
         if filereadable(expand('~/.vimrc'))

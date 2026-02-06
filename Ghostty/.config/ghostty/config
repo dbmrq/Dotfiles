@@ -12,50 +12,6 @@ macos-dock-drop-behavior = window
 macos-icon = retro
 
 # ═══════════════════════════════════════════════════════════════════
-# Vim-like keybindings with Ctrl+A prefix (tmux-style)
+# Note: Split/pane management is handled by Zellij (tmux mode, Ctrl+B prefix)
+# See ~/.config/zellij/config.kdl for details
 # ═══════════════════════════════════════════════════════════════════
-# Note: Using Ctrl+A instead of Ctrl+W because Ctrl+W has issues.
-# This is similar to tmux's default prefix key.
-
-
-# Split creation (vim: Ctrl+W s/v or :sp/:vs)
-keybind = ctrl+a>s=new_split:down
-keybind = ctrl+a>v=new_split:right
-
-# Split navigation (vim: Ctrl+W h/j/k/l)
-keybind = ctrl+a>h=goto_split:left
-keybind = ctrl+a>j=goto_split:down
-keybind = ctrl+a>k=goto_split:up
-keybind = ctrl+a>l=goto_split:right
-
-# Also support Ctrl+A Ctrl+h/j/k/l
-keybind = ctrl+a>ctrl+h=goto_split:left
-keybind = ctrl+a>ctrl+j=goto_split:down
-keybind = ctrl+a>ctrl+k=goto_split:up
-keybind = ctrl+a>ctrl+l=goto_split:right
-
-# Cycle through splits (vim: Ctrl+W w)
-keybind = ctrl+a>a=goto_split:next
-keybind = ctrl+a>ctrl+a=goto_split:next
-
-# Close split (vim: Ctrl+W c or Ctrl+W q)
-keybind = ctrl+a>c=close_surface
-keybind = ctrl+a>q=close_surface
-
-# Zoom/maximize split (vim: Ctrl+W o for :only)
-keybind = ctrl+a>o=toggle_split_zoom
-
-# Equalize splits (vim: Ctrl+W =)
-keybind = ctrl+a>equal=equalize_splits
-
-# Resize splits (vim: Ctrl+W +/-/</>)
-keybind = ctrl+a>shift+equal=resize_split:up,100
-keybind = ctrl+a>minus=resize_split:down,100
-keybind = ctrl+a>shift+comma=resize_split:left,100
-keybind = ctrl+a>shift+period=resize_split:right,100
-
-# Tab navigation
-keybind = ctrl+a>t=new_tab
-keybind = ctrl+a>n=next_tab
-keybind = ctrl+a>p=previous_tab
-

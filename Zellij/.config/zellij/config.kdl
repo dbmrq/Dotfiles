@@ -1,0 +1,29 @@
+// Zellij configuration - using tmux compatibility mode
+// This gives you transferable skills that work in tmux on remote servers too
+//
+// Quick reference (Ctrl+b prefix):
+//   Ctrl+b "  - Split horizontally
+//   Ctrl+b %  - Split vertically
+//   Ctrl+b arrow/hjkl - Navigate panes
+//   Ctrl+b z  - Toggle pane fullscreen
+//   Ctrl+b x  - Close pane
+//   Ctrl+b c  - New tab (window)
+//   Ctrl+b n/p - Next/previous tab
+//   Ctrl+b d  - Detach session
+//   Ctrl+b [  - Scroll mode (vim motions: hjkl, Ctrl+u/d, /, n/N)
+
+// Use the compact layout for a cleaner look
+default_layout "compact"
+
+// Enable tmux mode - Ctrl+b becomes the prefix key
+keybinds {
+    // Keep default keybinds and add tmux mode
+    tmux {
+        // Navigation with vim keys (in addition to arrows)
+        bind "h" { MoveFocus "Left"; SwitchToMode "Normal"; }
+        bind "j" { MoveFocus "Down"; SwitchToMode "Normal"; }
+        bind "k" { MoveFocus "Up"; SwitchToMode "Normal"; }
+        bind "l" { MoveFocus "Right"; SwitchToMode "Normal"; }
+    }
+}
+
