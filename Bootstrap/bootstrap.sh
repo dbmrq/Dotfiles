@@ -1324,7 +1324,7 @@ setup_shell_local() {
     local zshrc_local="$HOME/.zshrc.local"
 
     if [[ -f "$zshrc_local" ]]; then
-        print_success "~/.zshrc.local already exists"
+        print_success "$HOME/.zshrc.local already exists"
         return 0
     fi
 
