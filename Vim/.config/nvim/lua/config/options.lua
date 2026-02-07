@@ -30,6 +30,25 @@ opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 opt.breakindent = true
 opt.showmode = false
 
+-- Minimal statusline (matches Vim config in settings.vim)
+-- Hide statusline, use ruler instead
+opt.laststatus = 0
+opt.ruler = true
+
+-- Custom rulerformat: filename, modified, percentage
+vim.cmd([[
+  set rulerformat=%25(%=%t%{&mod?'\ +':''}%)%{winheight(0)<line('$')?'\ '.line('.')*100/line('$').'%%':''}%{&readonly?'\ [RO]':''}%{&ff!='unix'?'\ ['.&ff.']':''}%{(&fenc!='utf-8'&&!empty(&fenc))?'\ ['.&fenc.']':''}
+]])
+
+-- Statusline colors (for when it shows, e.g., in splits)
+vim.api.nvim_create_autocmd('ColorScheme', {
+  callback = function()
+    vim.cmd('hi! link StatusLine FoldColumn')
+    vim.cmd('hi! link StatusLineNC LineNr')
+    vim.cmd('hi! link VertSplit LineNr')
+  end,
+})
+
 if vim.env.BACKGROUND == 'light' then
   opt.background = 'light'
 else

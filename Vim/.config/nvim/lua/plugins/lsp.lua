@@ -13,10 +13,14 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     opts = {
       ensure_installed = {
+        -- LSP servers
         'lua-language-server',
         'pyright',
         'typescript-language-server',
+        'marksman',  -- Markdown
+        -- Formatters
         'stylua',
+        'swiftformat',
       },
     },
   },

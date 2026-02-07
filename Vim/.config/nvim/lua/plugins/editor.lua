@@ -1,5 +1,8 @@
 -- Editor enhancements
 return {
+  -- File icons
+  { 'echasnovski/mini.icons', version = '*', opts = {} },
+
   -- Which-key for keybinding hints
   {
     'folke/which-key.nvim',
@@ -60,12 +63,12 @@ return {
     end,
   },
 
-  -- Better text objects
-  {
-    'echasnovski/mini.ai',
-    version = '*',
-    opts = { n_lines = 500 },
-  },
+  -- Text objects (works in both Vim and nvim)
+  { 'kana/vim-textobj-user' },
+  { 'kana/vim-textobj-entire', dependencies = { 'kana/vim-textobj-user' } },
+
+  -- Exchange text (works in both vim and nvim)
+  { 'tommcdo/vim-exchange' },
 
   -- Highlight todo comments
   {
@@ -82,19 +85,6 @@ return {
     opts = {},
   },
 
-  -- Flash for quick navigation (like vim-sneak)
-  {
-    'folke/flash.nvim',
-    event = 'VeryLazy',
-    opts = {},
-    keys = {
-      { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
-      { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash Treesitter' },
-      { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote Flash' },
-      { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter Search' },
-    },
-  },
-
   -- Better diagnostics list
   {
     'folke/trouble.nvim',
@@ -107,19 +97,6 @@ return {
       { '<leader>cl', '<cmd>Trouble lsp toggle focus=false win.position=right<cr>', desc = 'LSP Definitions' },
       { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', desc = 'Location List' },
       { '<leader>xQ', '<cmd>Trouble qflist toggle<cr>', desc = 'Quickfix List' },
-    },
-  },
-
-  -- Statusline
-  {
-    'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    opts = {
-      options = {
-        theme = 'solarized',
-        component_separators = '',
-        section_separators = '',
-      },
     },
   },
 

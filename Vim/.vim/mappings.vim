@@ -78,25 +78,7 @@ map <leader>hi :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
     \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
     \ . ">"<CR>
 
-" Add blank lines
-function! s:BlankUp(count) abort
-  put!=repeat(nr2char(10), a:count)
-  ']+1
-  silent! call repeat#set("\<Plug>BlankUp", a:count)
-endfunction
-
-function! s:BlankDown(count) abort
-  put =repeat(nr2char(10), a:count)
-  '[-1
-  silent! call repeat#set("\<Plug>BlankDown", a:count)
-endfunction
-
-nnoremap <silent> <Plug>BlankUp   :<C-U>call <SID>BlankUp(v:count1)<CR>
-nnoremap <silent> <Plug>BlankDown :<C-U>call <SID>BlankDown(v:count1)<CR>
-
-nmap <leader>k <Plug>BlankUp
-nmap <leader>j <Plug>BlankDown
-
+" Add blank lines around paragraph (uses BlankUp/BlankDown from essential)
 nnoremap <leader>aa mn{O<esc>}o<esc>`n
 vmap <leader>aa <esc>`<<Plug>BlankUp`><Plug>BlankDown<esc>`<kV`>j
 

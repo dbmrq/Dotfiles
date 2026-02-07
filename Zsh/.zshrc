@@ -1,6 +1,9 @@
 # Start Zellij automatically (if not already inside Zellij)
 if [[ -z "$ZELLIJ" ]]; then
-    zellij attach -c
+    # Clean up old exited sessions
+    zellij delete-all-sessions --yes 2>/dev/null
+    # Start a fresh session
+    zellij
 fi
 
 # Source Prezto

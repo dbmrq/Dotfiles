@@ -19,6 +19,8 @@ on_force_close "quit"
 // Don't auto-copy on selection
 copy_on_select false
 
+show_startup_tips false
+
 ui {
     pane_frames {
         hide_session_name true

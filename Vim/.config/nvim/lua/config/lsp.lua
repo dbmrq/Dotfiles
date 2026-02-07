@@ -45,8 +45,15 @@ vim.lsp.config('sourcekit', {
   capabilities = capabilities,
 })
 
+vim.lsp.config('marksman', {
+  cmd = { 'marksman', 'server' },
+  filetypes = { 'markdown', 'markdown.mdx' },
+  root_markers = { '.marksman.toml', '.git' },
+  capabilities = capabilities,
+})
+
 -- Enable configured servers
-vim.lsp.enable({ 'lua_ls', 'pyright', 'ts_ls', 'sourcekit' })
+vim.lsp.enable({ 'lua_ls', 'pyright', 'ts_ls', 'sourcekit', 'marksman' })
 
 -- LSP keymaps on attach
 vim.api.nvim_create_autocmd('LspAttach', {

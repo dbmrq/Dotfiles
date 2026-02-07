@@ -6,7 +6,6 @@ return {
     lazy = false,
     build = ':TSUpdate',
     config = function()
-      -- Install parsers
       local parsers = {
         'bash',
         'c',
@@ -29,17 +28,22 @@ return {
         'yaml',
       }
 
-      -- Install parsers asynchronously
-      require('nvim-treesitter').install(parsers)
+      -- Only install missing parsers (avoid recompiling on every startup)
+      local installed = require('nvim-treesitter').installed()
+      local missing = {}
+      for _, parser in ipairs(parsers) do
+        if not vim.tbl_contains(installed, parser) then
+          table.insert(missing, parser)
+        end
+      end
+      if #missing > 0 then
+        require('nvim-treesitter').install(missing)
+      end
 
       -- Enable treesitter highlighting for all supported filetypes
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
-          -- Check if parser exists for this filetype
-          local ok = pcall(vim.treesitter.start, args.buf)
-          if not ok then
-            return
-          end
+          pcall(vim.treesitter.start, args.buf)
         end,
       })
     end,
