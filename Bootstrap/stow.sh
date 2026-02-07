@@ -206,6 +206,32 @@ verify_symlink() {
     fi
 }
 
+# Check if a file should be ignored based on .stow-local-ignore
+# Returns 0 if should be ignored, 1 if should be processed
+should_ignore_file() {
+    local pkg_dir="$1"
+    local rel_path="$2"
+    local ignore_file="$pkg_dir/.stow-local-ignore"
+
+    # Always ignore .stow-local-ignore itself
+    [[ "$rel_path" == ".stow-local-ignore" ]] && return 0
+
+    # If no ignore file exists, don't ignore
+    [[ ! -f "$ignore_file" ]] && return 1
+
+    # Check each pattern in the ignore file
+    while IFS= read -r pattern || [[ -n "$pattern" ]]; do
+        # Skip empty lines and comments
+        [[ -z "$pattern" || "$pattern" == \#* ]] && continue
+        # Check if rel_path matches the regex pattern
+        if [[ "$rel_path" =~ $pattern ]]; then
+            return 0  # Should be ignored
+        fi
+    done < "$ignore_file"
+
+    return 1  # Not ignored
+}
+
 # --- Check all symlinks for a package ---
 check_package() {
     local pkg="$1"
@@ -216,6 +242,12 @@ check_package() {
     # Find all files in the package (excluding .DS_Store)
     while IFS= read -r -d '' file; do
         local rel_path="${file#$pkg_dir/}"
+
+        # Skip files that match .stow-local-ignore patterns
+        if should_ignore_file "$pkg_dir" "$rel_path"; then
+            continue
+        fi
+
         local target="$DOTFILES_DIR/$pkg/$rel_path"
         local link="$HOME/$rel_path"
 

@@ -1,0 +1,3 @@
+# Minimal theme - square indicator padding (no rounded corners)
+[indicator]
+padding = { open = "█", close = "█" }

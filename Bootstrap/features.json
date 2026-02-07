@@ -104,12 +104,11 @@
     }
   },
   "cli_packages": {
-    "macos": ["git", "git-extras", "lua", "mas", "par", "stow", "ruby", "trash-cli", "cscope", "pandoc", "rename", "python3", "swiftlint"],
-    "linux": ["git", "vim", "neovim", "stow", "trash-cli", "curl", "wget", "htop", "tree", "fzf", "tmux"]
+    "macos": ["git", "git-extras", "lua", "mas", "par", "stow", "ruby", "trash-cli", "cscope", "pandoc", "rename", "python3", "swiftlint", "ripgrep", "fd", "fzf", "yazi", "bat", "eza", "jq", "htop", "tree"],
+    "linux": ["git", "vim", "neovim", "stow", "trash-cli", "curl", "wget", "htop", "tree", "fzf", "tmux", "ripgrep", "fd-find", "yazi", "bat", "eza", "jq"]
   },
   "gui_apps": {
     "casks": ["vlc", "basictex", "appcleaner", "hammerspoon", "ghostty", "google-chrome", "the-unarchiver"],
     "formulas": ["macvim", "neovim"]
   }
 }
-
