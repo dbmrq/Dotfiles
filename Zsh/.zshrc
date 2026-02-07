@@ -149,12 +149,20 @@ function +vi-git_status {
 
 # Precmd to update prompt info
 function prompt_precmd {
+    # Show hostname in yellow if SSH session
+    if [[ -n $SSH_TTY ]]; then
+        ssh_prompt="%F{yellow}%m: "
+    else
+        ssh_prompt=""
+    fi
+
     # Show path in red if not writable
     if [[ -w $PWD ]]; then
         path_color=""
     else
         path_color="%F{9}"
     fi
+
     vcs_info
 }
 add-zsh-hook precmd prompt_precmd
@@ -171,7 +179,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git_status
 # Prompt: hostname (yellow if SSH), path (red if not writable), git info, vi mode
 # Insert mode: >  Normal mode: <  Root: >>
 setopt PROMPT_SUBST
-PROMPT='%B%F{cyan}${SSH_TTY:+%F{yellow}%m: }${path_color}%2~%F{cyan}${vcs_info_msg_0_} %(!.>>${VI_MODE_INDICATOR}.)${VI_MODE_INDICATOR}%f%b '
+PROMPT='%B%F{cyan}${ssh_prompt}${path_color}%2~%F{cyan}${vcs_info_msg_0_} %(!.>>${VI_MODE_INDICATOR}.)${VI_MODE_INDICATOR}%f%b '
 RPROMPT=''
 
 # =============================================================================
