@@ -1,0 +1,10 @@
+// Custom compact layout with F1 tooltip for keybinding hints
+layout {
+    pane
+    pane size=1 borderless=true {
+        plugin location="compact-bar" {
+            tooltip "F1"
+        }
+    }
+}
+

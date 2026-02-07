@@ -10,8 +10,8 @@ window-padding-balance = true
 
 macos-dock-drop-behavior = window
 macos-icon = retro
+macos-option-as-alt = true
 
-# ═══════════════════════════════════════════════════════════════════
-# Note: Split/pane management is handled by Zellij (tmux mode, Ctrl+B prefix)
-# See ~/.config/zellij/config.kdl for details
-# ═══════════════════════════════════════════════════════════════════
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+macos-option-as-alt = true
