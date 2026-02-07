@@ -1,3 +1,8 @@
+# Start Zellij automatically (if not already inside Zellij)
+if [[ -z "$ZELLIJ" ]]; then
+    zellij attach -c
+fi
+
 # Source Prezto
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
     source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
