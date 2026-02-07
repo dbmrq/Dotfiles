@@ -34,7 +34,7 @@ brew "cscope"                 # Code navigation
 # category: cli_utils
 brew "mas"                    # Mac App Store CLI
 brew "par"                    # Paragraph reformatter
-brew "trash-cli"              # Safe rm alternative
+brew "trash"                  # Move files to macOS Trash
 brew "pandoc"                 # Document converter
 brew "rename"                 # Batch file renaming
 brew "ripgrep"                # Fast grep alternative
