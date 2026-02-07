@@ -40,6 +40,7 @@ brew "rename"                 # Batch file renaming
 brew "ripgrep"                # Fast grep alternative
 brew "fd"                     # Fast find alternative
 brew "fzf"                    # Fuzzy finder
+brew "yazi"                   # Terminal file manager
 brew "bat"                    # Cat with syntax highlighting
 brew "eza"                    # Modern ls replacement
 brew "jq"                     # JSON processor
