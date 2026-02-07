@@ -40,18 +40,32 @@ brew "rename"                 # Batch file renaming
 brew "ripgrep"                # Fast grep alternative
 brew "fd"                     # Fast find alternative
 brew "fzf"                    # Fuzzy finder
-brew "yazi"                   # Terminal file manager
+brew "nnn"                    # Terminal file manager
 brew "bat"                    # Cat with syntax highlighting
 brew "eza"                    # Modern ls replacement
 brew "jq"                     # JSON processor
 brew "htop"                   # Process viewer
 brew "tree"                   # Directory tree viewer
+brew "zoxide"                 # Smarter cd command
+
+# =============================================================================
+# Terminal Multiplexer
+# =============================================================================
+# category: cli_multiplexer
+brew "zellij"                 # Terminal workspace
+
+# =============================================================================
+# Zsh Plugins
+# =============================================================================
+# category: cli_zsh
+brew "zsh-autosuggestions"    # Fish-like suggestions
+brew "zsh-syntax-highlighting" # Syntax highlighting
+brew "zsh-history-substring-search" # History search with arrows
 
 # =============================================================================
 # Editors
 # =============================================================================
 # category: editors
-brew "macvim"                 # MacVim with GUI
 brew "neovim"                 # Modern Vim fork
 
 # =============================================================================
@@ -74,10 +88,9 @@ cask "vlc"                    # Media player
 # =============================================================================
 # category: gui_dev
 cask "ghostty"                # Terminal emulator
-cask "visual-studio-code"     # Code editor
 
 # =============================================================================
-# TeX/LaTeX
+# TeX/LaTeX (Optional)
 # =============================================================================
 # category: tex
-cask "basictex"               # Minimal TeX distribution
+# cask "basictex"             # Minimal TeX distribution (uncomment if needed)

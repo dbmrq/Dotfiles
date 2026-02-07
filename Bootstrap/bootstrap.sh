@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #
-# Bootstrap script for setting up a new macOS machine
-# - Detects what's already installed and verifies configuration
-# - Asks only about things that need to be installed/fixed
-# - Saves state so interrupted runs can be resumed
-# - Idempotent: safe to run multiple times
+# Bootstrap script for setting up a new macOS or Linux machine
+# - Detects what's already installed (idempotent)
+# - Asks all questions upfront, then runs unattended
+# - Each step checks if already done before running
 #
 # Usage:
 #   ./bootstrap.sh            # Interactive mode - detect, verify, ask
@@ -18,7 +17,6 @@ set -euo pipefail
 # --- Configuration ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-STATE_FILE="$SCRIPT_DIR/.bootstrap_state"
 TEMP_FILES=()
 SUDO_PID=""
 BOOTSTRAP_SUCCESS=false
@@ -33,9 +31,6 @@ fi
 
 # Source shared library for feature definitions and common functions
 source "$SCRIPT_DIR/lib.sh"
-
-# Selected features for installation (populated by gather_choices)
-SELECTED_FEATURES=()
 
 # --- Dry-run wrapper ---
 # Wraps a command: in dry-run mode, prints it; otherwise, executes it
@@ -76,10 +71,8 @@ cleanup() {
         done
     fi
 
-    # Handle state file based on success/failure
+    # Show completion message
     if $BOOTSTRAP_SUCCESS; then
-        # Success: remove state file
-        rm -f "$STATE_FILE" 2>/dev/null || true
         echo ""
         echo -e "${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
         echo -e "${GREEN}${BOLD}║     Bootstrap Complete!                ║${NC}"
@@ -88,15 +81,15 @@ cleanup() {
         echo "You may want to:"
         echo "  • Restart your terminal for shell changes to take effect"
         echo "  • Log out and back in for all preferences to apply"
-        echo "  • Restart your Mac if system updates were installed"
+        if is_macos; then
+            echo "  • Restart your Mac if system updates were installed"
+        fi
         echo ""
     elif [[ $exit_code -ne 0 ]]; then
-        # Failure: state file is preserved for resume
         echo ""
         print_error "Bootstrap interrupted or failed (exit code: $exit_code)"
         echo ""
-        echo "Your progress has been saved. Run the script again to resume."
-        echo "To start fresh, delete: $STATE_FILE"
+        echo "Run the script again to retry. Each step will skip if already done."
         echo ""
     fi
 
@@ -145,13 +138,6 @@ show_system_status() {
         else
             print_warning "Xcode (App Store): not installed"
         fi
-
-        # Prezto (macOS only)
-        if [[ "$(check_prezto_status)" == "installed" ]]; then
-            print_success "Prezto"
-        else
-            print_warning "Prezto: not installed"
-        fi
     else
         # Linux: show package manager
         local pm
@@ -194,86 +180,6 @@ show_system_status() {
 # Track a temporary file/directory for cleanup
 track_temp() {
     TEMP_FILES+=("$1")
-}
-
-# Mark a step as completed in state file
-mark_step_complete() {
-    local step="$1"
-    echo "$step" >> "$STATE_FILE"
-}
-
-# Check if a step was already completed
-step_completed() {
-    local step="$1"
-    [[ -f "$STATE_FILE" ]] && grep -qxF "$step" "$STATE_FILE"
-}
-
-# Save choices to state file
-save_choices() {
-    {
-        echo "# Bootstrap choices - $(date)"
-        echo "CHOICE_MACOS_UPDATE=$DO_MACOS_UPDATE"
-        echo "CHOICE_XCODE_TOOLS=$DO_XCODE_TOOLS"
-        echo "CHOICE_HOMEBREW=$DO_HOMEBREW"
-        echo "CHOICE_BREW_CLI=$DO_BREW_CLI"
-        echo "CHOICE_BREW_APPS=$DO_BREW_APPS"
-        echo "CHOICE_XCODE_APP=$DO_XCODE_APP"
-        echo "CHOICE_PREFS=$DO_PREFS"
-        echo "CHOICE_CLEAR_DOCK=$DO_CLEAR_DOCK"
-        echo "CHOICE_PREZTO=$DO_PREZTO"
-        echo "CHOICE_TERMINAL_THEME=$DO_TERMINAL_THEME"
-        echo "CHOICE_LATEX=$DO_LATEX"
-        echo "CHOICE_LATEX_DIR=$LATEX_DIR"
-        echo "CHOICE_STOW=$DO_STOW"
-        echo "CHOICE_PLUGINS=$DO_PLUGINS"
-        echo "CHOICE_GIT_IDENTITY=$DO_GIT_IDENTITY"
-        echo "CHOICE_GIT_USER_NAME=$GIT_USER_NAME"
-        echo "CHOICE_GIT_USER_EMAIL=$GIT_USER_EMAIL"
-        echo "CHOICE_SHELL_LOCAL=$DO_SHELL_LOCAL"
-        echo "CHOICE_SSH_KEYS=$DO_SSH_KEYS"
-        echo "CHOICE_SSH_DEFAULT=$DEFAULT_GITHUB_ACCOUNT"
-        # Save GitHub accounts array
-        echo "CHOICE_GITHUB_ACCOUNT_COUNT=${#GITHUB_ACCOUNTS[@]}"
-        for i in "${!GITHUB_ACCOUNTS[@]}"; do
-            echo "CHOICE_GITHUB_ACCOUNT_$i=${GITHUB_ACCOUNTS[$i]}"
-        done
-    } >> "$STATE_FILE"
-}
-
-# Load choices from state file
-load_choices() {
-    if [[ -f "$STATE_FILE" ]]; then
-        local account_count=0
-        # shellcheck source=/dev/null
-        while IFS='=' read -r key value; do
-            case "$key" in
-                CHOICE_MACOS_UPDATE) DO_MACOS_UPDATE="$value" ;;
-                CHOICE_XCODE_TOOLS) DO_XCODE_TOOLS="$value" ;;
-                CHOICE_HOMEBREW) DO_HOMEBREW="$value" ;;
-                CHOICE_BREW_CLI) DO_BREW_CLI="$value" ;;
-                CHOICE_BREW_APPS) DO_BREW_APPS="$value" ;;
-                CHOICE_XCODE_APP) DO_XCODE_APP="$value" ;;
-                CHOICE_PREFS) DO_PREFS="$value" ;;
-                CHOICE_CLEAR_DOCK) DO_CLEAR_DOCK="$value" ;;
-                CHOICE_PREZTO) DO_PREZTO="$value" ;;
-                CHOICE_TERMINAL_THEME) DO_TERMINAL_THEME="$value" ;;
-                CHOICE_LATEX) DO_LATEX="$value" ;;
-                CHOICE_LATEX_DIR) LATEX_DIR="$value" ;;
-                CHOICE_STOW) DO_STOW="$value" ;;
-                CHOICE_PLUGINS) DO_PLUGINS="$value" ;;
-                CHOICE_GIT_IDENTITY) DO_GIT_IDENTITY="$value" ;;
-                CHOICE_GIT_USER_NAME) GIT_USER_NAME="$value" ;;
-                CHOICE_GIT_USER_EMAIL) GIT_USER_EMAIL="$value" ;;
-                CHOICE_SHELL_LOCAL) DO_SHELL_LOCAL="$value" ;;
-                CHOICE_SSH_KEYS) DO_SSH_KEYS="$value" ;;
-                CHOICE_SSH_DEFAULT) DEFAULT_GITHUB_ACCOUNT="$value" ;;
-                CHOICE_GITHUB_ACCOUNT_COUNT) account_count="$value" ;;
-                CHOICE_GITHUB_ACCOUNT_*) GITHUB_ACCOUNTS+=("$value") ;;
-            esac
-        done < "$STATE_FILE"
-        return 0
-    fi
-    return 1
 }
 
 # --- Compatibility checks ---
@@ -459,10 +365,8 @@ gather_choices() {
     DO_XCODE_APP=false
     DO_PREFS=false
     DO_CLEAR_DOCK=false
-    DO_PREZTO=false
     DO_TERMINAL_THEME=false
     DO_LATEX=false
-    LATEX_DIR=""
     DO_STOW=false
     DO_PLUGINS=false
     DO_GIT_IDENTITY=false
@@ -488,7 +392,6 @@ gather_choices() {
     local missing_gui=""
     local gui_missing_count=0
     local has_xcode_app=false
-    local prezto_status="missing"
 
     if is_macos; then
         ensure_brew_in_path
@@ -506,7 +409,6 @@ gather_choices() {
         fi
 
         [[ -d "/Applications/Xcode.app" ]] && has_xcode_app=true
-        prezto_status=$(check_prezto_status)
     else
         # Linux: check CLI tools directly
         local cli_status; cli_status=$(check_cli_tools_status)
@@ -532,7 +434,6 @@ gather_choices() {
                 read -ra SELECTED_GUI_APPS <<< "$(get_all_gui_casks) $(get_all_gui_formulas)"
             fi
             $has_xcode_app || DO_XCODE_APP=true
-            [[ "$prezto_status" != "installed" ]] && DO_PREZTO=true
         fi
         if [[ "$cli_missing_count" -gt 0 ]]; then
             DO_BREW_CLI=true
@@ -542,7 +443,6 @@ gather_choices() {
         [[ "$stow_status" != "ok" ]] && DO_STOW=true
         # Update plugins if vim/neovim are installed
         (command_exists vim || command_exists nvim) && DO_PLUGINS=true
-        save_choices
         show_summary_and_confirm
         return
     fi
@@ -639,26 +539,16 @@ gather_choices() {
         fi
     fi
 
-    # Prezto (macOS only - Zsh configuration)
-    if is_macos && [[ "$prezto_status" != "installed" ]]; then
-        if ask_yes_no "Install Prezto (Zsh framework)?" "y"; then
-            DO_PREZTO=true
-            anything_to_do=true
-        fi
-    fi
-
     # Terminal theme (macOS only)
     if is_macos && ask_yes_no "Install/reinstall Solarized terminal theme?"; then
         DO_TERMINAL_THEME=true
         anything_to_do=true
     fi
 
-    # LaTeX (macOS only for now)
-    if is_macos && ask_yes_no "Set up LaTeX packages?"; then
+    # LaTeX (macOS only, optional - installs BasicTeX + minimal packages)
+    if is_macos && ask_yes_no "Install LaTeX (BasicTeX + pandoc support)?"; then
         DO_LATEX=true
         anything_to_do=true
-        read -r -p "  Directory for TeX supporting files: " LATEX_DIR
-        LATEX_DIR="${LATEX_DIR/#\~/$HOME}"
     fi
 
     # Dotfiles - use cached result
@@ -725,9 +615,6 @@ gather_choices() {
         exit 0
     fi
 
-    # Save choices for potential resume
-    save_choices
-
     show_summary_and_confirm
 }
 
@@ -750,9 +637,8 @@ show_summary_and_confirm() {
     $DO_XCODE_APP && echo "  • Xcode from App Store"
     $DO_PREFS && echo "  • macOS preferences"
     $DO_CLEAR_DOCK && echo "  • Clear Dock"
-    $DO_PREZTO && echo "  • Prezto"
     $DO_TERMINAL_THEME && echo "  • Terminal color scheme"
-    $DO_LATEX && echo "  • LaTeX packages${LATEX_DIR:+ (to: $LATEX_DIR)}"
+    $DO_LATEX && echo "  • LaTeX (BasicTeX)"
     $DO_STOW && echo "  • Dotfiles symlinks"
     $DO_GIT_IDENTITY && echo "  • Git identity ($GIT_USER_NAME <$GIT_USER_EMAIL>)"
     $DO_SHELL_LOCAL && echo "  • Shell local config (~/.zshrc.local)"
@@ -779,87 +665,14 @@ show_summary_and_confirm() {
     fi
 
     if ! ask_yes_no "Proceed with installation?" "y"; then
-        rm -f "$STATE_FILE"
         echo "Aborted."
         exit 0
     fi
 }
 
-# Check for and handle resuming a previous run
-check_resume() {
-    if [[ -f "$STATE_FILE" ]]; then
-        echo ""
-        print_warning "A previous bootstrap run was interrupted."
-        echo ""
-
-        # Show what was completed
-        local completed_steps
-        completed_steps=$(grep -v '^#' "$STATE_FILE" | grep -v '^CHOICE_' | grep -v '^$' || true)
-        if [[ -n "$completed_steps" ]]; then
-            echo "Completed steps:"
-            echo "$completed_steps" | while read -r step; do
-                echo "  ✓ $step"
-            done
-            echo ""
-        fi
-
-        echo "Options:"
-        echo "  1) Resume from where you left off (recommended)"
-        echo "  2) Start fresh (discard previous progress)"
-        echo "  3) Cancel"
-        echo ""
-        read -r -p "Choose [1/2/3]: " choice
-
-        case "$choice" in
-            1)
-                if load_choices; then
-                    print_success "Resuming previous run..."
-                    return 0  # Resume
-                else
-                    print_warning "Could not load previous choices. Starting fresh."
-                    rm -f "$STATE_FILE"
-                    return 1  # Fresh start
-                fi
-                ;;
-            2)
-                rm -f "$STATE_FILE"
-                return 1  # Fresh start
-                ;;
-            *)
-                echo "Cancelled."
-                exit 0
-                ;;
-        esac
-    fi
-    return 1  # No state file, fresh start
-}
-
 # --- Installation steps ---
-# Each step:
-# - Checks if already completed (for resume)
-# - Is idempotent (safe to run multiple times)
-# - Marks itself complete on success
-
-run_step() {
-    local step_name="$1"
-    local step_func="$2"
-
-    # In dry-run mode, don't check/mark completion
-    if ! $DRY_RUN && step_completed "$step_name"; then
-        print_success "$step_name (already completed)"
-        return 0
-    fi
-
-    if $step_func; then
-        # Don't mark complete in dry-run mode
-        if ! $DRY_RUN; then
-            mark_step_complete "$step_name"
-        fi
-        return 0
-    else
-        return 1
-    fi
-}
+# Each step is idempotent (safe to run multiple times)
+# Each step checks if already done before running
 
 install_macos_updates() {
     print_header "Updating macOS"
@@ -1085,20 +898,6 @@ clear_dock() {
     print_success "Dock cleared"
 }
 
-install_prezto() {
-    print_header "Installing Prezto"
-
-    local prezto_dir="${ZDOTDIR:-$HOME}/.zprezto"
-
-    if [[ -d "$prezto_dir" ]]; then
-        print_success "Prezto already installed"
-        return 0
-    fi
-
-    run_cmd git clone --recursive https://github.com/sorin-ionescu/prezto.git "$prezto_dir"
-    print_success "Prezto installed"
-}
-
 install_terminal_theme() {
     print_header "Installing Terminal color scheme"
 
@@ -1129,113 +928,64 @@ install_terminal_theme() {
 }
 
 install_latex() {
-    print_header "Installing LaTeX packages"
+    print_header "Installing LaTeX (BasicTeX)"
 
-    # Ensure tlmgr is available
+    # Check if BasicTeX is already installed
+    if [[ -d "/Library/TeX" ]] && command_exists tlmgr; then
+        print_success "BasicTeX already installed"
+    else
+        # Install BasicTeX via Homebrew cask
+        echo "Installing BasicTeX..."
+        ensure_brew_in_path
+        if command_exists brew; then
+            run_cmd brew install --cask basictex || {
+                print_warning "Failed to install BasicTeX"
+                return 0
+            }
+            # Add TeX to PATH for current session
+            export PATH="/Library/TeX/texbin:$PATH"
+        else
+            print_warning "Homebrew not available, cannot install BasicTeX"
+            return 0
+        fi
+    fi
+
+    # Ensure tlmgr is in PATH
     if ! command_exists tlmgr; then
-        # BasicTeX installs here
         export PATH="/Library/TeX/texbin:$PATH"
     fi
 
     if ! command_exists tlmgr && ! $DRY_RUN; then
-        print_warning "tlmgr not found. Install BasicTeX first."
-        return 0  # Not a fatal error
+        print_warning "tlmgr not found after installation"
+        return 0
     fi
 
+    # Update tlmgr
     echo "Updating TeX Live..."
-    run_sudo tlmgr update --self --all || true
+    run_sudo tlmgr update --self --all 2>/dev/null || true
 
-    echo "Installing TeX packages..."
-    run_sudo tlmgr install scheme-medium collection-humanities collection-langgreek \
-        collection-langother collection-latexextra collection-pictures logreq \
-        biblatex biber || print_warning "Some packages may have failed"
+    # Install minimal packages needed for pandoc
+    echo "Installing essential TeX packages for pandoc..."
+    run_sudo tlmgr install \
+        adjustbox babel-german background bidi collectbox csquotes everypage filehook \
+        footmisc footnotebackref framed fvextra letltxmacro ly1 mdframed mweights \
+        needspace pagecolor sourcecodepro sourcesanspro titling ucharcat ulem \
+        unicode-math upquote xecjk xurl zref 2>/dev/null || true
 
-    # Set up directories (idempotent - mkdir -p and ln -sf are safe to repeat)
-    if [[ -n "${LATEX_DIR:-}" ]]; then
-        run_cmd mkdir -p "${LATEX_DIR}/Classes"
-        run_cmd mkdir -p "${LATEX_DIR}/Packages"
-        run_cmd mkdir -p "${LATEX_DIR}/Bibliography"
-        run_cmd mkdir -p ~/Library/texmf/tex/latex
-        run_cmd mkdir -p ~/Library/texmf/bibtex
-
-        # Clone repositories (only if not exists)
-        if [[ ! -d "${LATEX_DIR}/Classes/dbmrq" ]] || $DRY_RUN; then
-            run_cmd git clone https://github.com/dbmrq/tex-dbmrq.git "${LATEX_DIR}/Classes/dbmrq"
-        else
-            echo "  dbmrq already cloned"
-        fi
-        if [[ ! -d "${LATEX_DIR}/Packages/biblatex-abnt" ]] || $DRY_RUN; then
-            run_cmd git clone https://github.com/abntex/biblatex-abnt.git "${LATEX_DIR}/Packages/biblatex-abnt"
-        else
-            echo "  biblatex-abnt already cloned"
-        fi
-
-        # Create symlinks (idempotent with -sf)
-        run_cmd ln -sf "${LATEX_DIR}/Classes" ~/Library/texmf/tex/latex/classes
-        run_cmd ln -sf "${LATEX_DIR}/Packages" ~/Library/texmf/tex/latex/packages
-        run_cmd ln -sf "${LATEX_DIR}/Bibliography" ~/Library/texmf/bibtex/bib
-    fi
-
-    print_success "LaTeX setup complete"
+    print_success "LaTeX setup complete (BasicTeX + pandoc support)"
 }
 
 setup_stow() {
     print_header "Symlinking dotfiles"
 
-    if is_macos; then
-        ensure_brew_in_path
-    fi
-    if ! command_exists stow && ! $DRY_RUN; then
-        print_warning "stow not installed, skipping dotfiles"
-        return 0  # Not a fatal error
-    fi
-
-    cd "$DOTFILES_DIR"
-
-    # Get stow packages from selected features (only those that apply to this OS)
-    local packages=()
-    if [[ ${#SELECTED_FEATURES[@]} -gt 0 ]]; then
-        for feature in "${SELECTED_FEATURES[@]}"; do
-            if feature_applies_to_os "$feature"; then
-                local stow_pkg
-                stow_pkg=$(get_stow_package "$feature")
-                if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
-                    packages+=("$stow_pkg")
-                fi
-            fi
-        done
-    else
-        # Fallback: stow packages that apply to this OS
-        local features
-        features=$(get_feature_keys)
-        for feature in $features; do
-            if feature_applies_to_os "$feature"; then
-                local stow_pkg
-                stow_pkg=$(get_stow_package "$feature")
-                if [[ -n "$stow_pkg" && -d "$DOTFILES_DIR/$stow_pkg" ]]; then
-                    # Avoid duplicates
-                    local pattern=" $stow_pkg "
-                    if [[ ! " ${packages[*]} " =~ $pattern ]]; then
-                        packages+=("$stow_pkg")
-                    fi
-                fi
-            fi
-        done
-    fi
-
-    if [[ ${#packages[@]} -eq 0 ]]; then
-        print_warning "No packages found to stow"
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} $SCRIPT_DIR/stow.sh --force"
+        print_success "Dotfiles would be symlinked"
         return 0
     fi
 
-    echo "Stowing: ${packages[*]}"
-
-    if $DRY_RUN; then
-        echo -e "  ${BLUE}[dry-run]${NC} $SCRIPT_DIR/stow.sh --force ${packages[*]}"
-    else
-        # Call the stow.sh script with the selected packages
-        "$SCRIPT_DIR/stow.sh" --force "${packages[@]}"
-    fi
+    # Call stow.sh which handles everything (installs stow if needed, stows all packages)
+    "$SCRIPT_DIR/stow.sh" --force
 
     print_success "Dotfiles symlinked"
 }
@@ -1574,71 +1324,23 @@ main() {
         print_header "Dry run - skipping sudo"
     fi
 
-    # Run selected installations with step tracking
-    # Each step checks if already completed and marks itself done
-    if [[ "$DO_MACOS_UPDATE" == "true" ]]; then
-        run_step "macOS updates" install_macos_updates
-    fi
-
-    if [[ "$DO_XCODE_TOOLS" == "true" ]]; then
-        run_step "Xcode Command Line Tools" install_xcode_tools
-    fi
-
-    if [[ "$DO_HOMEBREW" == "true" ]]; then
-        run_step "Homebrew" install_homebrew
-    fi
-
-    if [[ "$DO_BREW_CLI" == "true" ]]; then
-        run_step "CLI tools" install_brew_cli
-    fi
-
-    if [[ "$DO_BREW_APPS" == "true" ]]; then
-        run_step "GUI applications" install_brew_apps
-    fi
-
-    if [[ "$DO_XCODE_APP" == "true" ]]; then
-        run_step "Xcode from App Store" install_xcode_app
-    fi
-
-    if [[ "$DO_PREFS" == "true" ]]; then
-        run_step "macOS preferences" apply_preferences
-    fi
-
-    if [[ "$DO_CLEAR_DOCK" == "true" ]]; then
-        run_step "Clear Dock" clear_dock
-    fi
-
-    if [[ "$DO_PREZTO" == "true" ]]; then
-        run_step "Prezto" install_prezto
-    fi
-
-    if [[ "$DO_TERMINAL_THEME" == "true" ]]; then
-        run_step "Terminal color scheme" install_terminal_theme
-    fi
-
-    if [[ "$DO_LATEX" == "true" ]]; then
-        run_step "LaTeX packages" install_latex
-    fi
-
-    if [[ "$DO_STOW" == "true" ]]; then
-        run_step "Dotfiles symlinks" setup_stow
-    fi
-
-    if [[ "$DO_PLUGINS" == "true" ]]; then
-        run_step "Vim/Neovim plugins" setup_plugins
-    fi
-
-    if [[ "$DO_GIT_IDENTITY" == "true" ]]; then
-        run_step "Git identity" setup_git_identity
-    fi
-
-    if [[ "$DO_SHELL_LOCAL" == "true" ]]; then
-        run_step "Shell local config" setup_shell_local
-    fi
-
-    if [[ "$DO_SSH_KEYS" == "true" ]]; then
-        run_step "SSH keys for GitHub" setup_ssh_keys
-    fi
+    # Run selected installations
+    # Each step is idempotent and checks if already done
+    [[ "$DO_MACOS_UPDATE" == "true" ]] && install_macos_updates
+    [[ "$DO_XCODE_TOOLS" == "true" ]] && install_xcode_tools
+    [[ "$DO_HOMEBREW" == "true" ]] && install_homebrew
+    [[ "$DO_BREW_CLI" == "true" ]] && install_brew_cli
+    [[ "$DO_BREW_APPS" == "true" ]] && install_brew_apps
+    [[ "$DO_XCODE_APP" == "true" ]] && install_xcode_app
+    [[ "$DO_PREFS" == "true" ]] && apply_preferences
+    [[ "$DO_CLEAR_DOCK" == "true" ]] && clear_dock
+    [[ "$DO_TERMINAL_THEME" == "true" ]] && install_terminal_theme
+    [[ "$DO_LATEX" == "true" ]] && install_latex
+    [[ "$DO_STOW" == "true" ]] && setup_stow
+    [[ "$DO_PLUGINS" == "true" ]] && setup_plugins
+    [[ "$DO_GIT_IDENTITY" == "true" ]] && setup_git_identity
+    [[ "$DO_SHELL_LOCAL" == "true" ]] && setup_shell_local
+    [[ "$DO_SSH_KEYS" == "true" ]] && setup_ssh_keys
 
     # Mark as successful - cleanup handler will display success message
     BOOTSTRAP_SUCCESS=true

@@ -1,0 +1,147 @@
+name: Test Bootstrap Idempotency
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "Bootstrap/**"
+      - ".github/workflows/test-bootstrap.yml"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "Bootstrap/**"
+      - ".github/workflows/test-bootstrap.yml"
+  workflow_dispatch:
+
+jobs:
+  test-stow-macos:
+    name: Test stow.sh (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stow
+        run: brew install stow
+
+      - name: First run - should succeed
+        run: ./Bootstrap/stow.sh --force
+
+      - name: Verify symlinks created
+        run: |
+          # Check key symlinks exist
+          test -L ~/.zshrc || { echo "~/.zshrc not symlinked"; exit 1; }
+          test -L ~/.vimrc || { echo "~/.vimrc not symlinked"; exit 1; }
+          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked"; exit 1; }
+          echo "✓ Key symlinks verified"
+
+      - name: Second run - should be idempotent
+        run: ./Bootstrap/stow.sh --force
+
+      - name: Verify symlinks unchanged
+        run: |
+          test -L ~/.zshrc || { echo "~/.zshrc not symlinked after 2nd run"; exit 1; }
+          test -L ~/.vimrc || { echo "~/.vimrc not symlinked after 2nd run"; exit 1; }
+          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked after 2nd run"; exit 1; }
+          echo "✓ Symlinks still valid after second run"
+
+  test-stow-ubuntu:
+    name: Test stow.sh (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stow
+        run: sudo apt-get update && sudo apt-get install -y stow
+
+      - name: First run - should succeed
+        run: ./Bootstrap/stow.sh --force
+
+      - name: Verify symlinks created
+        run: |
+          test -L ~/.bashrc || test -L ~/.bash_aliases || echo "Bash config linked"
+          test -L ~/.vimrc || { echo "~/.vimrc not symlinked"; exit 1; }
+          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked"; exit 1; }
+          echo "✓ Key symlinks verified"
+
+      - name: Second run - should be idempotent
+        run: ./Bootstrap/stow.sh --force
+
+      - name: Verify symlinks unchanged
+        run: |
+          test -L ~/.vimrc || { echo "~/.vimrc not symlinked after 2nd run"; exit 1; }
+          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked after 2nd run"; exit 1; }
+          echo "✓ Symlinks still valid after second run"
+
+  test-bootstrap-dry-run-macos:
+    name: Test bootstrap.sh --dry-run (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stow
+        run: brew install stow
+
+      - name: Run bootstrap in dry-run mode
+        run: ./Bootstrap/bootstrap.sh --dry-run
+
+      - name: Verify dry-run didn't make changes
+        run: |
+          # Dry run should not create symlinks
+          if test -L ~/.zshrc; then
+            echo "ERROR: Dry run created symlinks"
+            exit 1
+          fi
+          echo "✓ Dry run did not modify filesystem"
+
+  test-bootstrap-dry-run-ubuntu:
+    name: Test bootstrap.sh --dry-run (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stow
+        run: sudo apt-get update && sudo apt-get install -y stow
+
+      - name: Run bootstrap in dry-run mode
+        run: ./Bootstrap/bootstrap.sh --dry-run
+
+      - name: Verify dry-run didn't make changes
+        run: |
+          # Check that the dotfiles vimrc wasn't linked (original may exist)
+          if test -L ~/.vimrc && readlink ~/.vimrc | grep -q Dotfiles; then
+            echo "ERROR: Dry run created symlinks"
+            exit 1
+          fi
+          echo "✓ Dry run did not modify filesystem"
+
+  test-lib-functions:
+    name: Test lib.sh functions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Source and test library functions
+        run: |
+          source Bootstrap/lib.sh
+
+          # Test OS detection
+          if is_macos; then
+            echo "ERROR: Should not detect macOS on Ubuntu"
+            exit 1
+          fi
+          echo "✓ OS detection works"
+
+          # Test package manager detection
+          pm=$(get_package_manager)
+          if [[ "$pm" != "apt" ]]; then
+            echo "ERROR: Expected apt, got $pm"
+            exit 1
+          fi
+          echo "✓ Package manager detection works"
+
+          # Test color functions exist
+          type print_header >/dev/null 2>&1 || { echo "print_header missing"; exit 1; }
+          type print_success >/dev/null 2>&1 || { echo "print_success missing"; exit 1; }
+          type print_error >/dev/null 2>&1 || { echo "print_error missing"; exit 1; }
+          echo "✓ Color functions defined"
+

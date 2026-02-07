@@ -6,8 +6,9 @@
 
 # --- Configuration ---
 LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FEATURES_JSON="$LIB_DIR/features.json"
 DOTFILES_DIR="${DOTFILES_DIR:-$(dirname "$LIB_DIR")}"
+BREWFILE="$LIB_DIR/Brewfile"
+PACKAGES_DEBIAN="$LIB_DIR/packages-debian.txt"
 
 # --- Colors (with fallback for basic terminals) ---
 setup_colors() {
@@ -233,113 +234,122 @@ brew_cask_installed() {
     command_exists brew && brew list --cask "$cask" >/dev/null 2>&1
 }
 
-# --- JSON Parsing (uses Python, available on macOS) ---
-_json_query() {
-    local query="$1"
-    python3 -c "
-import json, sys
-with open('$FEATURES_JSON') as f:
-    data = json.load(f)
-$query
-" 2>/dev/null
-}
+# --- Package List Parsing ---
+# These functions read from Brewfile (macOS) or packages-debian.txt (Linux)
 
-# Get list of all feature keys
-get_feature_keys() {
-    _json_query "print(' '.join(data['features'].keys()))"
-}
-
-# Get human-readable name for a feature
-get_feature_name() {
-    local feature="$1"
-    _json_query "print(data['features'].get('$feature', {}).get('name', '$feature'))"
-}
-
-# Get brew packages for a feature (space-separated)
-get_brew_packages() {
-    local feature="$1"
-    _json_query "print(' '.join(data['features'].get('$feature', {}).get('brew_packages', [])))"
-}
-
-# Get brew casks for a feature (space-separated)
-get_brew_casks() {
-    local feature="$1"
-    _json_query "print(' '.join(data['features'].get('$feature', {}).get('brew_casks', [])))"
-}
-
-# Get Linux packages for a feature (space-separated)
-get_linux_packages() {
-    local feature="$1"
-    _json_query "print(' '.join(data['features'].get('$feature', {}).get('linux_packages', [])))"
-}
-
-# Check if a feature is macOS only
-is_feature_macos_only() {
-    local feature="$1"
-    local result
-    result=$(_json_query "print('yes' if data['features'].get('$feature', {}).get('macos_only', False) else 'no')")
-    [[ "$result" == "yes" ]]
-}
-
-# Check if a feature is Linux only
-is_feature_linux_only() {
-    local feature="$1"
-    local result
-    result=$(_json_query "print('yes' if data['features'].get('$feature', {}).get('linux_only', False) else 'no')")
-    [[ "$result" == "yes" ]]
-}
-
-# Check if a feature applies to the current OS
-feature_applies_to_os() {
-    local feature="$1"
-    if is_macos; then
-        ! is_feature_linux_only "$feature"
-    else
-        ! is_feature_macos_only "$feature"
+# Parse Brewfile and extract brew formulas (one per line)
+_parse_brewfile_formulas() {
+    if [[ ! -f "$BREWFILE" ]]; then
+        return
     fi
+    # Extract package names from lines like: brew "git"  # comment
+    grep -E '^brew "' "$BREWFILE" | sed 's/brew "//;s/".*//'
 }
 
-# Get stow package for a feature
-get_stow_package() {
-    local feature="$1"
-    _json_query "print(data['features'].get('$feature', {}).get('stow_package') or '')"
+# Parse Brewfile and extract casks (one per line)
+_parse_brewfile_casks() {
+    if [[ ! -f "$BREWFILE" ]]; then
+        return
+    fi
+    # Extract cask names from lines like: cask "hammerspoon"  # comment
+    grep -E '^cask "' "$BREWFILE" | sed 's/cask "//;s/".*//'
 }
 
-# Get post-install type for a feature
-get_post_install() {
-    local feature="$1"
-    _json_query "print(data['features'].get('$feature', {}).get('post_install') or '')"
+# Parse packages-debian.txt (simple line-based format)
+_parse_debian_packages() {
+    if [[ ! -f "$PACKAGES_DEBIAN" ]]; then
+        return
+    fi
+    # Skip comments and empty lines
+    grep -v '^#' "$PACKAGES_DEBIAN" | grep -v '^$'
 }
 
 # Get all CLI packages for current OS (space-separated)
 get_all_cli_packages() {
     if is_macos; then
-        _json_query "
-cli = data.get('cli_packages', {})
-if isinstance(cli, dict):
-    print(' '.join(cli.get('macos', [])))
-else:
-    print(' '.join(cli))
-"
+        _parse_brewfile_formulas | tr '\n' ' '
     else
-        _json_query "
-cli = data.get('cli_packages', {})
-if isinstance(cli, dict):
-    print(' '.join(cli.get('linux', [])))
-else:
-    print(' '.join(cli))
-"
+        _parse_debian_packages | tr '\n' ' '
     fi
 }
 
-# Get all GUI casks (space-separated)
+# Get all GUI casks (space-separated, macOS only)
 get_all_gui_casks() {
-    _json_query "print(' '.join(data.get('gui_apps', {}).get('casks', [])))"
+    if ! is_macos; then
+        return
+    fi
+    _parse_brewfile_casks | tr '\n' ' '
 }
 
-# Get all GUI formulas (space-separated)
+# Get all GUI formulas (space-separated, macOS only)
+# Note: We no longer have separate GUI formulas (neovim is in CLI)
 get_all_gui_formulas() {
-    _json_query "print(' '.join(data.get('gui_apps', {}).get('formulas', [])))"
+    echo ""
+}
+
+# --- Legacy Feature Functions (for backward compatibility) ---
+# These will be removed in Phase 4 when bootstrap.sh is overhauled
+
+# Stow packages are now auto-detected from directories
+get_stow_packages() {
+    local packages=()
+    for dir in "$DOTFILES_DIR"/*/; do
+        local name
+        name="$(basename "$dir")"
+        [[ "$name" == "Bootstrap" ]] && continue
+        packages+=("$name")
+    done
+    echo "${packages[*]}"
+}
+
+# Legacy: get_feature_keys - returns stow package names as "features"
+get_feature_keys() {
+    get_stow_packages
+}
+
+# Legacy: get_feature_name - just returns the feature name
+get_feature_name() {
+    echo "$1"
+}
+
+# Legacy: feature_applies_to_os - all features apply (OS-specific logic removed)
+feature_applies_to_os() {
+    return 0
+}
+
+# Legacy: get_stow_package - returns the feature name itself
+get_stow_package() {
+    echo "$1"
+}
+
+# Legacy: get_brew_packages - returns empty (packages now in Brewfile)
+get_brew_packages() {
+    echo ""
+}
+
+# Legacy: get_brew_casks - returns empty (casks now in Brewfile)
+get_brew_casks() {
+    echo ""
+}
+
+# Legacy: get_linux_packages - returns empty (packages now in packages-debian.txt)
+get_linux_packages() {
+    echo ""
+}
+
+# Legacy: get_post_install - returns empty (post-install logic simplified)
+get_post_install() {
+    echo ""
+}
+
+# Legacy: is_feature_macos_only - returns false (OS-specific logic removed)
+is_feature_macos_only() {
+    return 1
+}
+
+# Legacy: is_feature_linux_only - returns false (OS-specific logic removed)
+is_feature_linux_only() {
+    return 1
 }
 
 # --- Status Checking Functions ---
@@ -464,9 +474,10 @@ check_ssh_keys_status() {
     echo "$count"
 }
 
-# Check prezto status
+# Check prezto status (deprecated - Prezto removed in Phase 3)
+# Always returns "installed" to skip Prezto installation prompts
 check_prezto_status() {
-    [[ -d "${ZDOTDIR:-$HOME}/.zprezto" ]] && echo "installed" || echo "missing"
+    echo "installed"
 }
 
 # --- Feature Detection ---

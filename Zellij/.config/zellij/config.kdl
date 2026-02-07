@@ -26,3 +26,14 @@ ui {
         hide_session_name true
     }
 }
+
+// Use Shift+h/l to move tabs
+keybinds {
+    tab {
+        bind "Shift Left" { MoveTab "Left"; }
+        bind "Shift h" { MoveTab "Left"; }
+        bind "Shift Right" { MoveTab "Right"; }
+        bind "Shift l" { MoveTab "Right"; }
+    }
+}
+

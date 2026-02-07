@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
-# Unified dotfiles installer
+# Dotfiles installer
 # curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/install.sh | bash
 #
-# Detects OS (macOS/Linux) and asks user what type of installation they want:
-#   - Light: Essential configs only, no cloning required
-#   - Full: Complete setup with all configurations
+# - Clones (or updates) the dotfiles repository
+# - Runs bootstrap.sh which handles all installation choices
 #
 
 set -euo pipefail
@@ -16,7 +15,6 @@ BASE_URL="https://raw.githubusercontent.com/dbmrq/Dotfiles/master"
 
 # Colors - only enable if we have a real terminal that supports them
 setup_colors() {
-    # Check if /dev/tty exists and supports colors
     if [[ -e /dev/tty ]] && command -v tput >/dev/null 2>&1; then
         local colors
         colors=$(tput colors 2>/dev/null) || colors=0
@@ -29,14 +27,12 @@ setup_colors() {
             return
         fi
     fi
-    # Fallback: no colors
     RED='' GREEN='' YELLOW='' BOLD='' NC=''
 }
 
 setup_colors
 
 # Read from /dev/tty to handle curl pipe correctly
-# Usage: read_input "prompt" variable_name
 read_input() {
     local prompt="$1"
     if [[ -e /dev/tty ]]; then
@@ -58,13 +54,8 @@ detect_os() {
 }
 
 OS="$(detect_os)"
-
-# Check if running as root
 IS_ROOT=false
-TARGET_USER=""
-if [[ "$(id -u)" -eq 0 ]]; then
-    IS_ROOT=true
-fi
+[[ "$(id -u)" -eq 0 ]] && IS_ROOT=true
 
 echo ""
 echo "${BOLD}╔════════════════════════════════════════╗${NC}"
@@ -78,41 +69,28 @@ if [[ "$OS" == "unknown" ]]; then
     exit 1
 fi
 
-if [[ "$OS" == "macos" ]]; then
-    echo "Detected: ${GREEN}macOS${NC}"
-else
-    echo "Detected: ${GREEN}Linux${NC}"
-fi
+echo "Detected: ${GREEN}$([ "$OS" == "macos" ] && echo "macOS" || echo "Linux")${NC}"
 
 # Install essential configs for a user (vim mappings, shell aliases)
-# Usage: install_essentials_for_user <username> <home_dir>
+# Used by root on Linux to set up configs for users
 install_essentials_for_user() {
     local username="$1"
     local home_dir="$2"
 
     echo "  Installing essentials for ${BOLD}$username${NC}..."
 
-    # Create vim and neovim directories
-    mkdir -p "$home_dir/.vim"
-    mkdir -p "$home_dir/.config/nvim"
+    mkdir -p "$home_dir/.vim" "$home_dir/.config/nvim"
 
-    # Download Vim files
     curl -fsSL "$BASE_URL/Vim/.vimrc" -o "$home_dir/.vimrc"
     curl -fsSL "$BASE_URL/Vim/.vim/settings-essential.vim" -o "$home_dir/.vim/settings-essential.vim"
     curl -fsSL "$BASE_URL/Vim/.vim/mappings-essential.vim" -o "$home_dir/.vim/mappings-essential.vim"
 
-    # Create neovim init.vim that sources the vim config
-    # Only create if it doesn't exist (don't overwrite existing nvim config)
     if [[ ! -f "$home_dir/.config/nvim/init.vim" ]] && [[ ! -f "$home_dir/.config/nvim/init.lua" ]]; then
         cat > "$home_dir/.config/nvim/init.vim" << 'NVIM_INIT'
 " Neovim config - sources shared vim configuration
-" Created by dotfiles installer
-
 if filereadable(expand('~/.vimrc'))
     source ~/.vimrc
 endif
-
-" Neovim-specific settings
 if has('nvim')
     tnoremap <Esc> <C-\><C-n>
     tnoremap jk <C-\><C-n>
@@ -121,27 +99,15 @@ endif
 NVIM_INIT
     fi
 
-    # Download shell aliases
     curl -fsSL "$BASE_URL/Shell/.shell_common" -o "$home_dir/.shell_common"
     curl -fsSL "$BASE_URL/Bash/.bash_aliases" -o "$home_dir/.bash_aliases"
 
-    # Source in .bashrc if not already
-    if [[ -f "$home_dir/.bashrc" ]]; then
-        if ! grep -q "\.bash_aliases" "$home_dir/.bashrc" 2>/dev/null; then
-            {
-                echo ""
-                echo "# Load custom aliases"
-                echo "if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi"
-            } >> "$home_dir/.bashrc"
-        fi
+    if [[ -f "$home_dir/.bashrc" ]] && ! grep -q "\.bash_aliases" "$home_dir/.bashrc" 2>/dev/null; then
+        echo -e "\n# Load custom aliases\nif [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi" >> "$home_dir/.bashrc"
     fi
 
-    # Fix ownership if installing for another user
-    if [[ "$username" != "root" ]]; then
-        chown -R "$username:" "$home_dir/.vim" "$home_dir/.vimrc" \
-            "$home_dir/.config/nvim" "$home_dir/.shell_common" \
-            "$home_dir/.bash_aliases" 2>/dev/null || true
-    fi
+    [[ "$username" != "root" ]] && chown -R "$username:" "$home_dir/.vim" "$home_dir/.vimrc" \
+        "$home_dir/.config/nvim" "$home_dir/.shell_common" "$home_dir/.bash_aliases" 2>/dev/null || true
 }
 
 # Handle root user
@@ -270,185 +236,41 @@ if $IS_ROOT; then
             ;;
     esac
 fi
+
+# --- Main installation flow ---
+# Clone (or update) the dotfiles repo and run bootstrap
+
 echo ""
 
-# Menu
-echo "What would you like to install?"
-echo ""
-echo "  1) ${BOLD}Light${NC} — Essential configs only (Vim, Git aliases)"
-echo "     Quick setup for temporary or remote machines."
-echo "     Does not clone the repository."
-echo ""
-echo "  2) ${BOLD}Full${NC} — Complete dotfiles setup"
-echo "     Clones the repository and runs the full bootstrap."
-if [[ "$OS" == "macos" ]]; then
-    echo "     Includes: Homebrew packages, macOS preferences, shell config, etc."
-else
-    echo "     Includes: Package installation, shell config, and terminal setup."
+# Check for git
+if ! command -v git >/dev/null 2>&1; then
+    echo "${RED}Error: git is not installed.${NC}"
+    if [[ "$OS" == "macos" ]]; then
+        echo "Install Xcode Command Line Tools first:"
+        echo "  xcode-select --install"
+    else
+        echo "Install git first:"
+        echo "  sudo apt install git   # Debian/Ubuntu"
+        echo "  sudo dnf install git   # Fedora"
+        echo "  sudo pacman -S git     # Arch"
+    fi
+    exit 1
 fi
+
+# Clone or update repo
+if [[ -d "$DOTFILES_DIR" ]]; then
+    echo "Dotfiles directory already exists at $DOTFILES_DIR"
+    echo "Updating..."
+    cd "$DOTFILES_DIR"
+    git pull --rebase || true
+else
+    echo "Cloning dotfiles to $DOTFILES_DIR..."
+    git clone "$REPO_URL" "$DOTFILES_DIR"
+fi
+
+# Run bootstrap - it handles all the "what to install" questions
 echo ""
-echo "  3) Cancel"
+echo "${GREEN}Running bootstrap...${NC}"
 echo ""
-
-read_input "Choose [1/2/3]: " choice
-
-# shellcheck disable=SC2154
-case "$choice" in
-    1)
-        # Light installation
-        echo ""
-        echo "${GREEN}Starting light installation...${NC}"
-        echo ""
-
-        # Create directories
-        mkdir -p ~/.vim
-        mkdir -p ~/.config/nvim
-
-        # Download Vim files
-        echo "Downloading Vim configuration..."
-        curl -fsSL "$BASE_URL/Vim/.vimrc" -o ~/.vimrc
-        curl -fsSL "$BASE_URL/Vim/.vim/settings-essential.vim" -o ~/.vim/settings-essential.vim
-        curl -fsSL "$BASE_URL/Vim/.vim/mappings-essential.vim" -o ~/.vim/mappings-essential.vim
-
-        # Create neovim init.vim that sources the vim config
-        # Only create if it doesn't exist (don't overwrite existing nvim config)
-        if [[ ! -f ~/.config/nvim/init.vim ]] && [[ ! -f ~/.config/nvim/init.lua ]]; then
-            cat > ~/.config/nvim/init.vim << 'NVIM_INIT'
-" Neovim config - sources shared vim configuration
-" Created by dotfiles installer
-
-if filereadable(expand('~/.vimrc'))
-    source ~/.vimrc
-endif
-
-" Neovim-specific settings
-if has('nvim')
-    tnoremap <Esc> <C-\><C-n>
-    tnoremap jk <C-\><C-n>
-    tnoremap kj <C-\><C-n>
-endif
-NVIM_INIT
-        fi
-
-        # Download Git config
-        echo "Downloading Git configuration..."
-        curl -fsSL "$BASE_URL/Git/.gitconfig-essential" -o ~/.gitconfig-essential
-
-        # Check if .gitconfig already exists
-        if [[ -f ~/.gitconfig ]]; then
-            if grep -q "gitconfig-essential" ~/.gitconfig 2>/dev/null; then
-                echo "${YELLOW}Git config already includes essential settings.${NC}"
-            else
-                echo "${YELLOW}Existing .gitconfig found.${NC}"
-                echo "To use the essential aliases, add this to your ~/.gitconfig:"
-                echo ""
-                echo "[include]"
-                echo "    path = ~/.gitconfig-essential"
-                echo ""
-            fi
-        else
-            # Ask for git user info
-            echo ""
-            echo "${YELLOW}Git user configuration:${NC}"
-            read_input "  Your name: " git_name
-            read_input "  Your email: " git_email
-
-            # shellcheck disable=SC2154
-            cat > ~/.gitconfig << EOF
-# Git configuration - created by dotfiles installer
-
-[include]
-    path = ~/.gitconfig-essential
-
-[user]
-    name = $git_name
-    email = $git_email
-EOF
-            echo ""
-            echo "Created ~/.gitconfig with your settings."
-        fi
-
-        # Download shell aliases for Linux
-        if [[ "$OS" == "linux" ]]; then
-            echo "Downloading shell configuration..."
-            curl -fsSL "$BASE_URL/Shell/.shell_common" -o ~/.shell_common
-            curl -fsSL "$BASE_URL/Bash/.bash_aliases" -o ~/.bash_aliases
-
-            # Source in .bashrc if not already
-            if [[ -f ~/.bashrc ]]; then
-                if ! grep -q "\.bash_aliases" ~/.bashrc 2>/dev/null; then
-                    {
-                        echo ""
-                        echo "# Load custom aliases"
-                        echo "if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi"
-                    } >> ~/.bashrc
-                    echo "Added .bash_aliases sourcing to .bashrc"
-                fi
-            fi
-        fi
-
-        echo ""
-        echo "${GREEN}Light installation complete!${NC}"
-        echo ""
-        echo "Installed:"
-        echo "  ~/.vimrc"
-        echo "  ~/.vim/settings-essential.vim"
-        echo "  ~/.vim/mappings-essential.vim"
-        echo "  ~/.config/nvim/init.vim (sources ~/.vimrc)"
-        echo "  ~/.gitconfig-essential"
-        if [[ "$OS" == "linux" ]]; then
-            echo "  ~/.shell_common"
-            echo "  ~/.bash_aliases"
-        fi
-        echo ""
-        echo "Essential Vim/Neovim features: jk/kj escape, H/L for line start/end, space as leader"
-        echo "Essential Git aliases: co, ci, st, br, tug, sync, lg, and more"
-        echo ""
-        ;;
-
-    2)
-        # Full installation
-        echo ""
-        echo "${GREEN}Starting full installation...${NC}"
-        echo ""
-
-        # Check for git
-        if ! command -v git >/dev/null 2>&1; then
-            echo "${RED}Error: git is not installed.${NC}"
-            if [[ "$OS" == "macos" ]]; then
-                echo "Install Xcode Command Line Tools first:"
-                echo "  xcode-select --install"
-            else
-                echo "Install git first:"
-                echo "  sudo apt install git   # Debian/Ubuntu"
-                echo "  sudo dnf install git   # Fedora"
-                echo "  sudo pacman -S git     # Arch"
-            fi
-            exit 1
-        fi
-
-        # Clone or update repo
-        if [[ -d "$DOTFILES_DIR" ]]; then
-            echo "Dotfiles directory already exists at $DOTFILES_DIR"
-            echo "Updating..."
-            cd "$DOTFILES_DIR"
-            git pull --rebase || true
-        else
-            echo "Cloning dotfiles to $DOTFILES_DIR..."
-            git clone "$REPO_URL" "$DOTFILES_DIR"
-        fi
-
-        # Run bootstrap
-        echo ""
-        echo "${GREEN}Running bootstrap...${NC}"
-        echo ""
-        cd "$DOTFILES_DIR/Bootstrap"
-        exec ./bootstrap.sh
-        ;;
-
-    *)
-        echo "Cancelled."
-        exit 0
-        ;;
-esac
-
+cd "$DOTFILES_DIR/Bootstrap"
+exec ./bootstrap.sh
