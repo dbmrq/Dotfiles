@@ -136,30 +136,18 @@ if [[ $risky_patterns -eq 0 ]]; then
 fi
 echo ""
 
-# --- Test 4: features.json validation ---
-echo "4. features.json validation"
-if [[ -f Bootstrap/features.json ]]; then
-    if python3 -c "import json; json.load(open('Bootstrap/features.json'))" 2>/dev/null; then
-        pass "features.json: valid JSON"
-    else
-        fail "features.json: invalid JSON"
-    fi
-
-    # Validate structure
-    if python3 -c "
-import json
-with open('Bootstrap/features.json') as f:
-    data = json.load(f)
-assert 'features' in data, 'Missing features key'
-for key, feat in data['features'].items():
-    assert 'name' in feat, f'Feature {key} missing name'
-" 2>/dev/null; then
-        pass "features.json: structure valid"
-    else
-        fail "features.json: invalid structure"
-    fi
+# --- Test 4: Package files validation ---
+echo "4. Package files validation"
+if [[ -f Bootstrap/Brewfile ]]; then
+    pass "Brewfile: exists"
 else
-    fail "features.json: file not found"
+    fail "Brewfile: not found"
+fi
+
+if [[ -f Bootstrap/packages-debian.txt ]]; then
+    pass "packages-debian.txt: exists"
+else
+    fail "packages-debian.txt: not found"
 fi
 echo ""
 
@@ -210,43 +198,42 @@ else
 fi
 echo ""
 
-# --- Test 6: Feature detection logic ---
-echo "6. Feature detection logic"
+# --- Test 6: Stow package detection ---
+echo "6. Stow package detection"
 source Bootstrap/lib.sh
 
-# Test get_feature_keys returns something
-keys=$(get_feature_keys)
-if [[ -n "$keys" ]]; then
-    pass "get_feature_keys: returns feature list"
+# Test get_stow_packages returns something
+packages=$(get_stow_packages)
+if [[ -n "$packages" ]]; then
+    pass "get_stow_packages: returns package list"
 else
-    fail "get_feature_keys: returns empty"
+    fail "get_stow_packages: returns empty"
 fi
 
-# Test get_feature_name
-name=$(get_feature_name "vim")
-if [[ "$name" == "Vim/Neovim" ]]; then
-    pass "get_feature_name: returns correct name"
+# Test that Vim directory is detected as a stow package
+if [[ "$packages" == *"Vim"* ]]; then
+    pass "get_stow_packages: includes Vim"
 else
-    fail "get_feature_name: expected 'Vim/Neovim', got '$name'"
+    fail "get_stow_packages: missing Vim package"
 fi
 
-# Test get_stow_package
-stow_pkg=$(get_stow_package "vim")
-if [[ "$stow_pkg" == "Vim" ]]; then
-    pass "get_stow_package: returns correct package"
+# Test that Bootstrap is excluded
+if [[ "$packages" != *"Bootstrap"* ]]; then
+    pass "get_stow_packages: excludes Bootstrap"
 else
-    fail "get_stow_package: expected 'Vim', got '$stow_pkg'"
+    fail "get_stow_packages: should not include Bootstrap"
 fi
 echo ""
 
 # --- Test 7: Dotfiles CLI ---
 echo "7. Dotfiles CLI"
 if [[ -x Bootstrap/dotfiles ]]; then
-    # Test help command
-    if ./Bootstrap/dotfiles help >/dev/null 2>&1; then
-        pass "dotfiles: help command works"
+    # Test that running with unknown command shows usage (exits 1 but prints help)
+    # Use a subshell without pipefail since dotfiles exits 1 for unknown commands
+    if (set +o pipefail; ./Bootstrap/dotfiles unknown 2>&1 | grep -q "Usage:"); then
+        pass "dotfiles: shows usage for unknown command"
     else
-        fail "dotfiles: help command failed"
+        fail "dotfiles: should show usage for unknown command"
     fi
 
     # Test cd command

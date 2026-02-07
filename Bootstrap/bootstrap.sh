@@ -17,6 +17,7 @@ set -euo pipefail
 # --- Configuration ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+export DOTFILES_DIR  # exported for lib.sh
 TEMP_FILES=()
 SUDO_PID=""
 BOOTSTRAP_SUCCESS=false
