@@ -29,10 +29,10 @@ return {
       }
 
       -- Only install missing parsers (avoid recompiling on every startup)
-      local installed = require('nvim-treesitter').installed()
       local missing = {}
       for _, parser in ipairs(parsers) do
-        if not vim.tbl_contains(installed, parser) then
+        local ok = pcall(vim.treesitter.language.inspect, parser)
+        if not ok then
           table.insert(missing, parser)
         end
       end
