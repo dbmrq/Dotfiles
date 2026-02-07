@@ -1305,14 +1305,8 @@ main() {
         exit 0
     fi
 
-    # Check for resume or gather new choices
-    if check_resume; then
-        # Resuming: show what will be done
-        show_summary_and_confirm
-    else
-        # Fresh start: gather choices
-        gather_choices
-    fi
+    # Gather choices (what to install)
+    gather_choices
 
     # Request sudo upfront and keep it alive (skip in dry-run mode)
     if ! $DRY_RUN; then

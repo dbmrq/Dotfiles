@@ -216,6 +216,8 @@ fi
 # =============================================================================
 if command -v zoxide &>/dev/null; then
     eval "$(zoxide init zsh)"
+    alias j='z'      # Jump to directory (like fasd)
+    alias ji='zi'    # Jump interactive (with fzf)
 fi
 
 # =============================================================================
