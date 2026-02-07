@@ -25,9 +25,7 @@ fd-find
 fzf
 bat
 eza
-jq
 htop
-tree
 trash-cli
 nnn
 zoxide

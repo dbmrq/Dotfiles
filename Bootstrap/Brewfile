@@ -39,13 +39,11 @@ brew "pandoc"                 # Document converter
 brew "rename"                 # Batch file renaming
 brew "ripgrep"                # Fast grep alternative
 brew "fd"                     # Fast find alternative
-brew "fzf"                    # Fuzzy finder
+brew "fzf"                    # Fuzzy finder (Ctrl-R for history, Ctrl-T for files)
 brew "nnn"                    # Terminal file manager
-brew "bat"                    # Cat with syntax highlighting
-brew "eza"                    # Modern ls replacement
-brew "jq"                     # JSON processor
+brew "bat"                    # Cat with syntax highlighting (aliased to cat)
+brew "eza"                    # Modern ls replacement (aliased to ls)
 brew "htop"                   # Process viewer
-brew "tree"                   # Directory tree viewer
 brew "zoxide"                 # Smarter cd command
 
 # =============================================================================

@@ -212,8 +212,28 @@ if (( $+widgets[history-substring-search-up] )); then
 fi
 
 # =============================================================================
-# Zoxide (replaces fasd)
+# Modern CLI Replacements
 # =============================================================================
+# bat: cat with syntax highlighting
+if command -v bat &>/dev/null; then
+    alias cat='bat --paging=never'
+    alias catp='bat'  # cat with pager
+fi
+
+# eza: modern ls with colors and icons
+if command -v eza &>/dev/null; then
+    alias ls='eza'
+    alias ll='eza -l'
+    alias la='eza -la'
+    alias lt='eza --tree'
+fi
+
+# fzf: fuzzy finder (Ctrl-R for history, Ctrl-T for files, Alt-C for cd)
+if command -v fzf &>/dev/null; then
+    source <(fzf --zsh)
+fi
+
+# zoxide: smarter cd (replaces fasd)
 if command -v zoxide &>/dev/null; then
     eval "$(zoxide init zsh)"
     alias j='z'      # Jump to directory (like fasd)
