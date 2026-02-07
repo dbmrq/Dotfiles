@@ -143,7 +143,7 @@ autoload -Uz vcs_info
 # Git status hook for untracked files
 function +vi-git_status {
     if [[ -n $(git ls-files --other --exclude-standard 2>/dev/null) ]]; then
-        hook_com[unstaged]='%F{red}●%f'
+        hook_com[unstaged]='%F{red}●%F{cyan}'
     fi
 }
 
@@ -170,10 +170,10 @@ add-zsh-hook precmd prompt_precmd
 # vcs_info configuration
 zstyle ':vcs_info:*' enable git hg svn
 zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' stagedstr '%F{green}●%f'
-zstyle ':vcs_info:*' unstagedstr '%F{yellow}●%f'
+zstyle ':vcs_info:*' stagedstr '%F{green}●%F{cyan}'
+zstyle ':vcs_info:*' unstagedstr '%F{yellow}●%F{cyan}'
 zstyle ':vcs_info:*' formats ' [%b%c%u]'
-zstyle ':vcs_info:*' actionformats " [%b%c%u|%F{cyan}%a%f]"
+zstyle ':vcs_info:*' actionformats " [%b%c%u|%F{cyan}%a]"
 zstyle ':vcs_info:git*+set-message:*' hooks git_status
 
 # Prompt: hostname (yellow if SSH), path (red if not writable), git info, vi mode
