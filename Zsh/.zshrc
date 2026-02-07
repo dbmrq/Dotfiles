@@ -170,6 +170,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks git_status
 
 # Prompt: hostname (yellow if SSH), path (red if not writable), git info, vi mode
 # Insert mode: >  Normal mode: <  Root: >>
+setopt PROMPT_SUBST
 PROMPT='%B%F{cyan}${SSH_TTY:+%F{yellow}%m: }${path_color}%2~%F{cyan}${vcs_info_msg_0_} %(!.>>${VI_MODE_INDICATOR}.)${VI_MODE_INDICATOR}%f%b '
 RPROMPT=''
 
