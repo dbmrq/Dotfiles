@@ -59,7 +59,9 @@ if [[ ${#REQUESTED_PACKAGES[@]} -gt 0 ]]; then
     done
 else
     for dir in */; do
+        # Skip non-stow directories
         [[ "$dir" == "Bootstrap/" ]] && continue
+        [[ "$dir" == "macOS/" ]] && continue  # macOS-specific (apps, not symlinks)
         packages+=("${dir%/}")
     done
 fi

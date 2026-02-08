@@ -45,6 +45,7 @@ brew "bat"                    # Cat with syntax highlighting (aliased to cat)
 brew "eza"                    # Modern ls replacement (aliased to ls)
 brew "htop"                   # Process viewer
 brew "zoxide"                 # Smarter cd command
+brew "duti"                   # Set default applications for file types
 
 # =============================================================================
 # Terminal Multiplexer

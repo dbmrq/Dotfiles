@@ -370,6 +370,7 @@ gather_choices() {
     DO_LATEX=false
     DO_STOW=false
     DO_PLUGINS=false
+    DO_DEFAULT_APPS=false
     DO_GIT_IDENTITY=false
     GIT_USER_NAME=""
     GIT_USER_EMAIL=""
@@ -444,6 +445,8 @@ gather_choices() {
         [[ "$stow_status" != "ok" ]] && DO_STOW=true
         # Update plugins if vim/neovim are installed
         (command_exists vim || command_exists nvim) && DO_PLUGINS=true
+        # Set up default apps (Neovim.app + duti) on macOS
+        is_macos && DO_DEFAULT_APPS=true
         show_summary_and_confirm
         return
     fi
@@ -574,6 +577,14 @@ gather_choices() {
         fi
     fi
 
+    # Default applications (macOS only - Neovim.app + file associations)
+    if is_macos; then
+        if ask_yes_no "Set up default apps (Neovim for text files)?"; then
+            DO_DEFAULT_APPS=true
+            anything_to_do=true
+        fi
+    fi
+
     # Git identity - check if ~/.gitconfig.local exists with user info
     if [[ ! -f "$HOME/.gitconfig.local" ]] || ! grep -q '^\[user\]' "$HOME/.gitconfig.local" 2>/dev/null; then
         echo ""
@@ -641,6 +652,7 @@ show_summary_and_confirm() {
     $DO_TERMINAL_THEME && echo "  • Terminal color scheme"
     $DO_LATEX && echo "  • LaTeX (BasicTeX)"
     $DO_STOW && echo "  • Dotfiles symlinks"
+    $DO_DEFAULT_APPS && echo "  • Default apps (Neovim for text files)"
     $DO_GIT_IDENTITY && echo "  • Git identity ($GIT_USER_NAME <$GIT_USER_EMAIL>)"
     $DO_SHELL_LOCAL && echo "  • Shell local config (~/.zshrc.local)"
     if $DO_SSH_KEYS && [[ ${#GITHUB_ACCOUNTS[@]} -gt 0 ]]; then
@@ -1004,6 +1016,52 @@ setup_plugins() {
     print_success "Plugins updated"
 }
 
+setup_default_apps() {
+    print_header "Setting up default applications"
+
+    # Only run on macOS
+    if ! is_macos; then
+        print_warning "Default apps setup is macOS only, skipping"
+        return 0
+    fi
+
+    local macos_dir="$DOTFILES_DIR/macOS"
+
+    # Install Neovim.app wrapper
+    if [[ -d "$macos_dir/Neovim.app" ]]; then
+        echo "Installing Neovim.app wrapper..."
+        mkdir -p "$HOME/Applications"
+
+        if $DRY_RUN; then
+            echo -e "  ${BLUE}[dry-run]${NC} cp -R $macos_dir/Neovim.app ~/Applications/"
+        else
+            # Copy the app (not symlink, as app bundles work better as copies)
+            rm -rf "$HOME/Applications/Neovim.app"
+            cp -R "$macos_dir/Neovim.app" "$HOME/Applications/"
+
+            # Register with Launch Services so Spotlight can find it
+            /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister "$HOME/Applications/Neovim.app" 2>/dev/null || true
+        fi
+        print_success "Neovim.app installed to ~/Applications"
+    fi
+
+    # Apply duti settings for file associations
+    if command_exists duti && [[ -f "$macos_dir/duti.conf" ]]; then
+        echo "Setting default applications for file types..."
+        if $DRY_RUN; then
+            echo -e "  ${BLUE}[dry-run]${NC} duti $macos_dir/duti.conf"
+        else
+            duti "$macos_dir/duti.conf" 2>/dev/null || print_warning "Some duti settings may have failed"
+        fi
+        print_success "Default file associations set"
+    elif ! command_exists duti; then
+        print_warning "duti not installed, skipping file associations"
+        echo "  Install duti with: brew install duti"
+    fi
+
+    print_success "Default applications configured"
+}
+
 setup_git_identity() {
     print_header "Configuring git identity"
 
@@ -1333,6 +1391,7 @@ main() {
     [[ "$DO_LATEX" == "true" ]] && install_latex
     [[ "$DO_STOW" == "true" ]] && setup_stow
     [[ "$DO_PLUGINS" == "true" ]] && setup_plugins
+    [[ "$DO_DEFAULT_APPS" == "true" ]] && setup_default_apps
     [[ "$DO_GIT_IDENTITY" == "true" ]] && setup_git_identity
     [[ "$DO_SHELL_LOCAL" == "true" ]] && setup_shell_local
     [[ "$DO_SSH_KEYS" == "true" ]] && setup_ssh_keys

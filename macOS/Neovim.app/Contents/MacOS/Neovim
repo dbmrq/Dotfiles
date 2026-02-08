@@ -1,0 +1,13 @@
+#!/bin/bash
+# Neovim wrapper - opens files in Ghostty with nvim
+
+# Get the file path(s) passed to the app
+# macOS passes files as arguments when opening with "Open With"
+if [[ $# -gt 0 ]]; then
+    # Open Ghostty with nvim editing the file(s)
+    open -na "Ghostty.app" --args -e nvim "$@"
+else
+    # No file specified - just open nvim
+    open -na "Ghostty.app" --args -e nvim
+fi
+

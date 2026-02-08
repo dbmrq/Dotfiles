@@ -11,6 +11,10 @@ fi
 # =============================================================================
 # Environment
 # =============================================================================
+# Default editor
+export EDITOR='nvim'
+export VISUAL='nvim'
+
 # Smart URLs (from Prezto environment module)
 autoload -Uz is-at-least
 if [[ ${ZSH_VERSION} != 5.1.1 && ${TERM} != "dumb" ]]; then
