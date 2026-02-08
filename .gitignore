@@ -24,15 +24,5 @@ Vim/.config/gh/
 Vim/.config/uv/
 Vim/.config/fish/
 
-# Augment (runtime files - only skills/ is tracked)
-Augment/.augment/.auggie.json
-Augment/.augment/binaries/
-Augment/.augment/checkpoint-documents/
-Augment/.augment/commands/
-Augment/.augment/session.json
-Augment/.augment/sessions/
-Augment/.augment/settings.json
-Augment/.augment/task-storage/
-
 # macOS
 .DS_Store

@@ -7,11 +7,10 @@
 #   1. Syntax checks for all shell scripts
 #   2. Unbound variable checks (set -u compatibility)
 #   3. Common shell pattern checks
-#   4. features.json validation
-#   5. Stow symlink verification (functional test)
-#   6. Light install simulation
-#   7. Feature detection logic
-#   8. Dotfiles CLI commands
+#   4. Stow symlink verification (functional test)
+#   5. Light install simulation
+#   6. Feature detection logic
+#   7. Dotfiles CLI commands
 #
 
 set -euo pipefail

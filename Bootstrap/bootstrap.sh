@@ -1000,7 +1000,50 @@ setup_stow() {
     # Call stow.sh which handles everything (installs stow if needed, stows all packages)
     "$SCRIPT_DIR/stow.sh" --force
 
+    # Set up agent symlinks (cross-package symlinks that stow can't handle)
+    setup_agent_symlinks
+
     print_success "Dotfiles symlinked"
+}
+
+setup_agent_symlinks() {
+    # Creates ~/.augment/skills -> ~/.agents/skills symlink
+    # This allows Augment to find skills while keeping them in the universal ~/.agents location
+    # Stow handles ~/.agents -> Dotfiles/Agents/.agents, but can't do cross-package symlinks
+
+    local augment_dir="$HOME/.augment"
+    local agents_skills="$HOME/.agents/skills"
+    local augment_skills="$augment_dir/skills"
+
+    # Only proceed if ~/.agents/skills exists (stow should have created it)
+    if [[ ! -d "$agents_skills" ]]; then
+        print_warning "~/.agents/skills not found, skipping agent symlinks"
+        return 0
+    fi
+
+    # Ensure ~/.augment directory exists (Augment creates this for runtime data)
+    if [[ ! -d "$augment_dir" ]]; then
+        mkdir -p "$augment_dir"
+    fi
+
+    # Create the symlink if it doesn't exist or points to wrong location
+    if [[ -L "$augment_skills" ]]; then
+        local current_target
+        current_target="$(readlink "$augment_skills")"
+        if [[ "$current_target" == "$agents_skills" || "$current_target" == "~/.agents/skills" ]]; then
+            # Already correct
+            return 0
+        fi
+        # Wrong target, remove and recreate
+        rm "$augment_skills"
+    elif [[ -e "$augment_skills" ]]; then
+        # It's a real directory, back it up
+        print_warning "Moving existing ~/.augment/skills to ~/.augment/skills.backup"
+        mv "$augment_skills" "$augment_skills.backup"
+    fi
+
+    # Create the symlink
+    ln -s "$agents_skills" "$augment_skills"
 }
 
 setup_plugins() {

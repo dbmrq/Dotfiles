@@ -474,12 +474,6 @@ check_ssh_keys_status() {
     echo "$count"
 }
 
-# Check prezto status (deprecated - Prezto removed in Phase 3)
-# Always returns "installed" to skip Prezto installation prompts
-check_prezto_status() {
-    echo "installed"
-}
-
 # --- Feature Detection ---
 
 # Check if a feature is fully installed

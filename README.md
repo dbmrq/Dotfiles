@@ -29,7 +29,6 @@ Complete setup with all configurations. The bootstrap script is interactive and 
 - **Xcode Command Line Tools** — Required for most development tasks
 - **Homebrew** — Package manager with CLI tools and GUI apps
 - **macOS preferences** — Dock, Finder, screenshots, etc.
-- **Prezto** — Zsh configuration framework
 - **Terminal theme** — Solarized color scheme
 - **LaTeX** — TeX Live packages and custom classes
 
@@ -39,14 +38,19 @@ Works on both Intel and Apple Silicon Macs. The script is idempotent and can be 
 
 | Directory | Platform | Description |
 |-----------|----------|-------------|
+| `Agents/` | Both | AI agent skills (shared across Augment, Claude Code, etc.) |
 | `Bash/` | Linux | Bash shell config, sources `.shell_common` |
 | `Bootstrap/` | Both | Setup scripts and CLI tools |
+| `Ghostty/` | Both | Ghostty terminal configuration |
 | `Git/` | Both | Git configuration and aliases |
 | `Hammerspoon/` | macOS | Window management (multi-monitor support) |
 | `Shell/` | Both | Shared shell config (`.shell_common`) used by both Bash and Zsh |
+| `SSH/` | Both | SSH configuration |
 | `TeX/` | macOS | LaTeX configuration |
 | `Vim/` | Both | Vim config; Neovim uses Lua with LSP, Treesitter, Telescope |
-| `Zsh/` | macOS | Zsh configuration with Prezto |
+| `Yazi/` | Both | Yazi file manager configuration |
+| `Zellij/` | Both | Zellij terminal multiplexer configuration |
+| `Zsh/` | macOS | Zsh configuration (standalone) |
 
 ### Shell Configuration
 
@@ -65,7 +69,6 @@ Each script in `Bootstrap/` can be run independently:
 ./brew.sh        # Interactive Homebrew package installer (select categories)
 ./prefs.sh       # Apply macOS preferences
 ./prefs-export.sh # Compare current prefs against expected values
-./tlmgr.sh       # Install LaTeX packages
 ./stow.sh        # Symlink dotfiles
 ```
 
