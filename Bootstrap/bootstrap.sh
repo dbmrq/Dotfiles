@@ -1017,7 +1017,7 @@ setup_agent_symlinks() {
 
     # Only proceed if ~/.agents/skills exists (stow should have created it)
     if [[ ! -d "$agents_skills" ]]; then
-        print_warning "~/.agents/skills not found, skipping agent symlinks"
+        print_warning "$agents_skills not found, skipping agent symlinks"
         return 0
     fi
 
@@ -1030,7 +1030,7 @@ setup_agent_symlinks() {
     if [[ -L "$augment_skills" ]]; then
         local current_target
         current_target="$(readlink "$augment_skills")"
-        if [[ "$current_target" == "$agents_skills" || "$current_target" == "~/.agents/skills" ]]; then
+        if [[ "$current_target" == "$agents_skills" ]]; then
             # Already correct
             return 0
         fi
