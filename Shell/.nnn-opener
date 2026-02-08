@@ -1,21 +1,53 @@
 #!/usr/bin/env sh
 # nnn custom opener
 # Opens files in zellij pane when inside zellij, otherwise uses nvim/editor
+#
+# In zellij: Creates an IDE-like layout on first file open (nnn left, nvim right)
+# Subsequent files open in the same nvim instance.
 
 FPATH="$1"
 
 # Get mime type
 MIMETYPE="$(file -bL --mime-type -- "$FPATH")"
 
+# Socket for nvim server (unique per nnn instance)
+NNN_NVIM_SOCKET="${NNN_NVIM_SOCKET:-/tmp/nvim-nnn-$PPID.sock}"
+
+# Function to open file in editor (handles IDE mode in zellij)
+open_in_editor() {
+    file="$1"
+
+    # Inside zellij: use IDE mode
+    if [ -n "$ZELLIJ" ]; then
+        if [ -S "$NNN_NVIM_SOCKET" ]; then
+            # nvim already running - send file to existing instance
+            nvim --server "$NNN_NVIM_SOCKET" --remote "$file"
+            # Focus the editor pane
+            zellij action focus-next-pane 2>/dev/null
+        else
+            # First file - create nvim pane to the left of nnn
+            # This makes nvim the "main" pane and nnn stays on the right
+            zellij run -d left -- nvim --listen "$NNN_NVIM_SOCKET" "$file"
+            # Shrink nnn (now on the right) to ~20%
+            zellij action resize increase left
+            zellij action resize increase left
+            zellij action resize increase left
+            zellij action resize increase left
+            zellij action resize increase left
+            zellij action resize increase left
+        fi
+        return 0
+    fi
+
+    # Outside zellij: just use editor directly
+    "${EDITOR:-nvim}" "$file"
+}
+
 # Handle based on mime type
 case "$MIMETYPE" in
     # Text files - open in editor
     text/*|*/xml|*/json|application/javascript|application/x-shellscript)
-        if [ -n "$ZELLIJ" ]; then
-            zellij action edit "$FPATH"
-        else
-            "${EDITOR:-nvim}" "$FPATH"
-        fi
+        open_in_editor "$FPATH"
         exit 0
         ;;
 
@@ -66,11 +98,7 @@ esac
 
 # Fallback: try to open as text if it looks like text, otherwise use system opener
 if file "$FPATH" | grep -q text; then
-    if [ -n "$ZELLIJ" ]; then
-        zellij action edit "$FPATH"
-    else
-        "${EDITOR:-nvim}" "$FPATH"
-    fi
+    open_in_editor "$FPATH"
 else
     if [ "$(uname)" = "Darwin" ]; then
         open "$FPATH"
