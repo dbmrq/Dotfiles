@@ -278,6 +278,13 @@ if command -v nnn &>/dev/null; then
     # Custom opener: opens text files in zellij pane or nvim
     export NNN_OPENER="$HOME/.nnn-opener"
 
+    # Use trash instead of rm (macos: trash, linux: trash-cli)
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        command -v trash &>/dev/null && export NNN_TRASH="trash"
+    else
+        command -v trash-put &>/dev/null && export NNN_TRASH="trash-put"
+    fi
+
     n() {
         # Block nesting of nnn in subshells
         [ "${NNNLVL:-0}" -eq 0 ] || {
