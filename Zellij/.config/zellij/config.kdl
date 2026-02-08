@@ -16,8 +16,10 @@ default_layout "compact"
 // Quit instead of detach when terminal closes
 on_force_close "quit"
 
-// Don't auto-copy on selection
-copy_on_select false
+// Clipboard integration: use macOS pbcopy and auto-copy on selection
+copy_command "pbcopy"       // send copied text to macOS clipboard
+copy_clipboard "system"    // (default) explicit: use system clipboard
+copy_on_select true         // auto-copy selection when mouse is released
 
 show_startup_tips false
 
