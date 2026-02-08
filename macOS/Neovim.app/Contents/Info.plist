@@ -36,8 +36,6 @@
 				<string>public.plain-text</string>
 				<string>public.text</string>
 				<string>public.source-code</string>
-				<string>public.script</string>
-				<string>public.shell-script</string>
 				<string>public.json</string>
 				<string>public.xml</string>
 				<string>public.yaml</string>
@@ -53,9 +51,6 @@
 				<string>yaml</string>
 				<string>yml</string>
 				<string>xml</string>
-				<string>sh</string>
-				<string>bash</string>
-				<string>zsh</string>
 				<string>py</string>
 				<string>rb</string>
 				<string>js</string>
