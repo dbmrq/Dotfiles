@@ -203,14 +203,6 @@ elif [[ -d /usr/share/zsh ]]; then
         source /usr/share/zsh-history-substring-search/zsh-history-substring-search.zsh
 fi
 
-# History substring search keybindings (after plugin is loaded)
-if (( $+widgets[history-substring-search-up] )); then
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[[B' history-substring-search-down
-    bindkey -M vicmd 'k' history-substring-search-up
-    bindkey -M vicmd 'j' history-substring-search-down
-fi
-
 # =============================================================================
 # Modern CLI Replacements
 # =============================================================================
@@ -231,6 +223,36 @@ fi
 # fzf: fuzzy finder (Ctrl-R for history, Ctrl-T for files, Alt-C for cd)
 if command -v fzf &>/dev/null; then
     source <(fzf --zsh)
+
+    # Smart up-arrow: fzf history when line is empty, substring-search otherwise
+    function _smart-history-up {
+        if [[ -z $BUFFER ]]; then
+            fzf-history-widget
+        elif (( $+widgets[history-substring-search-up] )); then
+            history-substring-search-up
+        else
+            up-line-or-history
+        fi
+    }
+    zle -N _smart-history-up
+    bindkey '^[[A' _smart-history-up
+
+    # Keep down-arrow as substring-search (or regular history)
+    if (( $+widgets[history-substring-search-down] )); then
+        bindkey '^[[B' history-substring-search-down
+    fi
+else
+    # No fzf: use history-substring-search if available
+    if (( $+widgets[history-substring-search-up] )); then
+        bindkey '^[[A' history-substring-search-up
+        bindkey '^[[B' history-substring-search-down
+    fi
+fi
+
+# Vi mode j/k for history (always substring-search)
+if (( $+widgets[history-substring-search-up] )); then
+    bindkey -M vicmd 'k' history-substring-search-up
+    bindkey -M vicmd 'j' history-substring-search-down
 fi
 
 # zoxide: smarter cd (replaces fasd)
