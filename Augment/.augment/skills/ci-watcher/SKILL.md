@@ -1,11 +1,13 @@
 ---
-name: ci-watcher
-description: Automatically check GitHub Actions CI status after pushing changes. Triggers after every `git push` in projects with a `.github/workflows` directory. Monitors build status, reports results, and helps debug failures.
+name: github-actions-ci
+description: Check GitHub Actions CI status after pushing changes. Triggers after `git push` in projects with a `.github/workflows` directory. For Xcode Cloud builds (iOS/macOS projects without .github/workflows), use the xcode-cloud-ci skill instead.
 ---
 
-# CI Watcher
+# GitHub Actions CI Watcher
 
 After performing a `git push` in a project with `.github/workflows`, check CI status.
+
+**Note**: This skill is for GitHub Actions only. For Xcode Cloud builds, use the `xcode-cloud-ci` skill.
 
 ## Workflow
 
