@@ -2,14 +2,80 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AMIsApplet</key>
+	<true/>
+	<key>AMStayOpen</key>
+	<false/>
+	<key>BuildMachineOSBuild</key>
+	<string>23A344014</string>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleDisplayName</key>
-	<string>Neovim</string>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Text Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.plain-text</string>
+				<string>public.text</string>
+				<string>public.source-code</string>
+				<string>public.data</string>
+				<string>public.json</string>
+				<string>public.xml</string>
+				<string>public.yaml</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>txt</string>
+				<string>text</string>
+				<string>md</string>
+				<string>markdown</string>
+				<string>json</string>
+				<string>yaml</string>
+				<string>yml</string>
+				<string>xml</string>
+				<string>csv</string>
+				<string>toml</string>
+				<string>conf</string>
+				<string>cfg</string>
+				<string>ini</string>
+				<string>log</string>
+				<string>py</string>
+				<string>rb</string>
+				<string>js</string>
+				<string>ts</string>
+				<string>jsx</string>
+				<string>tsx</string>
+				<string>lua</string>
+				<string>vim</string>
+				<string>rs</string>
+				<string>go</string>
+				<string>c</string>
+				<string>h</string>
+				<string>cpp</string>
+				<string>hpp</string>
+				<string>java</string>
+				<string>swift</string>
+				<string>css</string>
+				<string>scss</string>
+				<string>html</string>
+				<string>htm</string>
+				<string>tex</string>
+				<string>bib</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
-	<string>Neovim</string>
+	<string>Automator Application Stub</string>
 	<key>CFBundleIconFile</key>
-	<string>AppIcon</string>
+	<string>ApplicationStub</string>
+	<key>CFBundleIconName</key>
+	<string>ApplicationStub</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.neovim.Neovim</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -19,68 +85,68 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>10.15.0</string>
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.developer-tools</string>
-	<key>CFBundleDocumentTypes</key>
+	<string>1.3</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleSupportedPlatforms</key>
 	<array>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string>Text File</string>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>public.plain-text</string>
-				<string>public.text</string>
-				<string>public.source-code</string>
-				<string>public.json</string>
-				<string>public.xml</string>
-				<string>public.yaml</string>
-				<string>net.daringfireball.markdown</string>
-				<string>org.vim.vim-script</string>
-			</array>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>txt</string>
-				<string>md</string>
-				<string>markdown</string>
-				<string>json</string>
-				<string>yaml</string>
-				<string>yml</string>
-				<string>xml</string>
-				<string>py</string>
-				<string>rb</string>
-				<string>js</string>
-				<string>ts</string>
-				<string>jsx</string>
-				<string>tsx</string>
-				<string>css</string>
-				<string>scss</string>
-				<string>html</string>
-				<string>htm</string>
-				<string>lua</string>
-				<string>vim</string>
-				<string>conf</string>
-				<string>cfg</string>
-				<string>ini</string>
-				<string>toml</string>
-				<string>rs</string>
-				<string>go</string>
-				<string>c</string>
-				<string>h</string>
-				<string>cpp</string>
-				<string>hpp</string>
-				<string>java</string>
-				<string>swift</string>
-				<string>tex</string>
-				<string>log</string>
-				<string>csv</string>
-			</array>
-		</dict>
+		<string>MacOSX</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array/>
+	<key>CFBundleVersion</key>
+	<string>531</string>
+	<key>DTCompiler</key>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>DTPlatformBuild</key>
+	<string>25B5042h</string>
+	<key>DTPlatformName</key>
+	<string>macosx</string>
+	<key>DTPlatformVersion</key>
+	<string>26.1</string>
+	<key>DTSDKBuild</key>
+	<string>25B5042h</string>
+	<key>DTSDKName</key>
+	<string>macosx26.1.internal</string>
+	<key>DTXcode</key>
+	<string>2600</string>
+	<key>DTXcodeBuild</key>
+	<string>17A6264l</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.9</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>This workflow needs to control other applications to run.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>This workflow needs access to your music to run.</string>
+	<key>NSAppleScriptEnabled</key>
+	<string>YES</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This workflow needs access to your calendars to run.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This workflow needs access to your camera to run.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This workflow needs access to your contacts to run.</string>
+	<key>NSHomeKitUsageDescription</key>
+	<string>This workflow needs access to your HomeKit Home to run.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This workflow needs access to your microphone to run.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This workflow needs access to your photos to run.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>This workflow needs access to your reminders to run.</string>
+	<key>NSServices</key>
+	<array/>
+	<key>NSSiriUsageDescription</key>
+	<string>This workflow needs access to Siri to run.</string>
+	<key>NSSystemAdministrationUsageDescription</key>
+	<string>This workflow needs access to administer this system in order to run.</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array/>
+	<key>UTImportedTypeDeclarations</key>
+	<array/>
 </dict>
 </plist>
-
