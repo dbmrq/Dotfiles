@@ -46,6 +46,7 @@ brew "eza"                    # Modern ls replacement (aliased to ls)
 brew "htop"                   # Process viewer
 brew "zoxide"                 # Smarter cd command
 brew "duti"                   # Set default applications for file types
+brew "lazygit"                # Terminal UI for git
 
 # =============================================================================
 # Terminal Multiplexer

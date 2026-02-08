@@ -207,6 +207,8 @@ elif [[ -d /usr/share/zsh ]]; then
         source /usr/share/zsh-history-substring-search/zsh-history-substring-search.zsh
 fi
 
+
+
 # =============================================================================
 # Modern CLI Replacements
 # =============================================================================
@@ -252,6 +254,19 @@ else
         bindkey '^[[B' history-substring-search-down
     fi
 fi
+
+# Tab accepts autosuggestion if one exists, otherwise does fzf/normal completion
+function _autosuggest-accept-or-complete {
+    if (( ${+widgets[autosuggest-accept]} )) && [[ -n "$POSTDISPLAY" ]]; then
+        zle autosuggest-accept
+    elif (( ${+widgets[fzf-completion]} )); then
+        zle fzf-completion
+    else
+        zle expand-or-complete
+    fi
+}
+zle -N _autosuggest-accept-or-complete
+bindkey '^I' _autosuggest-accept-or-complete
 
 # Vi mode j/k for history (always substring-search)
 if (( $+widgets[history-substring-search-up] )); then

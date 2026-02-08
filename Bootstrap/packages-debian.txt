@@ -29,6 +29,7 @@ htop
 trash-cli
 nnn
 zoxide
+lazygit
 
 # =============================================================================
 # Terminal Multiplexer
