@@ -64,21 +64,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
       vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
     end
 
-    -- Use telescope if available, otherwise fallback to vim.lsp.buf
-    local telescope_ok, telescope = pcall(require, 'telescope.builtin')
-    if telescope_ok then
-      map('gd', telescope.lsp_definitions, 'Definition')
-      map('gr', telescope.lsp_references, 'References')
-      map('gI', telescope.lsp_implementations, 'Implementation')
-      map('<leader>D', telescope.lsp_type_definitions, 'Type definition')
-      map('<leader>ds', telescope.lsp_document_symbols, 'Document symbols')
-      map('<leader>ws', telescope.lsp_dynamic_workspace_symbols, 'Workspace symbols')
-    else
-      map('gd', vim.lsp.buf.definition, 'Definition')
-      map('gr', vim.lsp.buf.references, 'References')
-      map('gI', vim.lsp.buf.implementation, 'Implementation')
-      map('<leader>D', vim.lsp.buf.type_definition, 'Type definition')
-    end
+    -- LSP navigation
+    map('gd', vim.lsp.buf.definition, 'Definition')
+    map('gr', vim.lsp.buf.references, 'References')
+    map('gI', vim.lsp.buf.implementation, 'Implementation')
+    map('<leader>D', vim.lsp.buf.type_definition, 'Type definition')
 
     map('gD', vim.lsp.buf.declaration, 'Declaration')
     map('<leader>rn', vim.lsp.buf.rename, 'Rename')
