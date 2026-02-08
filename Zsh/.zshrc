@@ -257,9 +257,15 @@ fi
 
 # zoxide: smarter cd (replaces fasd)
 if command -v zoxide &>/dev/null; then
-    eval "$(zoxide init zsh)"
-    alias j='z'      # Jump to directory (like fasd)
-    alias ji='zi'    # Jump interactive (with fzf)
+    eval "$(zoxide init zsh --cmd cd)"  # replaces cd with zoxide
+    # j: interactive list when no args, jump when args given
+    function j {
+        if [[ $# -eq 0 ]]; then
+            cdi  # interactive (zoxide init --cmd cd creates cdi)
+        else
+            cd "$@"
+        fi
+    }
 fi
 
 # =============================================================================
