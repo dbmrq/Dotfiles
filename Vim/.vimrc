@@ -12,7 +12,5 @@ elseif filereadable(expand('~/.vim/mappings-essential.vim'))
     source ~/.vim/mappings-essential.vim
 endif
 
-" Load plugins (only for full installation)
-if filereadable(expand('~/.vim/plugins.vim'))
-    source ~/.vim/plugins.vim
-endif
+" NOTE: Plugins are managed in Neovim via lazy.nvim (~/.config/nvim/)
+" Vim is kept minimal for quick editing and remote usage

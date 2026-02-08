@@ -272,6 +272,32 @@ if command -v zoxide &>/dev/null; then
     }
 fi
 
+# nnn: cd on quit (press ^G to quit and cd to last dir)
+# Uses custom opener to open files in zellij pane when inside zellij
+if command -v nnn &>/dev/null; then
+    # Custom opener: opens text files in zellij pane or nvim
+    export NNN_OPENER="$HOME/.nnn-opener"
+
+    n() {
+        # Block nesting of nnn in subshells
+        [ "${NNNLVL:-0}" -eq 0 ] || {
+            echo "nnn is already running"
+            return
+        }
+
+        # cd on quit when pressing ^G
+        export NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
+
+        # -c: use NNN_OPENER as CLI opener
+        command nnn -c "$@"
+
+        [ ! -f "$NNN_TMPFILE" ] || {
+            . "$NNN_TMPFILE"
+            rm -f -- "$NNN_TMPFILE" > /dev/null
+        }
+    }
+fi
+
 # =============================================================================
 # Common Shell Configuration
 # =============================================================================

@@ -1,0 +1,83 @@
+#!/usr/bin/env sh
+# nnn custom opener
+# Opens files in zellij pane when inside zellij, otherwise uses nvim/editor
+
+FPATH="$1"
+
+# Get mime type
+MIMETYPE="$(file -bL --mime-type -- "$FPATH")"
+
+# Handle based on mime type
+case "$MIMETYPE" in
+    # Text files - open in editor
+    text/*|*/xml|*/json|application/javascript|application/x-shellscript)
+        if [ -n "$ZELLIJ" ]; then
+            zellij action edit "$FPATH"
+        else
+            "${EDITOR:-nvim}" "$FPATH"
+        fi
+        exit 0
+        ;;
+
+    # Images - use macOS open or other viewer
+    image/*)
+        if [ "$(uname)" = "Darwin" ]; then
+            open "$FPATH"
+        elif command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$FPATH" &
+        fi
+        exit 0
+        ;;
+
+    # PDFs
+    application/pdf)
+        if [ "$(uname)" = "Darwin" ]; then
+            open "$FPATH"
+        elif command -v zathura >/dev/null 2>&1; then
+            zathura "$FPATH" &
+        elif command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$FPATH" &
+        fi
+        exit 0
+        ;;
+
+    # Audio/Video - use system player
+    audio/*|video/*)
+        if [ "$(uname)" = "Darwin" ]; then
+            open "$FPATH"
+        elif command -v mpv >/dev/null 2>&1; then
+            mpv "$FPATH" &
+        elif command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$FPATH" &
+        fi
+        exit 0
+        ;;
+
+    # Archives - list contents
+    application/zip|application/x-tar|application/gzip|application/x-bzip2)
+        if command -v atool >/dev/null 2>&1; then
+            atool --list -- "$FPATH" | ${PAGER:-less}
+        elif command -v bsdtar >/dev/null 2>&1; then
+            bsdtar --list --file "$FPATH" | ${PAGER:-less}
+        fi
+        exit 0
+        ;;
+esac
+
+# Fallback: try to open as text if it looks like text, otherwise use system opener
+if file "$FPATH" | grep -q text; then
+    if [ -n "$ZELLIJ" ]; then
+        zellij action edit "$FPATH"
+    else
+        "${EDITOR:-nvim}" "$FPATH"
+    fi
+else
+    if [ "$(uname)" = "Darwin" ]; then
+        open "$FPATH"
+    elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$FPATH" &
+    fi
+fi
+
+exit 0
+
