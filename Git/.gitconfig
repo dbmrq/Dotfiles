@@ -26,4 +26,4 @@
     process = git-lfs filter-process
     required = true
 [color]
-	ui = auto
+    ui = auto

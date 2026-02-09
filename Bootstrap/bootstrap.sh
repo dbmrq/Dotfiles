@@ -585,15 +585,20 @@ gather_choices() {
         fi
     fi
 
-    # Git identity - check if ~/.gitconfig.local exists with user info
-    if [[ ! -f "$HOME/.gitconfig.local" ]] || ! grep -q '^\[user\]' "$HOME/.gitconfig.local" 2>/dev/null; then
+    # Git identity - check if ~/.gitconfig.local has user name AND email configured
+    # We check the local file directly since that's where machine-specific config lives
+    # and git config --global may not follow includes reliably across versions
+    local has_git_name has_git_email
+    has_git_name=$(git config --file "$HOME/.gitconfig.local" user.name 2>/dev/null || echo "")
+    has_git_email=$(git config --file "$HOME/.gitconfig.local" user.email 2>/dev/null || echo "")
+
+    if [[ -z "$has_git_name" ]] || [[ -z "$has_git_email" ]]; then
         echo ""
         echo "Git needs your identity for commits (name and email)."
-        if ask_yes_no "Configure git identity?" "y"; then
-            DO_GIT_IDENTITY=true
-            anything_to_do=true
-            gather_git_identity
-        fi
+        echo "This is required to avoid git's auto-detection warnings."
+        DO_GIT_IDENTITY=true
+        anything_to_do=true
+        gather_git_identity
     fi
 
     # Shell local config - check if ~/.zshrc.local exists
