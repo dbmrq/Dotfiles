@@ -66,6 +66,56 @@ do_stow() {
     "$SCRIPT_DIR/stow.sh" --force
 }
 
+do_update() {
+    print_header "Updating everything..."
+
+    # 1. Sync dotfiles first
+    print_info "Syncing dotfiles repository..."
+    if git pull --rebase; then
+        print_ok "Repository updated"
+    else
+        print_warn "Git pull failed, continuing anyway..."
+    fi
+
+    # 2. Restow packages
+    print_info "Restowing packages..."
+    "$SCRIPT_DIR/stow.sh" --force
+
+    # 3. Update Homebrew (macOS only)
+    if is_macos && command_exists brew; then
+        print_info "Updating Homebrew..."
+        brew update && brew upgrade && brew cleanup
+        print_ok "Homebrew updated"
+    fi
+
+    # 4. Update agent skills
+    if [[ -x "$SCRIPT_DIR/skills.sh" ]]; then
+        "$SCRIPT_DIR/skills.sh" update
+    fi
+
+    # 5. Update shell plugins
+    if [[ -x "$SCRIPT_DIR/plugins.sh" ]]; then
+        print_info "Updating shell plugins..."
+        "$SCRIPT_DIR/plugins.sh"
+    fi
+
+    print_ok "Update complete!"
+}
+
+do_prefs() {
+    if ! is_macos; then
+        print_warn "Preferences only available on macOS"
+        return 1
+    fi
+    if [[ -x "$SCRIPT_DIR/prefs.sh" ]]; then
+        print_header "Applying macOS preferences..."
+        "$SCRIPT_DIR/prefs.sh"
+    else
+        print_error "prefs.sh not found"
+        return 1
+    fi
+}
+
 # --- Menu ---
 
 show_menu() {
@@ -76,9 +126,11 @@ show_menu() {
     echo "What would you like to do?"
     echo ""
     echo "  ${BOLD}1)${NC} Sync     - Pull latest changes and restow symlinks"
-    echo "  ${BOLD}2)${NC} Status   - Check git and symlink status"
-    echo "  ${BOLD}3)${NC} Edit     - Open dotfiles in \$EDITOR"
-    echo "  ${BOLD}4)${NC} Stow     - Just restow symlinks (no git pull)"
+    echo "  ${BOLD}2)${NC} Update   - Update everything (Homebrew, skills, plugins)"
+    echo "  ${BOLD}3)${NC} Status   - Check git and symlink status"
+    echo "  ${BOLD}4)${NC} Edit     - Open dotfiles in \$EDITOR"
+    echo "  ${BOLD}5)${NC} Stow     - Just restow symlinks (no git pull)"
+    echo "  ${BOLD}6)${NC} Prefs    - Apply macOS preferences"
     echo "  ${BOLD}q)${NC} Quit"
     echo ""
 }
@@ -89,12 +141,14 @@ show_menu() {
 if [[ $# -gt 0 ]]; then
     case "$1" in
         sync)   do_sync ;;
+        update) do_update ;;
         status) do_status ;;
         edit)   do_edit ;;
         stow)   do_stow ;;
+        prefs)  do_prefs ;;
         cd)     echo "$DOTFILES_DIR" ;;
         *)
-            echo "Usage: dotfiles [sync|status|edit|stow|cd]"
+            echo "Usage: dotfiles [sync|update|status|edit|stow|prefs|cd]"
             echo "Or just run 'dotfiles' for interactive menu."
             exit 1
             ;;
@@ -106,22 +160,30 @@ fi
 show_menu
 
 while true; do
-    read -rp "Choose [1-4, q]: " choice
+    read -rp "Choose [1-6, q]: " choice
     case "$choice" in
         1|sync)
             do_sync
             break
             ;;
-        2|status)
+        2|update)
+            do_update
+            break
+            ;;
+        3|status)
             do_status
             break
             ;;
-        3|edit)
+        4|edit)
             do_edit
             break
             ;;
-        4|stow)
+        5|stow)
             do_stow
+            break
+            ;;
+        6|prefs)
+            do_prefs
             break
             ;;
         q|Q|quit|exit)
@@ -129,7 +191,7 @@ while true; do
             break
             ;;
         *)
-            echo "Invalid choice. Please enter 1-4 or q."
+            echo "Invalid choice. Please enter 1-6 or q."
             ;;
     esac
 done

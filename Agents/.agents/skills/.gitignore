@@ -6,3 +6,10 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Ignore all skills by default (catalog skills installed via npx skills)
+*/
+
+# Explicitly track custom skills
+!ci-watcher/
+!xcode-cloud-ci/

@@ -78,8 +78,9 @@ After installation, the `dotfiles` command is available:
 
 ```sh
 dotfiles sync     # Pull latest and re-stow
+dotfiles update   # Update everything (Homebrew, agent skills, plugins)
 dotfiles status   # Check git status
 dotfiles edit     # Open dotfiles in editor
-dotfiles update   # Update Homebrew and plugins
+dotfiles stow     # Just restow symlinks
 dotfiles prefs    # Apply macOS preferences
 ```

@@ -1,0 +1,21 @@
+# Skills Manifest
+# ===============
+# Catalog skills to install via npx skills add
+#
+# Format: <owner/repo@skill-name> or <owner/repo --skill name>
+# Lines starting with # are comments
+#
+# These skills are installed from the skills.sh catalog and auto-updated
+# via 'dotfiles update'. Custom skills are tracked directly in git at
+# Agents/.agents/skills/ and don't need to be listed here.
+#
+# Run 'npx skills find <query>' to discover available skills
+
+# Anthropic's skill-creator - for creating new agent skills
+anthropics/skills@skill-creator
+
+# Swift/SwiftUI skills
+dimillian/skills@swiftui-performance-audit
+avdlee/swiftui-agent-skill@swiftui-expert-skill
+dimillian/skills@swift-concurrency-expert
+
