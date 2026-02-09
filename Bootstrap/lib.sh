@@ -78,6 +78,28 @@ is_linux() {
     [[ "$OS" == "linux" ]]
 }
 
+# Ensure TMPDIR points to a user-writable location
+# Some tools (like npx) fail when the system temp dir has restricted permissions
+ensure_user_tmpdir() {
+    local user_tmp="$HOME/.cache/tmp"
+
+    # Check if current TMPDIR is writable
+    if [[ -n "${TMPDIR:-}" ]] && [[ -d "$TMPDIR" ]] && [[ -w "$TMPDIR" ]]; then
+        # Current TMPDIR is fine, test if we can actually create files
+        if touch "$TMPDIR/.write_test" 2>/dev/null; then
+            rm -f "$TMPDIR/.write_test"
+            return 0
+        fi
+    fi
+
+    # Fall back to user cache directory
+    mkdir -p "$user_tmp"
+    chmod 700 "$user_tmp"
+    export TMPDIR="$user_tmp"
+    export TMP="$user_tmp"
+    export TEMP="$user_tmp"
+}
+
 # Get Linux distribution name (lowercase)
 # Returns: debian, ubuntu, fedora, arch, rhel, centos, opensuse, alpine, or "unknown"
 get_linux_distro() {

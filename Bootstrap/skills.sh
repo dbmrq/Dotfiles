@@ -103,6 +103,9 @@ install_catalog_skills() {
         return 1
     fi
 
+    # Ensure temp directory is user-writable (npx can fail with system temp dirs)
+    ensure_user_tmpdir
+
     # Install global skills from Bootstrap manifest
     install_from_manifest "$MANIFEST" "-g" "global"
 
@@ -118,6 +121,9 @@ update_catalog_skills() {
         print_error "npx not found. Install Node.js first."
         return 1
     fi
+
+    # Ensure temp directory is user-writable (npx can fail with system temp dirs)
+    ensure_user_tmpdir
 
     # Update global skills
     print_header "Updating global skills..."
