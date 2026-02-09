@@ -62,19 +62,16 @@ setup_agent_symlinks() {
     done
 }
 
-install_catalog_skills() {
-    print_header "Installing catalog skills..."
+install_from_manifest() {
+    local manifest_file="$1"
+    local global_flag="$2"  # "-g" for global, "" for local
+    local label="$3"
 
-    if [[ ! -f "$MANIFEST" ]]; then
-        print_warn "No manifest found at $MANIFEST"
+    if [[ ! -f "$manifest_file" ]]; then
         return 0
     fi
 
-    # Check for npx
-    if ! command_exists npx; then
-        print_error "npx not found. Install Node.js first."
-        return 1
-    fi
+    print_header "Installing $label skills..."
 
     local count=0
     while IFS= read -r line || [[ -n "$line" ]]; do
@@ -85,32 +82,59 @@ install_catalog_skills() {
         print_info "Installing: $line"
         # shellcheck disable=SC2086
         # Use </dev/null to prevent npx from consuming the while loop's stdin
-        if npx skills add $line -g -y </dev/null; then
+        if npx skills add $line $global_flag -y </dev/null; then
             ((count++))
         else
             print_warn "Failed to install: $line"
         fi
-    done < "$MANIFEST"
+    done < "$manifest_file"
 
     if [[ $count -gt 0 ]]; then
-        print_ok "Installed $count catalog skill(s)"
+        print_ok "Installed $count $label skill(s)"
     else
-        print_info "No new skills to install"
+        print_info "No new $label skills to install"
     fi
 }
 
-update_catalog_skills() {
-    print_header "Updating catalog skills..."
-
+install_catalog_skills() {
+    # Check for npx
     if ! command_exists npx; then
         print_error "npx not found. Install Node.js first."
         return 1
     fi
 
-    if npx skills update -g -y 2>/dev/null; then
-        print_ok "Skills updated"
+    # Install global skills from Bootstrap manifest
+    install_from_manifest "$MANIFEST" "-g" "global"
+
+    # Install project-local skills if .skills-manifest.txt exists in current directory
+    local local_manifest=".skills-manifest.txt"
+    if [[ -f "$local_manifest" ]]; then
+        install_from_manifest "$local_manifest" "" "project-local"
+    fi
+}
+
+update_catalog_skills() {
+    if ! command_exists npx; then
+        print_error "npx not found. Install Node.js first."
+        return 1
+    fi
+
+    # Update global skills
+    print_header "Updating global skills..."
+    if npx skills update -g -y </dev/null; then
+        print_ok "Global skills updated"
     else
-        print_warn "No updates available or update failed"
+        print_warn "No global updates available or update failed"
+    fi
+
+    # Update project-local skills if .skills-manifest.txt exists
+    if [[ -f ".skills-manifest.txt" ]]; then
+        print_header "Updating project-local skills..."
+        if npx skills update -y </dev/null; then
+            print_ok "Project-local skills updated"
+        else
+            print_warn "No local updates available or update failed"
+        fi
     fi
 }
 
@@ -118,11 +142,21 @@ show_status() {
     print_header "Agent Skills Status"
 
     echo ""
-    echo -e "${BOLD}Shared skills directory:${NC} $SKILLS_DIR"
+    echo -e "${BOLD}Global skills directory:${NC} $SKILLS_DIR"
     if [[ -d "$SKILLS_DIR" ]]; then
         local skills
         skills=$(find "$SKILLS_DIR" -maxdepth 1 -type d -not -name ".*" -not -path "$SKILLS_DIR" | wc -l | tr -d ' ')
         echo "  $skills skill(s) installed"
+    fi
+
+    # Show project-local skills if present
+    local local_skills_dir=".agents/skills"
+    if [[ -d "$local_skills_dir" ]]; then
+        echo ""
+        echo -e "${BOLD}Project-local skills:${NC} $local_skills_dir"
+        local local_skills
+        local_skills=$(find "$local_skills_dir" -maxdepth 1 -type d -not -name ".*" -not -path "$local_skills_dir" | wc -l | tr -d ' ')
+        echo "  $local_skills skill(s) installed"
     fi
 
     echo ""

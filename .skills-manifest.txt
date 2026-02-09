@@ -1,0 +1,11 @@
+# Project-Local Skills Manifest
+# ==============================
+# Skills specific to this repository (installed without -g flag)
+# Run 'npx skills add <skill> -y' to install, or use the update script
+#
+# These are NOT tracked in git - only this manifest is tracked.
+# Run 'npx skills update' in this directory to update them.
+
+# Shell scripting best practices (for dotfiles scripts)
+pproenca/dot-skills@shell
+
