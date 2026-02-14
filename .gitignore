@@ -27,6 +27,9 @@ Vim/.config/fish/
 # macOS
 .DS_Store
 
+# Hammerspoon Spoons (managed by SpoonInstall)
+Hammerspoon/.hammerspoon/Spoons/
+
 # Project-local agent skills (installed via npx skills from .skills-manifest.txt)
 # These are symlinks/copies created by npx skills for each agent
 .agents/

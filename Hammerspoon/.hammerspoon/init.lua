@@ -10,20 +10,27 @@ winmanHotkeys = {
 Cherry = hs.loadSpoon("Cherry")
 Cherry:bindHotkeys()
 
+-- SpoonInstall for managing Spoons from GitHub
+hs.loadSpoon("SpoonInstall")
+
+spoon.SpoonInstall.repos.dbmrq = {
+    url = "https://github.com/dbmrq/Spoons",
+    desc = "Personal Spoons",
+}
+
+spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
+spoon.SpoonInstall:andUse("SlowQ", { repo = "dbmrq", start = true })
+
 -- Clear cached modules on reload to avoid stale hotkeys
 package.loaded["winman"] = nil
-package.loaded["slowq"] = nil
 package.loaded["snippets"] = nil
 package.loaded["collage"] = nil
 package.loaded["mocha"] = nil
-package.loaded["readline"] = nil
 
 require "winman"
-require "slowq"
 require "snippets"
 require "collage"
 require "mocha"
-require "readline"
 
 -- Meta hotkeys
 hs.hotkey.bind(super, 'P', function() hs.openPreferences() end)
