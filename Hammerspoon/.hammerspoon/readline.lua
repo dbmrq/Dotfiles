@@ -4,60 +4,84 @@
 -- Readline-style keybindings for macOS
 -- Complements the built-in Cocoa text bindings (C-a, C-e, C-f, C-b, C-n, C-p, C-d, C-k, C-t, C-o)
 
--- Word movement (M-f, M-b) {{{1
-hs.hotkey.bind({"alt"}, 'f', function()
-    hs.eventtap.keyStroke({"alt"}, "Right")
-end)
+local M = {}
+M.hotkeys = {}
 
-hs.hotkey.bind({"alt"}, 'b', function()
-    hs.eventtap.keyStroke({"alt"}, "Left")
-end)
+-- Action functions {{{1
+M.actions = {
+    wordForward = function()
+        hs.eventtap.keyStroke({"alt"}, "Right")
+    end,
+
+    wordBackward = function()
+        hs.eventtap.keyStroke({"alt"}, "Left")
+    end,
+
+    wordSelectForward = function()
+        hs.eventtap.keyStroke({"alt", "shift"}, "Right")
+    end,
+
+    wordSelectBackward = function()
+        hs.eventtap.keyStroke({"alt", "shift"}, "Left")
+    end,
+
+    docStart = function()
+        hs.eventtap.keyStroke({"cmd"}, "Up")
+    end,
+
+    docEnd = function()
+        hs.eventtap.keyStroke({"cmd"}, "Down")
+    end,
+
+    deleteWordForward = function()
+        hs.eventtap.keyStroke({"alt"}, "forwarddelete")
+    end,
+
+    deleteWordBackward = function()
+        hs.eventtap.keyStroke({"alt"}, "delete")
+    end,
+
+    killToStart = function()
+        hs.eventtap.keyStroke({"cmd", "shift"}, "Left")
+        hs.eventtap.keyStroke({}, "delete")
+    end,
+}
 -- }}}1
 
--- Word selection with shift (M-F, M-B) {{{1
-hs.hotkey.bind({"alt", "shift"}, 'f', function()
-    hs.eventtap.keyStroke({"alt", "shift"}, "Right")
-end)
-
-hs.hotkey.bind({"alt", "shift"}, 'b', function()
-    hs.eventtap.keyStroke({"alt", "shift"}, "Left")
-end)
+-- Helper to bind and track hotkeys {{{1
+local function bind(mods, key, actionName)
+    local fn = M.actions[actionName]
+    if not fn then
+        print("readline: unknown action " .. actionName)
+        return
+    end
+    local hk = hs.hotkey.new(mods, key, fn)
+    if hk then
+        hk:enable()
+        table.insert(M.hotkeys, hk)
+    else
+        print("readline: failed to create hotkey for " .. key)
+    end
+end
 -- }}}1
 
--- Document navigation (M-<, M->) {{{1
--- Using Alt-, and Alt-. as proxies for Alt-< and Alt->
-hs.hotkey.bind({"alt"}, ',', function()
-    hs.eventtap.keyStroke({"cmd"}, "Up")
-end)
-
-hs.hotkey.bind({"alt"}, '.', function()
-    hs.eventtap.keyStroke({"cmd"}, "Down")
-end)
+-- Keybindings {{{1
+bind({"alt"}, 'f', "wordForward")
+bind({"alt"}, 'b', "wordBackward")
+bind({"alt", "shift"}, 'f', "wordSelectForward")
+bind({"alt", "shift"}, 'b', "wordSelectBackward")
+bind({"alt"}, ',', "docStart")
+bind({"alt"}, '.', "docEnd")
+bind({"alt"}, 'd', "deleteWordForward")
+bind({"ctrl"}, 'w', "deleteWordBackward")
+bind({"ctrl"}, 'u', "killToStart")
 -- }}}1
 
--- Delete word forward (M-d) {{{1
-hs.hotkey.bind({"alt"}, 'd', function()
-    hs.eventtap.keyStroke({"alt"}, "forwarddelete")
-end)
--- }}}1
+-- Cleanup function (useful for reloading)
+function M.disable()
+    for _, hk in ipairs(M.hotkeys) do
+        hk:disable()
+    end
+end
 
--- Delete word backward (M-Backspace, C-w) {{{1
--- Alt-Backspace is standard Readline for delete-word-backward
-hs.hotkey.bind({"alt"}, 'delete', function()
-    hs.eventtap.keyStroke({"alt"}, "delete")
-end)
-
--- Ctrl-w is unix-word-rubout (delete word backward)
-hs.hotkey.bind({"ctrl"}, 'w', function()
-    hs.eventtap.keyStroke({"alt"}, "delete")
-end)
--- }}}1
-
--- Kill line (C-u) - kill from cursor to beginning of line {{{1
--- macOS doesn't have this by default, only C-k (kill to end)
-hs.hotkey.bind({"ctrl"}, 'u', function()
-    hs.eventtap.keyStroke({"cmd", "shift"}, "Left")
-    hs.eventtap.keyStroke({}, "delete")
-end)
--- }}}1
-
+return M

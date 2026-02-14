@@ -10,6 +10,14 @@ winmanHotkeys = {
 Cherry = hs.loadSpoon("Cherry")
 Cherry:bindHotkeys()
 
+-- Clear cached modules on reload to avoid stale hotkeys
+package.loaded["winman"] = nil
+package.loaded["slowq"] = nil
+package.loaded["snippets"] = nil
+package.loaded["collage"] = nil
+package.loaded["mocha"] = nil
+package.loaded["readline"] = nil
+
 require "winman"
 require "slowq"
 require "snippets"
