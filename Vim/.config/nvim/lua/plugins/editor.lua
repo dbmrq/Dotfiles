@@ -70,6 +70,9 @@ return {
   -- Exchange text (works in both vim and nvim)
   { 'tommcdo/vim-exchange' },
 
+  -- Readline-style insert mode bindings (C-a, C-e, M-f, M-b, etc.)
+  { 'tpope/vim-rsi' },
+
   -- Highlight todo comments
   {
     'folke/todo-comments.nvim',
