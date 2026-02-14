@@ -6,13 +6,21 @@
 
 # --- Exit Codes ---
 # Use meaningful exit codes for different failure types
+# These are exported for use by scripts that source this library
+# shellcheck disable=SC2034
 readonly E_SUCCESS=0        # Successful execution
 readonly E_GENERAL=1        # General/unspecified error
+# shellcheck disable=SC2034
 readonly E_MISSING_DEP=2    # Missing dependency (command not found)
+# shellcheck disable=SC2034
 readonly E_USER_ABORT=3     # User cancelled operation
+# shellcheck disable=SC2034
 readonly E_INVALID_ARG=4    # Invalid argument or option
+# shellcheck disable=SC2034
 readonly E_OS_UNSUPPORTED=5 # Unsupported operating system
+# shellcheck disable=SC2034
 readonly E_PERMISSION=6     # Permission denied
+# shellcheck disable=SC2034
 readonly E_NETWORK=7        # Network error (download failed)
 
 # --- Configuration ---
