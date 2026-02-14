@@ -4,11 +4,27 @@
 # Source this file to get common functions and feature definitions
 #
 
+# --- Exit Codes ---
+# Use meaningful exit codes for different failure types
+readonly E_SUCCESS=0        # Successful execution
+readonly E_GENERAL=1        # General/unspecified error
+readonly E_MISSING_DEP=2    # Missing dependency (command not found)
+readonly E_USER_ABORT=3     # User cancelled operation
+readonly E_INVALID_ARG=4    # Invalid argument or option
+readonly E_OS_UNSUPPORTED=5 # Unsupported operating system
+readonly E_PERMISSION=6     # Permission denied
+readonly E_NETWORK=7        # Network error (download failed)
+
 # --- Configuration ---
+# Use readonly for constants that should not change during execution
 LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly LIB_DIR
+
 DOTFILES_DIR="${DOTFILES_DIR:-$(dirname "$LIB_DIR")}"
-BREWFILE="$LIB_DIR/Brewfile"
-PACKAGES_DEBIAN="$LIB_DIR/packages-debian.txt"
+readonly DOTFILES_DIR
+
+readonly BREWFILE="$LIB_DIR/Brewfile"
+readonly PACKAGES_DEBIAN="$LIB_DIR/packages-debian.txt"
 
 # --- Colors (with fallback for basic terminals) ---
 setup_colors() {
@@ -28,18 +44,39 @@ setup_colors() {
 setup_colors
 
 # --- Common Output Functions ---
-print_ok() { echo -e "${GREEN}✓${NC} $1"; }
-print_success() { echo -e "${GREEN}✓ $1${NC}"; }
-print_warn() { echo -e "${YELLOW}!${NC} $1"; }
-print_warning() { echo -e "${YELLOW}! $1${NC}"; }
-print_error() { echo -e "${RED}✗${NC} $1"; }
-print_info() { echo -e "${BLUE}→${NC} $1"; }
-print_header() { echo -e "\n${BLUE}${BOLD}==> $1${NC}"; }
+# Print a green checkmark with message (compact format)
+print_ok() { printf '%b✓%b %s\n' "${GREEN}" "${NC}" "$1"; }
+
+# Print a green success message (message also green)
+print_success() { printf '%b✓ %s%b\n' "${GREEN}" "$1" "${NC}"; }
+
+# Print a yellow warning indicator (compact format)
+print_warn() { printf '%b!%b %s\n' "${YELLOW}" "${NC}" "$1"; }
+
+# Print a yellow warning message (message also yellow)
+print_warning() { printf '%b! %s%b\n' "${YELLOW}" "$1" "${NC}"; }
+
+# Print a red error message
+print_error() { printf '%b✗%b %s\n' "${RED}" "${NC}" "$1" >&2; }
+
+# Print a blue info indicator
+print_info() { printf '%b→%b %s\n' "${BLUE}" "${NC}" "$1"; }
+
+# Print a bold blue section header
+print_header() { printf '\n%b%b==> %s%b\n' "${BLUE}" "${BOLD}" "$1" "${NC}"; }
 
 # --- Prompt Functions ---
+# Ask a yes/no question with configurable default
+# Arguments:
+#   $1 - The prompt message to display
+#   $2 - Default answer: "y" for yes (default), "n" for no
+# Returns:
+#   0 if user answered yes, 1 if no
 ask_yes_no() {
     local prompt="$1"
     local default="${2:-y}"
+    local reply
+
     if [[ "$default" =~ ^[Yy]$ ]]; then
         prompt="$prompt [Y/n] "
     else
@@ -51,8 +88,41 @@ ask_yes_no() {
 }
 
 # --- Command Helpers ---
+# Check if a command exists in PATH
+# Arguments:
+#   $1 - Command name to check
+# Returns:
+#   0 if command exists, 1 otherwise
 command_exists() {
     command -v "$1" >/dev/null 2>&1
+}
+
+# --- Temporary File Helpers ---
+# Create a secure temporary file using mktemp
+# Arguments:
+#   $1 - Optional suffix for the temp file (e.g., ".txt")
+# Returns:
+#   Prints the path to the created temp file
+#   Exit code 0 on success, E_GENERAL on failure
+make_temp_file() {
+    local suffix="${1:-}"
+    local temp_file
+    if [[ -n "$suffix" ]]; then
+        temp_file=$(mktemp "${TMPDIR:-/tmp}/dotfiles.XXXXXX$suffix") || return "$E_GENERAL"
+    else
+        temp_file=$(mktemp "${TMPDIR:-/tmp}/dotfiles.XXXXXX") || return "$E_GENERAL"
+    fi
+    printf '%s' "$temp_file"
+}
+
+# Create a secure temporary directory using mktemp
+# Returns:
+#   Prints the path to the created temp directory
+#   Exit code 0 on success, E_GENERAL on failure
+make_temp_dir() {
+    local temp_dir
+    temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles.XXXXXX") || return "$E_GENERAL"
+    printf '%s' "$temp_dir"
 }
 
 # --- OS Detection ---
@@ -157,7 +227,10 @@ get_package_manager() {
 }
 
 # Install packages using the appropriate package manager
-# Usage: pkg_install pkg1 pkg2 ...
+# Arguments:
+#   $@ - Package names to install
+# Returns:
+#   0 on success, 1 on failure or unknown package manager
 pkg_install() {
     local pm
     pm="$(get_package_manager)"
@@ -192,7 +265,11 @@ pkg_install() {
     esac
 }
 
-# Check if a package is installed (Linux package managers)
+# Check if a package is installed using the system package manager
+# Arguments:
+#   $1 - Package name to check
+# Returns:
+#   0 if installed, 1 if not installed or unknown package manager
 pkg_installed() {
     local pkg="$1"
     local pm
@@ -224,14 +301,20 @@ pkg_installed() {
 }
 
 # --- Homebrew Helpers (macOS-specific) ---
+
+# Get the path to the Homebrew executable based on architecture
+# Returns:
+#   Path to brew binary (Apple Silicon or Intel)
 get_brew_path() {
     if [[ "$(uname -m)" == "arm64" ]]; then
-        echo "/opt/homebrew/bin/brew"
+        printf '%s' "/opt/homebrew/bin/brew"
     else
-        echo "/usr/local/bin/brew"
+        printf '%s' "/usr/local/bin/brew"
     fi
 }
 
+# Ensure Homebrew is available in the current PATH
+# Evaluates brew shellenv if brew exists but isn't in PATH
 ensure_brew_in_path() {
     if ! command_exists brew; then
         local brew_path
@@ -242,14 +325,22 @@ ensure_brew_in_path() {
     fi
 }
 
-# Check if a brew formula is installed
+# Check if a Homebrew formula is installed
+# Arguments:
+#   $1 - Formula name to check
+# Returns:
+#   0 if installed, 1 otherwise
 brew_pkg_installed() {
     local pkg="$1"
     ensure_brew_in_path
     command_exists brew && brew list "$pkg" >/dev/null 2>&1
 }
 
-# Check if a brew cask is installed
+# Check if a Homebrew cask is installed
+# Arguments:
+#   $1 - Cask name to check
+# Returns:
+#   0 if installed, 1 otherwise
 brew_cask_installed() {
     local cask="$1"
     ensure_brew_in_path

@@ -12,26 +12,33 @@
 
 set -euo pipefail
 
+# --- Script setup ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BREWFILE="$SCRIPT_DIR/Brewfile"
 
 # Source shared library
 source "$SCRIPT_DIR/lib.sh"
 
-# Check for Homebrew
-ensure_brew_in_path
-if ! command -v brew >/dev/null 2>&1; then
-    print_error "Homebrew is not installed."
-    echo "Install it with:"
-    echo '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
-    exit 1
-fi
-
-# Parse Brewfile and extract categories
+# --- Global state ---
 declare -A CATEGORIES
 declare -A CATEGORY_NAMES
 declare -A CATEGORY_PACKAGES
 
+# --- Functions ---
+
+# Check that Homebrew is available
+# Returns: 0 if available, exits with E_MISSING_DEP otherwise
+check_homebrew() {
+    ensure_brew_in_path
+    if ! command -v brew >/dev/null 2>&1; then
+        print_error "Homebrew is not installed."
+        echo "Install it with:"
+        echo '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+        exit "$E_MISSING_DEP"
+    fi
+}
+
+# Parse Brewfile and extract categories into global arrays
 parse_brewfile() {
     local current_category=""
 
@@ -165,31 +172,38 @@ interactive_select() {
     fi
 }
 
-# Parse the Brewfile
-parse_brewfile
+# --- Main ---
+main() {
+    check_homebrew
+    parse_brewfile
 
-# Main
-case "${1:-interactive}" in
-    --all)
-        print_header "Installing all packages from Brewfile..."
-        brew bundle --file="$BREWFILE"
-        ;;
-    --list)
-        list_categories
-        ;;
-    --category)
-        if [[ -z "${2:-}" ]]; then
-            print_error "Please specify a category"
+    case "${1:-interactive}" in
+        --all)
+            print_header "Installing all packages from Brewfile..."
+            brew bundle --file="$BREWFILE"
+            ;;
+        --list)
             list_categories
-            exit 1
-        fi
-        install_category "$2"
-        ;;
-    interactive|"")
-        interactive_select
-        ;;
-    *)
-        echo "Usage: $0 [--all|--list|--category <name>]"
-        exit 1
-        ;;
-esac
+            ;;
+        --category)
+            if [[ -z "${2:-}" ]]; then
+                print_error "Please specify a category"
+                list_categories
+                exit "$E_INVALID_ARG"
+            fi
+            install_category "$2"
+            ;;
+        interactive|"")
+            interactive_select
+            ;;
+        *)
+            echo "Usage: $0 [--all|--list|--category <name>]"
+            exit "$E_INVALID_ARG"
+            ;;
+    esac
+}
+
+# Only run if executed, not sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

@@ -44,7 +44,7 @@ do_status() {
         git status --short
     fi
     local ahead
-    ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")
+    ahead=$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo "0")
     if [[ "$ahead" -gt 0 ]]; then
         print_warn "$ahead commit(s) ahead of remote"
     fi

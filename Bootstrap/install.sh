@@ -33,13 +33,16 @@ setup_colors() {
 setup_colors
 
 # Read from /dev/tty to handle curl pipe correctly
+# Arguments:
+#   $1 - Prompt message to display
+#   $2 - Variable name to store the result
 read_input() {
     local prompt="$1"
     if [[ -e /dev/tty ]]; then
         # shellcheck disable=SC2229
         read -rp "$prompt" "$2" </dev/tty
     else
-        echo "Error: Cannot read input (no terminal available)." >&2
+        printf 'Error: Cannot read input (no terminal available).\n' >&2
         exit 1
     fi
 }
@@ -64,8 +67,8 @@ echo "${BOLD}╚═════════════════════�
 echo ""
 
 if [[ "$OS" == "unknown" ]]; then
-    echo "${RED}Error: Unsupported operating system.${NC}"
-    echo "This installer supports macOS and Linux only."
+    printf '%sError: Unsupported operating system.%s\n' "${RED}" "${NC}" >&2
+    printf 'This installer supports macOS and Linux only.\n' >&2
     exit 1
 fi
 
@@ -244,15 +247,15 @@ echo ""
 
 # Check for git
 if ! command -v git >/dev/null 2>&1; then
-    echo "${RED}Error: git is not installed.${NC}"
+    printf '%sError: git is not installed.%s\n' "${RED}" "${NC}" >&2
     if [[ "$OS" == "macos" ]]; then
-        echo "Install Xcode Command Line Tools first:"
-        echo "  xcode-select --install"
+        printf 'Install Xcode Command Line Tools first:\n' >&2
+        printf '  xcode-select --install\n' >&2
     else
-        echo "Install git first:"
-        echo "  sudo apt install git   # Debian/Ubuntu"
-        echo "  sudo dnf install git   # Fedora"
-        echo "  sudo pacman -S git     # Arch"
+        printf 'Install git first:\n' >&2
+        printf '  sudo apt install git   # Debian/Ubuntu\n' >&2
+        printf '  sudo dnf install git   # Fedora\n' >&2
+        printf '  sudo pacman -S git     # Arch\n' >&2
     fi
     exit 1
 fi

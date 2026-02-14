@@ -9,33 +9,13 @@
 
 set -euo pipefail
 
+# --- Script setup ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 
-MODE="${1:-interactive}"
+# --- Functions ---
 
-echo ""
-echo -e "${BOLD}Neovim Plugin & Spell File Manager${NC}"
-echo ""
-
-# Check if neovim is available
-has_nvim=false
-command -v nvim >/dev/null 2>&1 && has_nvim=true
-
-if ! $has_nvim; then
-    print_warn "Neovim is not installed."
-    exit 0
-fi
-
-# Ask for confirmation in interactive mode
-if [[ "$MODE" != "--force" ]]; then
-    if ! ask_yes_no "Update Neovim plugins and spell files?" "y"; then
-        echo "Skipping update."
-        exit 0
-    fi
-fi
-
-# Install spell files
+# Install spell files for vim/neovim
 install_spell_files() {
     local vim_spell_dir="$HOME/.vim/spell"
     local nvim_spell_dir="$HOME/.local/share/nvim/site/spell"
@@ -65,18 +45,49 @@ install_spell_files() {
     done
 }
 
-echo "Installing spell files..."
-install_spell_files
-
-echo ""
-echo "Updating Neovim plugins..."
-
-# Update plugins using lazy.nvim (headless)
-print_info "Syncing lazy.nvim plugins..."
-nvim --headless "+Lazy! sync" +qa 2>/dev/null || {
-    print_warn "lazy.nvim sync had issues (may be normal on first run)"
+# Sync lazy.nvim plugins
+sync_plugins() {
+    print_info "Syncing lazy.nvim plugins..."
+    nvim --headless "+Lazy! sync" +qa 2>/dev/null || {
+        print_warn "lazy.nvim sync had issues (may be normal on first run)"
+    }
 }
 
-echo ""
-print_ok "Done."
+# --- Main ---
+main() {
+    local mode="${1:-interactive}"
+
+    echo ""
+    echo -e "${BOLD}Neovim Plugin & Spell File Manager${NC}"
+    echo ""
+
+    # Check if neovim is available
+    if ! command -v nvim >/dev/null 2>&1; then
+        print_warn "Neovim is not installed."
+        exit "$E_SUCCESS"
+    fi
+
+    # Ask for confirmation in interactive mode
+    if [[ "$mode" != "--force" ]]; then
+        if ! ask_yes_no "Update Neovim plugins and spell files?" "y"; then
+            echo "Skipping update."
+            exit "$E_USER_ABORT"
+        fi
+    fi
+
+    echo "Installing spell files..."
+    install_spell_files
+
+    echo ""
+    echo "Updating Neovim plugins..."
+    sync_plugins
+
+    echo ""
+    print_ok "Done."
+}
+
+# Only run if executed, not sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
 

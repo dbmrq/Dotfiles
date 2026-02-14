@@ -4,22 +4,32 @@
 # Installs catalog skills from manifest and sets up agent symlinks
 #
 
-set -eo pipefail
+set -euo pipefail
 
+# --- Script setup ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 
+# --- Configuration ---
 MANIFEST="$SCRIPT_DIR/skills-manifest.txt"
 SKILLS_DIR="$HOME/.agents/skills"
 
 # Agents to link (agent name and skills path pairs)
 AGENTS=(augment cursor claude copilot)
+
+# --- Functions ---
+
+# Get the skills directory path for a given agent
+# Arguments:
+#   $1 - Agent name (augment, cursor, claude, copilot)
+# Returns:
+#   Path to the agent's skills directory
 get_agent_path() {
     case "$1" in
-        augment) echo "$HOME/.augment/skills" ;;
-        cursor)  echo "$HOME/.cursor/skills" ;;
-        claude)  echo "$HOME/.claude/skills" ;;
-        copilot) echo "$HOME/.copilot/skills" ;;
+        augment) printf '%s' "$HOME/.augment/skills" ;;
+        cursor)  printf '%s' "$HOME/.cursor/skills" ;;
+        claude)  printf '%s' "$HOME/.claude/skills" ;;
+        copilot) printf '%s' "$HOME/.copilot/skills" ;;
     esac
 }
 
@@ -181,30 +191,36 @@ show_status() {
 }
 
 # --- Main ---
+main() {
+    case "${1:-install}" in
+        install)
+            setup_agent_symlinks
+            install_catalog_skills
+            ;;
+        update)
+            update_catalog_skills
+            ;;
+        link|symlinks)
+            setup_agent_symlinks
+            ;;
+        status)
+            show_status
+            ;;
+        *)
+            echo "Usage: $0 [install|update|link|status]"
+            echo ""
+            echo "Commands:"
+            echo "  install   Install catalog skills and setup symlinks (default)"
+            echo "  update    Update catalog skills to latest versions"
+            echo "  link      Only setup agent symlinks"
+            echo "  status    Show current skills and symlink status"
+            exit "$E_INVALID_ARG"
+            ;;
+    esac
+}
 
-case "${1:-install}" in
-    install)
-        setup_agent_symlinks
-        install_catalog_skills
-        ;;
-    update)
-        update_catalog_skills
-        ;;
-    link|symlinks)
-        setup_agent_symlinks
-        ;;
-    status)
-        show_status
-        ;;
-    *)
-        echo "Usage: $0 [install|update|link|status]"
-        echo ""
-        echo "Commands:"
-        echo "  install   Install catalog skills and setup symlinks (default)"
-        echo "  update    Update catalog skills to latest versions"
-        echo "  link      Only setup agent symlinks"
-        echo "  status    Show current skills and symlink status"
-        exit 1
-        ;;
-esac
+# Only run if executed, not sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
 
