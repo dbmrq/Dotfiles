@@ -17,13 +17,44 @@ inoremap JK <esc>
 inoremap KJ <esc>
 vnoremap <CR> <esc>
 
-" Movements - H/L for beginning/end of line (more intuitive than ^/$)
-nnoremap H ^
-nnoremap L $
-onoremap H ^
-onoremap L $
-vnoremap H ^
-vnoremap L $h
+" Keyboard layout switching - US layout for normal mode (no dead keys)
+" Requires: brew install issw
+if executable('issw')
+    let g:normal_mode_layout = 'com.apple.keylayout.US'
+    let g:insert_mode_layout = ''
+
+    function! s:InitLayoutSwitching()
+        let g:insert_mode_layout = trim(system('issw'))
+        if g:insert_mode_layout != g:normal_mode_layout
+            call system('issw ' . shellescape(g:normal_mode_layout))
+        endif
+    endfunction
+
+    function! s:EnterInsertMode()
+        if g:insert_mode_layout != ''
+            call system('issw ' . shellescape(g:insert_mode_layout))
+        endif
+    endfunction
+
+    function! s:LeaveInsertMode()
+        let g:insert_mode_layout = trim(system('issw'))
+        call system('issw ' . shellescape(g:normal_mode_layout))
+    endfunction
+
+    function! s:RestoreLayoutOnExit()
+        if g:insert_mode_layout != ''
+            call system('issw ' . shellescape(g:insert_mode_layout))
+        endif
+    endfunction
+
+    augroup KeyboardLayoutSwitch
+        autocmd!
+        autocmd VimEnter * call s:InitLayoutSwitching()
+        autocmd InsertEnter * call s:EnterInsertMode()
+        autocmd InsertLeave * call s:LeaveInsertMode()
+        autocmd VimLeave * call s:RestoreLayoutOnExit()
+    augroup END
+endif
 
 " Move by visual lines when wrap is on
 nnoremap j gj
