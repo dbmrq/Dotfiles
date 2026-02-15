@@ -96,6 +96,14 @@ spoon.SpoonInstall:andUse("Collage", {
             { title = "Top of the month", fn = redditTopMonth },
             { title = "Top of the year", fn = redditTopYear },
         })
+        s:addSubmenu("Caffeinate", {
+            { title = "Stay Awake (until disabled)", fn = mochaTurnOn },
+            { title = "30 minutes", fn = mochaFor30m },
+            { title = "1 hour", fn = mochaFor60m },
+            { title = "2 hours", fn = mochaFor2h },
+            { title = "-" },  -- Separator
+            { title = "Allow Sleep", fn = mochaTurnOff },
+        })
         s:addSubmenu("Utils", {
             { title = "Lock Keyboard for Cleaning", fn = lockKeyboard },
         })
