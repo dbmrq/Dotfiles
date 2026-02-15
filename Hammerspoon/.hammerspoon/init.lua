@@ -20,20 +20,10 @@ spoon.SpoonInstall:andUse("WinMan", {
     start = true,
     config = {
         modifiers = super,
+        gridSize = "6x6",
+        gridMargins = "15,15",
+        cascadeSpacing = 40,
     },
-    fn = function(s)
-        -- Use vim-style hjkl for resize, arrows for move
-        s:bindHotkeys({
-            resizeUp = "K",
-            resizeDown = "J",
-            resizeLeft = "H",
-            resizeRight = "L",
-            moveUp = "Up",
-            moveDown = "Down",
-            moveLeft = "Left",
-            moveRight = "Right",
-        })
-    end
 })
 
 -- Clear cached modules on reload to avoid stale hotkeys
