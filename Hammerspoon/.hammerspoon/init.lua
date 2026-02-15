@@ -1,5 +1,19 @@
 local super = {"ctrl", "alt", "cmd"}
 
+-- Enable CLI (hs command)
+require("hs.ipc")
+
+-- Keyboard layout functions for Vim integration
+-- Usage from Vim: system('hs -c "getInputSource()"')
+--                 system('hs -c "setInputSource(\'com.apple.keylayout.US\')"')
+function getInputSource()
+    return hs.keycodes.currentSourceID()
+end
+
+function setInputSource(sourceID)
+    hs.keycodes.currentSourceID(sourceID)
+end
+
 Cherry = hs.loadSpoon("Cherry")
 Cherry:bindHotkeys()
 

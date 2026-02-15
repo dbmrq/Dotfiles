@@ -18,32 +18,32 @@ inoremap KJ <esc>
 vnoremap <CR> <esc>
 
 " Keyboard layout switching - US layout for normal mode (no dead keys)
-" Requires: brew install issw
-if executable('issw')
+" Uses Hammerspoon's hs CLI for native macOS input source switching
+if executable('hs')
     let g:normal_mode_layout = 'com.apple.keylayout.US'
     let g:insert_mode_layout = ''
 
     function! s:InitLayoutSwitching()
-        let g:insert_mode_layout = trim(system('issw'))
+        let g:insert_mode_layout = trim(system('hs -c "getInputSource()"'))
         if g:insert_mode_layout != g:normal_mode_layout
-            call system('issw ' . shellescape(g:normal_mode_layout))
+            call system("hs -c \"setInputSource('" . g:normal_mode_layout . "')\"")
         endif
     endfunction
 
     function! s:EnterInsertMode()
         if g:insert_mode_layout != ''
-            call system('issw ' . shellescape(g:insert_mode_layout))
+            call system("hs -c \"setInputSource('" . g:insert_mode_layout . "')\"")
         endif
     endfunction
 
     function! s:LeaveInsertMode()
-        let g:insert_mode_layout = trim(system('issw'))
-        call system('issw ' . shellescape(g:normal_mode_layout))
+        let g:insert_mode_layout = trim(system('hs -c "getInputSource()"'))
+        call system("hs -c \"setInputSource('" . g:normal_mode_layout . "')\"")
     endfunction
 
     function! s:RestoreLayoutOnExit()
         if g:insert_mode_layout != ''
-            call system('issw ' . shellescape(g:insert_mode_layout))
+            call system("hs -c \"setInputSource('" . g:insert_mode_layout . "')\"")
         endif
     endfunction
 
