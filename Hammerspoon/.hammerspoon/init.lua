@@ -14,6 +14,16 @@ spoon.SpoonInstall.repos.dbmrq = {
 spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
 spoon.SpoonInstall:andUse("SlowQ", { repo = "dbmrq", start = true })
 
+-- CheatSheet shows all shortcuts when holding super modifiers
+spoon.SpoonInstall:andUse("CheatSheet", {
+    repo = "dbmrq",
+    start = true,
+    config = {
+        modifiers = super,
+        delay = 0.5,
+    },
+})
+
 -- WinMan window management
 spoon.SpoonInstall:andUse("WinMan", {
     repo = "dbmrq",
@@ -86,7 +96,7 @@ hs.hotkey.bind({"cmd", "shift"}, "v", function()
 end)
 
 -- Type email from git config
-hs.hotkey.bind(super, 'M', function()
+hs.hotkey.bind(super, 'M', "typeEmail", function()
     local email = hs.execute("git config user.email"):gsub("%s+$", "")
     if email and #email > 0 then
         hs.eventtap.keyStrokes(email)
@@ -96,8 +106,8 @@ hs.hotkey.bind(super, 'M', function()
 end)
 
 -- Meta hotkeys
-hs.hotkey.bind(super, 'P', function() hs.openPreferences() end)
-hs.hotkey.bind(super, 'R', function() hs.reload() end)
+hs.hotkey.bind(super, 'P', "openPrefs", function() hs.openPreferences() end)
+hs.hotkey.bind(super, 'R', "reload", function() hs.reload() end)
 
 -- Auto-reload on config changes
 local function reloadConfig(files)
