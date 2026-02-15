@@ -47,12 +47,22 @@ if executable('hs')
         endif
     endfunction
 
+    function! s:OnFocusGained()
+        if mode() =~# '[iR]'
+            call s:EnterInsertMode()
+        else
+            call s:LeaveInsertMode()
+        endif
+    endfunction
+
     augroup KeyboardLayoutSwitch
         autocmd!
         autocmd VimEnter * call s:InitLayoutSwitching()
         autocmd InsertEnter * call s:EnterInsertMode()
         autocmd InsertLeave * call s:LeaveInsertMode()
         autocmd VimLeave * call s:RestoreLayoutOnExit()
+        autocmd FocusLost * call s:RestoreLayoutOnExit()
+        autocmd FocusGained * call s:OnFocusGained()
     augroup END
 endif
 

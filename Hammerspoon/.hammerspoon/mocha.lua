@@ -42,5 +42,5 @@ function disable()
     menu:delete()
 end
 
-hs.hotkey.bind(modifiers, hotkey, function() enable() end)
+hs.hotkey.bind(modifiers, hotkey, "Keep Awake (Mocha)", function() enable() end)
 

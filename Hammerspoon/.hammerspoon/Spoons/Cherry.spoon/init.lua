@@ -56,9 +56,9 @@ function obj:bindHotkeys(mapping)
   end
 
   if mapping and mapping["start"] then
-    hs.hotkey.bind(mapping["start"][1], mapping["start"][2], function() self:start() end)
+    hs.hotkey.bind(mapping["start"][1], mapping["start"][2], "Pomodoro Timer", function() self:start() end)
   else
-    hs.hotkey.bind(self.defaultMapping["start"][1], self.defaultMapping["start"][2], function() self:start() end)
+    hs.hotkey.bind(self.defaultMapping["start"][1], self.defaultMapping["start"][2], "Pomodoro Timer", function() self:start() end)
   end
 end
 
