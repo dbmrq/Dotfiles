@@ -1,11 +1,4 @@
-super = {"ctrl", "alt", "cmd"}
-
-winmanHotkeys = {
-    resizeUp = "K", resizeDown = "J", resizeLeft = "H", resizeRight = "L",
-    showDesktop = "O", cascadeAllWindows = ",", cascadeAppWindows = ".",
-    snapToGrid = "/", maximizeWindow = ";",
-    moveUp = "Up", moveDown = "Down", moveLeft = "Left", moveRight = "Right"
-}
+local super = {"ctrl", "alt", "cmd"}
 
 Cherry = hs.loadSpoon("Cherry")
 Cherry:bindHotkeys()
@@ -20,12 +13,33 @@ spoon.SpoonInstall.repos.dbmrq = {
 
 spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
 spoon.SpoonInstall:andUse("SlowQ", { repo = "dbmrq", start = true })
+
+-- WinMan window management
+spoon.SpoonInstall:andUse("WinMan", {
+    repo = "dbmrq",
+    start = true,
+    config = {
+        modifiers = super,
+    },
+    fn = function(s)
+        -- Use vim-style hjkl for resize, arrows for move
+        s:bindHotkeys({
+            resizeUp = "K",
+            resizeDown = "J",
+            resizeLeft = "H",
+            resizeRight = "L",
+            moveUp = "Up",
+            moveDown = "Down",
+            moveLeft = "Left",
+            moveRight = "Right",
+        })
+    end
+})
+
 -- Clear cached modules on reload to avoid stale hotkeys
-package.loaded["winman"] = nil
 package.loaded["keylock"] = nil
 package.loaded["mocha"] = nil
 
-require "winman"
 require "keylock"
 require "mocha"
 
