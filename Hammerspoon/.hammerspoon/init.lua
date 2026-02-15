@@ -9,6 +9,7 @@ hs.loadSpoon("SpoonInstall")
 spoon.SpoonInstall.repos.dbmrq = {
     url = "https://github.com/dbmrq/Spoons",
     desc = "Personal Spoons",
+    data = nil,  -- Force refresh of repo data
 }
 
 spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
