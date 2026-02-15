@@ -20,17 +20,76 @@ spoon.SpoonInstall.repos.dbmrq = {
 
 spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
 spoon.SpoonInstall:andUse("SlowQ", { repo = "dbmrq", start = true })
-
 -- Clear cached modules on reload to avoid stale hotkeys
 package.loaded["winman"] = nil
-package.loaded["snippets"] = nil
-package.loaded["collage"] = nil
+package.loaded["keylock"] = nil
 package.loaded["mocha"] = nil
 
 require "winman"
-require "snippets"
-require "collage"
+require "keylock"
 require "mocha"
+
+-- Custom functions for Collage submenus
+local function redditTopMonth()
+    hs.eventtap.keyStroke({"cmd"}, "c")
+    hs.timer.doAfter(0.1, function()
+        local selection = hs.pasteboard.getContents()
+        local subReddit = string.match(selection, '/r/(.-)/')
+        if subReddit then
+            hs.alert.show(subReddit)
+            hs.eventtap.keyStrokes('https://www.redditp.com/r/' .. subReddit .. '/top/?t=month')
+        else
+            hs.alert.show("No subreddit found in selection")
+        end
+    end)
+end
+
+local function redditTopYear()
+    hs.eventtap.keyStroke({"cmd"}, "c")
+    hs.timer.doAfter(0.1, function()
+        local selection = hs.pasteboard.getContents()
+        local subReddit = string.match(selection, '/r/(.-)/')
+        if subReddit then
+            hs.alert.show(subReddit)
+            hs.eventtap.keyStrokes('https://www.redditp.com/r/' .. subReddit .. '/top/?t=year')
+        else
+            hs.alert.show("No subreddit found in selection")
+        end
+    end)
+end
+
+-- Load Collage with custom submenus (fn callback ensures Spoon is loaded first)
+spoon.SpoonInstall:andUse("Collage", {
+    repo = "dbmrq",
+    start = true,
+    fn = function(s)
+        s:addSubmenu("Reddit", {
+            { title = "Top of the month", fn = redditTopMonth },
+            { title = "Top of the year", fn = redditTopYear },
+        })
+        s:addSubmenu("Utils", {
+            { title = "Lock Keyboard for Cleaning", fn = lockKeyboard },
+        })
+    end
+})
+
+-- Paste as keystrokes (bypasses paste restrictions)
+hs.hotkey.bind({"cmd", "shift"}, "v", function()
+    local contents = hs.pasteboard.getContents()
+    if contents then
+        hs.eventtap.keyStrokes(contents)
+    end
+end)
+
+-- Type email from git config
+hs.hotkey.bind(super, 'M', function()
+    local email = hs.execute("git config user.email"):gsub("%s+$", "")
+    if email and #email > 0 then
+        hs.eventtap.keyStrokes(email)
+    else
+        hs.alert.show("No email found in git config")
+    end
+end)
 
 -- Meta hotkeys
 hs.hotkey.bind(super, 'P', function() hs.openPreferences() end)
