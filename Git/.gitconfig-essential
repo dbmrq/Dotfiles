@@ -36,7 +36,7 @@
     remotes = remote -v
 
     unstage = reset -q HEAD --
-    discard = checkout --
+    discard = restore --
     uncommit = reset --mixed HEAD~
     amend = commit --amend --no-edit
 
@@ -50,7 +50,7 @@
     wordRegex = .
 
 [push]
-    default = upstream
+    default = simple
     followTags = true
     autoSetupRemote = true
 

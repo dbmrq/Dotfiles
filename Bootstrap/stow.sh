@@ -56,6 +56,10 @@ get_packages() {
             # Skip non-stow directories
             [[ "$dir" == "Bootstrap/" ]] && continue
             [[ "$dir" == "macOS/" ]] && continue  # macOS-specific (apps, not symlinks)
+            if [[ "$(uname -s)" != "Darwin" ]]; then
+                [[ "$dir" == "Hammerspoon/" ]] && continue
+                [[ "$dir" == "TeX/" ]] && continue
+            fi
             PACKAGES+=("${dir%/}")
         done
     fi

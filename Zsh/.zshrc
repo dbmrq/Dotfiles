@@ -11,10 +11,6 @@ fi
 # =============================================================================
 # Environment
 # =============================================================================
-# Default editor
-export EDITOR='nvim'
-export VISUAL='nvim'
-
 # Smart URLs (from Prezto environment module)
 autoload -Uz is-at-least
 if [[ ${ZSH_VERSION} != 5.1.1 && ${TERM} != "dumb" ]]; then
@@ -42,6 +38,11 @@ setopt NOTIFY               # Report background job status immediately
 unsetopt BG_NICE            # Don't lower priority of background jobs
 unsetopt HUP                # Don't kill jobs on shell exit
 unsetopt CHECK_JOBS         # Don't report on jobs when shell exits
+
+# =============================================================================
+# Common Shell Configuration
+# =============================================================================
+[[ -f "$HOME/.shell_common" ]] && source "$HOME/.shell_common"
 
 # =============================================================================
 # History
@@ -319,11 +320,6 @@ if command -v nnn &>/dev/null; then
         }
     }
 fi
-
-# =============================================================================
-# Common Shell Configuration
-# =============================================================================
-[[ -f "$HOME/.shell_common" ]] && source "$HOME/.shell_common"
 
 # =============================================================================
 # macOS-specific aliases
