@@ -29,8 +29,8 @@ spoon.SpoonInstall.repos.dbmrq = {
 spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
 spoon.SpoonInstall:andUse("SlowQ", { repo = "dbmrq", start = true })
 
--- Load CheatSheet and WinMan from local development path
--- (Change to SpoonInstall:andUse when ready to push to GitHub)
+-- Load CheatSheet and WinMan from local dev path for faster iteration
+-- To use published versions instead: spoon.SpoonInstall:andUse("CheatSheet", { repo = "dbmrq" })
 local devSpoonsPath = os.getenv("HOME") .. "/Documents/Programação/Misc/Spoons/Source"
 package.path = devSpoonsPath .. "/?.spoon/init.lua;" .. package.path
 
@@ -143,9 +143,6 @@ hs.hotkey.bind(super, 'M', function()
         hs.alert.show("No email found in git config")
     end
 end)
-
--- Note: Reload (Super+R) and Prefs (Super+P) moved to Collage > Hammerspoon submenu
--- to reduce Super+ hotkey clutter and avoid conflicts with WinMan modal bindings
 
 -- Auto-reload on config changes
 local function reloadConfig(files)
