@@ -19,7 +19,13 @@ alias la='ls -A'
 alias l='ls -CF'
 
 # Make zip archives easier
-zipr() { zip -r "$1.zip" "$1"; }
+zipr() {
+    if [ -z "$1" ]; then
+        echo "Usage: zipr <directory-or-file-name>" >&2
+        return 1
+    fi
+    zip -r "$1.zip" "$1"
+}
 
 # Quick file search
 alias ff='find . -name'
