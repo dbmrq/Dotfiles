@@ -19,13 +19,19 @@ alias la='ls -A'
 alias l='ls -CF'
 
 # Make zip archives easier
-alias zipr='f() { zip -r "$1.zip" "$1"; }; f'
+zipr() {
+    if [ -z "$1" ]; then
+        echo "Usage: zipr <directory-or-file-name>" >&2
+        return 1
+    fi
+    zip -r "$1.zip" "$1"
+}
 
 # Quick file search
 alias ff='find . -name'
 
 # Disk usage
-alias duh='du -h --max-depth=1 2>/dev/null | sort -h'
+alias duh='du -h -d 1 2>/dev/null | sort -h'
 
 # =============================================================================
 # Safety prompts

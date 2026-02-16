@@ -50,7 +50,7 @@ Works on both Intel and Apple Silicon Macs. The script is idempotent and can be 
 | `Vim/` | Both | Vim config; Neovim uses Lua with LSP, Treesitter, Telescope |
 | `Yazi/` | Both | Yazi file manager configuration |
 | `Zellij/` | Both | Zellij terminal multiplexer configuration |
-| `Zsh/` | macOS | Zsh configuration (standalone) |
+| `Zsh/` | Both | Zsh configuration (standalone) |
 
 ### Shell Configuration
 
@@ -59,7 +59,7 @@ Both Bash and Zsh source `~/.shell_common` for shared settings:
 - PATH configuration
 - Editor setup (auto-detects nvim if available)
 
-Platform-specific options are in `.bash_aliases` (Linux) and `.zshrc` (macOS).
+Platform-specific options are in `.bash_aliases` (Linux-specific) and `.zshrc` (additional shell-specific configuration).
 
 ## Individual Scripts
 

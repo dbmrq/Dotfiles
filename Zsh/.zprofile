@@ -5,9 +5,11 @@ if [[ "$OSTYPE" == darwin* ]]; then
     export BROWSER='open'
 fi
 
-# Editors
+# Editor
 export EDITOR='vim'
-export VISUAL='vim'
+export VISUAL="$EDITOR"
+
+# Pager
 export PAGER='less'
 
 # Language
@@ -38,4 +40,8 @@ fi
 TMPPREFIX="${TMPDIR%/}/zsh"
 
 # Homebrew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
