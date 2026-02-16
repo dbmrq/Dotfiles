@@ -43,7 +43,7 @@ Works on both Intel and Apple Silicon Macs. The script is idempotent and can be 
 | `Bootstrap/` | Both | Setup scripts and CLI tools |
 | `Ghostty/` | Both | Ghostty terminal configuration |
 | `Git/` | Both | Git configuration and aliases |
-| `Hammerspoon/` | macOS | Window management (multi-monitor support) |
+| `Hammerspoon/` | macOS | Window management with zellij-style modal bindings |
 | `Shell/` | Both | Shared shell config (`.shell_common`) used by both Bash and Zsh |
 | `SSH/` | Both | SSH configuration |
 | `TeX/` | macOS | LaTeX configuration |
