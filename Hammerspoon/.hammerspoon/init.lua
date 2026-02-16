@@ -39,8 +39,9 @@ spoon.CheatSheet.modifiers = super
 spoon.CheatSheet.delay = 0.5
 -- Group related commands together in the cheat sheet
 -- WinMan modal modes matching Zellij: p=pane, n=resize, h=move, t=tab/spaces
+-- S = Neru scroll mode (like Zellij's Ctrl+S)
 spoon.CheatSheet.keyOrder = {
-    "P", "N", "H", "T",
+    "P", "N", "H", "T", "S",
 }
 spoon.CheatSheet:start()
 
@@ -58,9 +59,11 @@ spoon.WinMan:start()
 -- Clear cached modules on reload to avoid stale hotkeys
 package.loaded["keylock"] = nil
 package.loaded["mocha"] = nil
+package.loaded["neru"] = nil
 
 require "keylock"
 require "mocha"
+require "neru"
 
 -- Custom functions for Collage submenus
 local function redditTopMonth()

@@ -9,6 +9,7 @@
 # =============================================================================
 tap "homebrew/bundle"
 tap "homebrew/services"
+tap "y3owk1n/tap"                 # Neru keyboard navigation
 
 # =============================================================================
 # CLI Tools (Essential)
@@ -73,6 +74,7 @@ brew "neovim"                 # Modern Vim fork
 # =============================================================================
 # category: gui_productivity
 cask "hammerspoon"            # macOS automation
+cask "neru"                   # Keyboard navigation (hints, scrolling)
 cask "appcleaner"             # App uninstaller
 cask "the-unarchiver"         # Archive extractor
 

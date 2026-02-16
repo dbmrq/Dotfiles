@@ -867,6 +867,11 @@ install_brew_apps() {
         install_spooninstall
     fi
 
+    # Install Neru launchd service if Neru was installed
+    if [[ " ${apps[*]} " == *" neru "* ]]; then
+        install_neru_services
+    fi
+
     print_success "GUI applications installed"
 }
 
@@ -897,6 +902,34 @@ install_spooninstall() {
         print_success "SpoonInstall installed"
     else
         print_warning "Failed to download SpoonInstall"
+    fi
+}
+
+# Install Neru launchd service (auto-start on login)
+install_neru_services() {
+    if ! command_exists neru; then
+        # Neru might be installed but not in PATH yet
+        if [[ -x "/Applications/Neru.app/Contents/MacOS/neru" ]]; then
+            local neru_cmd="/Applications/Neru.app/Contents/MacOS/neru"
+        else
+            print_warning "Neru not found, skipping service installation"
+            return 0
+        fi
+    else
+        local neru_cmd="neru"
+    fi
+
+    echo "  Installing Neru launchd service..."
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} $neru_cmd services install"
+        return 0
+    fi
+
+    if $neru_cmd services install 2>/dev/null; then
+        print_success "Neru service installed (will auto-start on login)"
+    else
+        print_warning "Failed to install Neru service (may already be installed)"
     fi
 }
 
