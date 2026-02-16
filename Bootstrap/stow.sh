@@ -52,7 +52,8 @@ get_packages() {
             fi
         done
     else
-        local os=$(uname -s)
+        local os
+        os=$(uname -s)
         for dir in */; do
             # Skip non-stow directories
             [[ "$dir" == "Bootstrap/" ]] && continue
