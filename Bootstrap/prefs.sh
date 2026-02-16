@@ -42,6 +42,9 @@ configure_screenshots() {
 configure_safari() {
     printf '  Configuring Safari...\n'
     defaults write com.apple.safari ShowFullURLInSmartSearchField -bool true 2>/dev/null || true
+    # Enable JavaScript from AppleEvents (for Hammerspoon copy-on-select in Safari)
+    /usr/libexec/PlistBuddy -c "Add :AllowJavaScriptFromAppleEvents bool true" ~/Library/Preferences/com.apple.Safari.plist 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Set :AllowJavaScriptFromAppleEvents true" ~/Library/Preferences/com.apple.Safari.plist 2>/dev/null || true
 }
 
 # Configure Finder settings
