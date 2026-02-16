@@ -29,8 +29,25 @@ ui {
     }
 }
 
-// Use Shift+h/l to move tabs
+// ---------------------------------------------------------
+// Keybindings: Using Zellij defaults (canonical reference)
+// ---------------------------------------------------------
+// We rely on Zellij's built-in modal bindings as the canonical
+// window management system. macOS (Hammerspoon) and Neovim
+// mirror these patterns for consistency:
+//
+// Ctrl+p  Pane mode    - hjkl focus, n new, x close, f fullscreen, w floating
+// Ctrl+t  Tab mode     - hl switch, n new, x close, r rename
+// Ctrl+n  Resize mode  - hjkl resize
+// Ctrl+h  Move mode    - hjkl reposition pane
+// Ctrl+s  Scroll mode  - scroll/search
+// Ctrl+g  Locked mode  - passthrough to app
+//
+// j/k in Pane mode cycles through stacked panes.
+// ---------------------------------------------------------
+
 keybinds {
+    // Only keep Shift+H/L for tab reordering (not a default)
     tab {
         bind "Shift Left" { MoveTab "Left"; }
         bind "Shift h" { MoveTab "Left"; }

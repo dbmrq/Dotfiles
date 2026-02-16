@@ -862,7 +862,42 @@ install_brew_apps() {
 
     run_cmd brew cleanup || true
 
+    # Install SpoonInstall if Hammerspoon was installed
+    if [[ " ${apps[*]} " == *" hammerspoon "* ]]; then
+        install_spooninstall
+    fi
+
     print_success "GUI applications installed"
+}
+
+# Install SpoonInstall for Hammerspoon (required for Spoon management)
+install_spooninstall() {
+    local spoon_dir="$HOME/.hammerspoon/Spoons"
+
+    if [[ -d "$spoon_dir/SpoonInstall.spoon" ]]; then
+        echo "  SpoonInstall already installed"
+        return 0
+    fi
+
+    echo "  Installing SpoonInstall for Hammerspoon..."
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} curl -sL https://github.com/Hammerspoon/Spoons/.../SpoonInstall.spoon.zip"
+        echo -e "  ${BLUE}[dry-run]${NC} unzip SpoonInstall.spoon.zip -d $spoon_dir"
+        return 0
+    fi
+
+    mkdir -p "$spoon_dir"
+    local zip_url="https://github.com/Hammerspoon/Spoons/raw/master/Spoons/SpoonInstall.spoon.zip"
+    local tmp_zip="/tmp/SpoonInstall.spoon.zip"
+
+    if curl -sL "$zip_url" -o "$tmp_zip"; then
+        unzip -q -o "$tmp_zip" -d "$spoon_dir"
+        rm -f "$tmp_zip"
+        print_success "SpoonInstall installed"
+    else
+        print_warning "Failed to download SpoonInstall"
+    fi
 }
 
 install_xcode_app() {

@@ -14,8 +14,8 @@ function setInputSource(sourceID)
     hs.keycodes.currentSourceID(sourceID)
 end
 
+-- Load Cherry (Pomodoro timer) - hotkeys moved to Collage menu
 Cherry = hs.loadSpoon("Cherry")
-Cherry:bindHotkeys()
 
 -- SpoonInstall for managing Spoons from GitHub
 hs.loadSpoon("SpoonInstall")
@@ -29,27 +29,31 @@ spoon.SpoonInstall.repos.dbmrq = {
 spoon.SpoonInstall:andUse("Readline", { repo = "dbmrq", start = true })
 spoon.SpoonInstall:andUse("SlowQ", { repo = "dbmrq", start = true })
 
--- CheatSheet shows all shortcuts when holding super modifiers
-spoon.SpoonInstall:andUse("CheatSheet", {
-    repo = "dbmrq",
-    start = true,
-    config = {
-        modifiers = super,
-        delay = 0.5,
-    },
-})
+-- Load CheatSheet and WinMan from local development path
+-- (Change to SpoonInstall:andUse when ready to push to GitHub)
+local devSpoonsPath = os.getenv("HOME") .. "/Documents/Programação/Misc/Spoons/Source"
+package.path = devSpoonsPath .. "/?.spoon/init.lua;" .. package.path
+
+hs.loadSpoon("CheatSheet")
+spoon.CheatSheet.modifiers = super
+spoon.CheatSheet.delay = 0.5
+-- Group related commands together in the cheat sheet
+-- WinMan modal modes matching Zellij: p=pane, n=resize, h=move, t=tab/spaces
+spoon.CheatSheet.keyOrder = {
+    "P", "N", "H", "T",
+}
+spoon.CheatSheet:start()
 
 -- WinMan window management
-spoon.SpoonInstall:andUse("WinMan", {
-    repo = "dbmrq",
-    start = true,
-    config = {
-        modifiers = super,
-        gridSize = "6x6",
-        gridMargins = "15,15",
-        cascadeSpacing = 40,
-    },
-})
+-- mode = "zellij" uses modal bindings (Super+p/n/h/t) matching Zellij patterns
+-- mode = "simple" uses direct bindings (HJKL resize, arrows move)
+hs.loadSpoon("WinMan")
+spoon.WinMan.modifiers = super
+spoon.WinMan.mode = "zellij"  -- Modal bindings: Super+p Focus, Super+n Resize, Super+h Move, Super+t Spaces
+spoon.WinMan.gridSize = "6x6"
+spoon.WinMan.gridMargins = "15,15"
+spoon.WinMan.cascadeSpacing = 40
+spoon.WinMan:start()
 
 -- Clear cached modules on reload to avoid stale hotkeys
 package.loaded["keylock"] = nil
@@ -107,6 +111,18 @@ spoon.SpoonInstall:andUse("Collage", {
         s:addSubmenu("Utils", {
             { title = "Lock Keyboard for Cleaning", fn = lockKeyboard },
         })
+        s:addSubmenu("Hammerspoon", {
+            { title = "Reload Config", fn = hs.reload },
+            { title = "Open Config", fn = function()
+                hs.execute("open -a 'Neovide' ~/.hammerspoon/init.lua")
+            end },
+            { title = "-" },
+            { title = "Preferences", fn = hs.openPreferences },
+            { title = "Console", fn = hs.openConsole },
+        })
+        s:addSubmenu("Pomodoro", {
+            { title = "Start Timer", fn = function() Cherry:start() end },
+        })
     end
 })
 
@@ -118,8 +134,8 @@ hs.hotkey.bind({"cmd", "shift"}, "v", function()
     end
 end)
 
--- Type email from git config
-hs.hotkey.bind(super, 'M', "typeEmail", function()
+-- Type email from git config (no description = hidden from CheatSheet)
+hs.hotkey.bind(super, 'M', function()
     local email = hs.execute("git config user.email"):gsub("%s+$", "")
     if email and #email > 0 then
         hs.eventtap.keyStrokes(email)
@@ -128,9 +144,8 @@ hs.hotkey.bind(super, 'M', "typeEmail", function()
     end
 end)
 
--- Meta hotkeys
-hs.hotkey.bind(super, 'P', "openPrefs", function() hs.openPreferences() end)
-hs.hotkey.bind(super, 'R', "reload", function() hs.reload() end)
+-- Note: Reload (Super+R) and Prefs (Super+P) moved to Collage > Hammerspoon submenu
+-- to reduce Super+ hotkey clutter and avoid conflicts with WinMan modal bindings
 
 -- Auto-reload on config changes
 local function reloadConfig(files)
