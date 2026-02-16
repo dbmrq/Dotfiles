@@ -91,40 +91,37 @@ local function redditTopYear()
     end)
 end
 
--- Load Collage with custom submenus (fn callback ensures Spoon is loaded first)
-spoon.SpoonInstall:andUse("Collage", {
-    repo = "dbmrq",
-    start = true,
-    fn = function(s)
-        s:addSubmenu("Reddit", {
-            { title = "Top of the month", fn = redditTopMonth },
-            { title = "Top of the year", fn = redditTopYear },
-        })
-        s:addSubmenu("Caffeinate", {
-            { title = "Stay Awake (until disabled)", fn = mochaTurnOn },
-            { title = "30 minutes", fn = mochaFor30m },
-            { title = "1 hour", fn = mochaFor60m },
-            { title = "2 hours", fn = mochaFor2h },
-            { title = "-" },  -- Separator
-            { title = "Allow Sleep", fn = mochaTurnOff },
-        })
-        s:addSubmenu("Utils", {
-            { title = "Lock Keyboard for Cleaning", fn = lockKeyboard },
-        })
-        s:addSubmenu("Hammerspoon", {
-            { title = "Reload Config", fn = hs.reload },
-            { title = "Open Config", fn = function()
-                hs.execute("open -a 'Neovide' ~/.hammerspoon/init.lua")
-            end },
-            { title = "-" },
-            { title = "Preferences", fn = hs.openPreferences },
-            { title = "Console", fn = hs.openConsole },
-        })
-        s:addSubmenu("Pomodoro", {
-            { title = "Start Timer", fn = function() Cherry:start() end },
-        })
-    end
+-- Load Collage from local dev path with custom submenus
+hs.loadSpoon("Collage")
+spoon.Collage.copyOnSelect = true
+spoon.Collage:addSubmenu("Reddit", {
+    { title = "Top of the month", fn = redditTopMonth },
+    { title = "Top of the year", fn = redditTopYear },
 })
+spoon.Collage:addSubmenu("Caffeinate", {
+    { title = "Stay Awake (until disabled)", fn = mochaTurnOn },
+    { title = "30 minutes", fn = mochaFor30m },
+    { title = "1 hour", fn = mochaFor60m },
+    { title = "2 hours", fn = mochaFor2h },
+    { title = "-" },  -- Separator
+    { title = "Allow Sleep", fn = mochaTurnOff },
+})
+spoon.Collage:addSubmenu("Utils", {
+    { title = "Lock Keyboard for Cleaning", fn = lockKeyboard },
+})
+spoon.Collage:addSubmenu("Hammerspoon", {
+    { title = "Reload Config", fn = hs.reload },
+    { title = "Open Config", fn = function()
+        hs.execute("open -a 'Neovide' ~/.hammerspoon/init.lua")
+    end },
+    { title = "-" },
+    { title = "Preferences", fn = hs.openPreferences },
+    { title = "Console", fn = hs.openConsole },
+})
+spoon.Collage:addSubmenu("Pomodoro", {
+    { title = "Start Timer", fn = function() Cherry:start() end },
+})
+spoon.Collage:start()
 
 -- Paste as keystrokes (bypasses paste restrictions)
 hs.hotkey.bind({"cmd", "shift"}, "v", function()
