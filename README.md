@@ -23,7 +23,7 @@ Supports macOS (Intel/Apple Silicon) and Linux. The installer offers two options
 | `Ghostty/` | Ghostty terminal configuration |
 | `Git/` | Git configuration and aliases |
 | `Hammerspoon/` | macOS window management |
-| `Neru/` | Neru configuration |
+| `Neru/` | Keyboard-driven mouse control (macOS) |
 | `Shell/` | Shared shell configuration |
 | `SSH/` | SSH configuration |
 | `TeX/` | LaTeX configuration |
