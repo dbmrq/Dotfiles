@@ -61,7 +61,10 @@
 					<key>COMMAND_STRING</key>
 					<string>for f in "$@"
 do
-    open -na Ghostty --args -e /opt/homebrew/bin/nvim "$f"
+    # Write file path to temp file for .zshrc to pick up
+    echo "$f" &gt; /tmp/nvim-open-file.txt
+    # Open new Ghostty window - .zshrc will start zellij and open the file
+    open -na Ghostty
 done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
@@ -187,9 +190,14 @@ done</string>
 	<dict/>
 	<key>workflowMetaData</key>
 	<dict>
+		<key>serviceInputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>serviceOutputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>serviceProcessesInput</key>
+		<integer>0</integer>
 		<key>workflowTypeIdentifier</key>
 		<string>com.apple.Automator.servicesMenu</string>
 	</dict>
 </dict>
 </plist>
-

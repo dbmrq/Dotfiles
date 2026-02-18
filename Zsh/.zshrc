@@ -8,6 +8,16 @@ if [[ -z "$ZELLIJ" ]] && command -v zellij &>/dev/null; then
     zellij
 fi
 
+# Open file with nvim if requested (used by Finder Quick Action)
+if [[ -n "$ZELLIJ" && -f /tmp/nvim-open-file.txt ]]; then
+    _nvim_file=$(<"/tmp/nvim-open-file.txt")
+    rm -f /tmp/nvim-open-file.txt
+    if [[ -n "$_nvim_file" && -e "$_nvim_file" ]]; then
+        nvim "$_nvim_file"
+    fi
+    unset _nvim_file
+fi
+
 # =============================================================================
 # Environment
 # =============================================================================
