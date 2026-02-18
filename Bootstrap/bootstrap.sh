@@ -1094,7 +1094,7 @@ install_quick_actions() {
         if $DRY_RUN; then
             echo -e "  ${BLUE}[dry-run]${NC} cp -R $workflow $services_dir/"
         else
-            rm -rf "$services_dir/$name"
+            rm -rf "${services_dir:?}/${name:?}"
             cp -R "$workflow" "$services_dir/"
         fi
         echo "  Installed: $name"
