@@ -1064,7 +1064,41 @@ setup_stow() {
     # Set up agent symlinks (cross-package symlinks that stow can't handle)
     setup_agent_symlinks
 
+    # Install macOS Quick Actions (Services)
+    is_macos && install_quick_actions
+
     print_success "Dotfiles symlinked"
+}
+
+install_quick_actions() {
+    # Install Quick Actions (Services) from macOS directory
+    local macos_dir="$DOTFILES_DIR/macOS"
+    local services_dir="$HOME/Library/Services"
+
+    # Find all .workflow bundles
+    local workflows=()
+    while IFS= read -r -d '' workflow; do
+        workflows+=("$workflow")
+    done < <(find "$macos_dir" -maxdepth 1 -name "*.workflow" -type d -print0 2>/dev/null)
+
+    if [[ ${#workflows[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    echo "  Installing macOS Quick Actions..."
+    mkdir -p "$services_dir"
+
+    for workflow in "${workflows[@]}"; do
+        local name
+        name=$(basename "$workflow")
+        if $DRY_RUN; then
+            echo -e "  ${BLUE}[dry-run]${NC} cp -R $workflow $services_dir/"
+        else
+            rm -rf "$services_dir/$name"
+            cp -R "$workflow" "$services_dir/"
+        fi
+        echo "  Installed: $name"
+    done
 }
 
 setup_agent_symlinks() {
