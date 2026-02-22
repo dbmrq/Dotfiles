@@ -97,6 +97,7 @@ end
 -- Load Collage from local dev path with custom submenus
 hs.loadSpoon("Collage")
 spoon.Collage.copyOnSelect = true
+spoon.Collage.copyOnSelectRequiresShift = true
 spoon.Collage:addSubmenu("Reddit", {
     { title = "Top of the month", fn = redditTopMonth },
     { title = "Top of the year", fn = redditTopYear },

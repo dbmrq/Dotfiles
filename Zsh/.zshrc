@@ -4,8 +4,64 @@
 
 # Start Zellij automatically (if not already inside Zellij)
 if [[ -z "$ZELLIJ" ]] && command -v zellij &>/dev/null; then
-    zellij delete-all-sessions --yes 2>/dev/null
-    zellij
+    # Quick action mode: skip session logic, start fresh
+    if [[ -f /tmp/nvim-open-file.txt ]]; then
+        zellij
+    # Check if any Zellij is already running (other terminal windows open)
+    elif pgrep -q "zellij" 2>/dev/null; then
+        # Other terminals exist, start independent session
+        zellij
+    else
+        # No Zellij running - check for orphaned sessions to resume
+        _detached_sessions=$(zellij list-sessions --no-formatting 2>/dev/null | grep -v "EXITED")
+        _session_count=$(echo "$_detached_sessions" | grep -c . 2>/dev/null)
+        _session_count=${_session_count:-0}
+
+        if [[ $_session_count -eq 0 ]]; then
+            zellij
+        elif [[ $_session_count -eq 1 ]]; then
+            # Single orphaned session, auto-resume
+            _session_name=$(echo "$_detached_sessions" | awk '{print $1}')
+            zellij attach "$_session_name"
+        else
+            # Multiple orphaned sessions, let user choose
+            echo "Found $_session_count orphaned Zellij sessions:"
+            echo ""
+            if command -v fzf &>/dev/null; then
+                _selected=$(echo "$_detached_sessions" | fzf --height=~50% --reverse \
+                    --header="Select session to resume (ESC for menu)" \
+                    --preview-window=hidden)
+                if [[ -n "$_selected" ]]; then
+                    _session_name=$(echo "$_selected" | awk '{print $1}')
+                    zellij attach "$_session_name"
+                else
+                    echo "[n]ew session  [d]elete all  [q]uit"
+                    read -sk1 "?> "
+                    echo ""
+                    case $_REPLY in
+                        d|D) zellij delete-all-sessions --yes 2>/dev/null; zellij ;;
+                        q|Q) ;;
+                        *) zellij ;;
+                    esac
+                fi
+            else
+                echo "$_detached_sessions" | nl -w2 -s') '
+                echo ""
+                echo "Enter number to resume, [n]ew session, [d]elete all, [q]uit"
+                read -r "?> "
+                case $_REPLY in
+                    [0-9]*)
+                        _session_name=$(echo "$_detached_sessions" | sed -n "${_REPLY}p" | awk '{print $1}')
+                        [[ -n "$_session_name" ]] && zellij attach "$_session_name" || zellij
+                        ;;
+                    d|D) zellij delete-all-sessions --yes 2>/dev/null; zellij ;;
+                    q|Q) ;;
+                    *) zellij ;;
+                esac
+            fi
+        fi
+        unset _detached_sessions _session_count _session_name _selected
+    fi
 fi
 
 # Open file with nvim if requested (used by Finder Quick Action)
