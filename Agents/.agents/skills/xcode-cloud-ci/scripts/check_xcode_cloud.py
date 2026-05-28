@@ -109,7 +109,7 @@ def get_workflows(token, product_id):
 
 def get_recent_builds_for_workflow(token, workflow_id, limit=5):
     """Get recent build runs for a specific workflow."""
-    params = {"limit": limit}
+    params = {"limit": limit, "sort": "-number"}
     data = api_request(f"/ciWorkflows/{workflow_id}/buildRuns", token, params)
     return data.get("data", [])
 

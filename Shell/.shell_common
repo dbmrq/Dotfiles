@@ -59,8 +59,12 @@ alias diff='diff --color=auto'
 # =============================================================================
 export PATH="$PATH:$HOME/.local/bin"
 
-# Dotfiles CLI
-[[ -d "$HOME/Dotfiles/Bootstrap" ]] && export PATH="$HOME/Dotfiles/Bootstrap:$PATH"
+# Dotfiles scripts (find location dynamically via symlinked .shell_common)
+if [[ -L "$HOME/.shell_common" ]]; then
+    _dotfiles_dir=$(dirname "$(dirname "$(readlink -f "$HOME/.shell_common")")")
+    [[ -d "$_dotfiles_dir/Bootstrap" ]] && export PATH="$_dotfiles_dir/Bootstrap:$PATH"
+    unset _dotfiles_dir
+fi
 
 # macOS-specific
 if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -84,6 +88,58 @@ if command -v nvim >/dev/null 2>&1; then
 fi
 
 # =============================================================================
+# Zellij helpers
+# =============================================================================
+# runpane: open or focus a small bottom pane for long-running commands
+runpane() {
+    case "${1:-}" in
+        -h|--help|help)
+            cat <<'EOF'
+Usage: runpane
+
+Open or focus a small bottom Zellij pane for long-running commands.
+
+Recommended use:
+  runpane      Open/focus the bottom run pane
+  rp           Short alias for runpane
+
+Tips:
+  - Use this for servers, REPLs, logs, and long pytest runs
+  - Use Neovim (<leader>p) for quick Python test/fix actions
+  - After opening, resize with Ctrl-n then j/k if needed
+EOF
+            return 0
+            ;;
+    esac
+
+    if [[ -z "$ZELLIJ" ]]; then
+        echo "runpane: not inside Zellij. Start Zellij first." >&2
+        return 1
+    fi
+
+    local layout shell_cmd
+    layout="$(zellij action dump-layout 2>/dev/null || true)"
+    if printf '%s' "$layout" | grep -Eq 'name *= *"run"|name *= *run'; then
+        zellij action move-focus down 2>/dev/null || true
+        echo "[runpane] Focused the bottom run pane. Use Ctrl-g to lock back into the app."
+        return 0
+    fi
+
+    shell_cmd="${SHELL:-/bin/zsh}"
+    zellij run -d down -n run --cwd "$PWD" -- "$shell_cmd" -i || return 1
+    zellij action move-focus up 2>/dev/null || true
+    zellij action resize increase down 2>/dev/null || true
+    zellij action resize increase down 2>/dev/null || true
+    zellij action resize increase down 2>/dev/null || true
+    zellij action resize increase down 2>/dev/null || true
+    zellij action move-focus down 2>/dev/null || true
+
+    echo "[runpane] Opened a bottom run pane for long-running commands. Resize with Ctrl-n then j/k if needed."
+}
+
+alias rp='runpane'
+
+# =============================================================================
 # Git shortcuts (supplement gitconfig aliases)
 # =============================================================================
 alias g='git'
@@ -94,3 +150,6 @@ alias gco='git checkout'
 alias gcm='git commit -m'
 alias gp='git push'
 alias gl='git pull'
+
+# AI commit alias (git-ai script in ~/.local/bin)
+alias gci='git ai'

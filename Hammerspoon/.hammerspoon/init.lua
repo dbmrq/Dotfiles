@@ -60,10 +60,12 @@ spoon.WinMan:start()
 package.loaded["keylock"] = nil
 package.loaded["mocha"] = nil
 package.loaded["neru"] = nil
+package.loaded["videolight"] = nil
 
 require "keylock"
 require "mocha"
 require "neru"
+require "videolight"
 
 -- Custom functions for Collage submenus
 local function redditTopMonth()
@@ -98,6 +100,13 @@ end
 hs.loadSpoon("Collage")
 spoon.Collage.copyOnSelect = true
 spoon.Collage.copyOnSelectRequiresShift = true
+spoon.Collage:addSubmenu("Video Light", {
+    { title = "Toggle", fn = videoLightToggle },
+    { title = "-" },
+    { title = "Soft Cream", fn = videoLightPresetSoftCream },
+    { title = "Pure White", fn = videoLightPresetPureWhite },
+    { title = "Warm Glow", fn = videoLightPresetWarmGlow },
+})
 spoon.Collage:addSubmenu("Reddit", {
     { title = "Top of the month", fn = redditTopMonth },
     { title = "Top of the year", fn = redditTopYear },

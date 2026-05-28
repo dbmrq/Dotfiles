@@ -8,6 +8,20 @@ if ok then
   capabilities = vim.tbl_deep_extend('force', capabilities, cmp_nvim_lsp.default_capabilities())
 end
 
+local python_root_markers = {
+  'pyproject.toml',
+  'ruff.toml',
+  '.ruff.toml',
+  'pytest.ini',
+  'tox.ini',
+  'setup.py',
+  'setup.cfg',
+  'requirements.txt',
+  'Pipfile',
+  'pyrightconfig.json',
+  '.git',
+}
+
 -- Configure LSP servers using vim.lsp.config (Neovim 0.11+)
 vim.lsp.config('lua_ls', {
   cmd = { 'lua-language-server' },
@@ -27,7 +41,27 @@ vim.lsp.config('lua_ls', {
 vim.lsp.config('pyright', {
   cmd = { 'pyright-langserver', '--stdio' },
   filetypes = { 'python' },
-  root_markers = { 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', 'pyrightconfig.json', '.git' },
+  root_markers = python_root_markers,
+  settings = {
+    pyright = {
+      disableOrganizeImports = true,
+    },
+    python = {
+      analysis = {
+        autoSearchPaths = true,
+        diagnosticMode = 'openFilesOnly',
+        typeCheckingMode = 'basic',
+        useLibraryCodeForTypes = true,
+      },
+    },
+  },
+  capabilities = capabilities,
+})
+
+vim.lsp.config('ruff', {
+  cmd = { 'ruff', 'server' },
+  filetypes = { 'python' },
+  root_markers = python_root_markers,
   capabilities = capabilities,
 })
 
@@ -53,7 +87,7 @@ vim.lsp.config('marksman', {
 })
 
 -- Enable configured servers
-vim.lsp.enable({ 'lua_ls', 'pyright', 'ts_ls', 'sourcekit', 'marksman' })
+vim.lsp.enable({ 'lua_ls', 'pyright', 'ruff', 'ts_ls', 'sourcekit', 'marksman' })
 
 -- LSP keymaps on attach
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -74,8 +108,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
     map('<leader>rn', vim.lsp.buf.rename, 'Rename')
     map('<leader>ca', vim.lsp.buf.code_action, 'Code action', { 'n', 'x' })
 
-    -- Highlight references on cursor hold
     local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client and client.name == 'ruff' then
+      client.server_capabilities.hoverProvider = false
+    end
+
+    -- Highlight references on cursor hold
     if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
       local highlight_augroup = vim.api.nvim_create_augroup('lsp-highlight', { clear = false })
       vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {

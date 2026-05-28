@@ -13,28 +13,137 @@ MIMETYPE="$(file -bL --mime-type -- "$FPATH")"
 # Socket for nvim server (unique per nnn instance)
 NNN_NVIM_SOCKET="${NNN_NVIM_SOCKET:-/tmp/nvim-nnn-$PPID.sock}"
 
+PYTHON_TAB_NAME="python"
+
+python_ide_socket() {
+    tmpdir="${TMPDIR:-/tmp}"
+    case "$tmpdir" in
+        */) ;;
+        *) tmpdir="$tmpdir/" ;;
+    esac
+
+    session_name=$(printf '%s' "${ZELLIJ_SESSION_NAME:-default}" | tr -c 'A-Za-z0-9_.-' '_')
+    printf '%snvim-python-ide-%s.sock\n' "$tmpdir" "$session_name"
+}
+
+shell_quote() {
+    printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\''/g")"
+}
+
+tab_exists() {
+    zellij action query-tab-names 2>/dev/null | grep -Fxq "$1"
+}
+
+is_python_file() {
+    case "$1" in
+        *.py|*.pyi|*.pyw)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+layout_has_named_pane() {
+    zellij action dump-layout 2>/dev/null | grep -Eq "name *= *\"$1\"|name *= *$1"
+}
+
+focus_editor_area() {
+    zellij action move-focus up 2>/dev/null || true
+    zellij action move-focus right 2>/dev/null || true
+}
+
+resize_current_pane() {
+    direction="$1"
+    count="$2"
+    i=0
+    while [ "$i" -lt "$count" ]; do
+        zellij action resize increase "$direction" 2>/dev/null || break
+        i=$((i + 1))
+    done
+}
+
+ensure_run_pane() {
+    cwd="$1"
+    [ -n "$ZELLIJ" ] || return 0
+    layout_has_named_pane run && return 0
+
+    focus_editor_area
+    zellij run -d down -n run --cwd "$cwd" -- "${SHELL:-/bin/sh}" -i || return 1
+    zellij action rename-pane run 2>/dev/null || true
+    zellij action move-focus up 2>/dev/null || true
+    resize_current_pane down 4
+}
+
+ensure_python_files_pane() {
+    cwd="$1"
+    socket="$2"
+
+    layout_has_named_pane files && return 0
+    zellij run -d right -n files --cwd "$cwd" -- env "NNN_OPENER=$HOME/.nnn-opener" "NNN_NVIM_SOCKET=$socket" nnn -c || return 1
+    zellij action rename-pane files 2>/dev/null || true
+    zellij action move-pane left 2>/dev/null || true
+    zellij action move-focus right 2>/dev/null || true
+    resize_current_pane left 4
+}
+
+start_editor_in_current_pane() {
+    socket="$1"
+    file="$2"
+    command_text="exec nvim --listen $(shell_quote "$socket") $(shell_quote "$file")"
+    zellij action rename-pane editor 2>/dev/null || true
+    zellij action write-chars "$command_text"
+    zellij action write 13
+}
+
+open_in_python_ide() {
+    file="$1"
+    cwd=$(dirname "$file")
+    socket=$(python_ide_socket)
+
+    if tab_exists "$PYTHON_TAB_NAME"; then
+        zellij action go-to-tab-name "$PYTHON_TAB_NAME" || return 1
+    else
+        zellij action new-tab -n "$PYTHON_TAB_NAME" --cwd "$cwd" || return 1
+    fi
+
+    zellij action rename-tab "$PYTHON_TAB_NAME" 2>/dev/null || true
+    ensure_python_files_pane "$cwd" "$socket" || return 1
+    ensure_run_pane "$cwd" || return 1
+    focus_editor_area
+
+    if [ -S "$socket" ]; then
+        nvim --server "$socket" --remote "$file"
+        zellij action rename-pane editor 2>/dev/null || true
+    else
+        start_editor_in_current_pane "$socket" "$file"
+    fi
+
+    return 0
+}
+
 # Function to open file in editor (handles IDE mode in zellij)
 open_in_editor() {
     file="$1"
 
     # Inside zellij: use IDE mode
     if [ -n "$ZELLIJ" ]; then
+        if is_python_file "$file"; then
+            open_in_python_ide "$file"
+            return $?
+        fi
+
+        zellij action rename-pane files 2>/dev/null || true
+
         if [ -S "$NNN_NVIM_SOCKET" ]; then
             # nvim already running - send file to existing instance
             nvim --server "$NNN_NVIM_SOCKET" --remote "$file"
             # Focus the editor pane
-            zellij action focus-next-pane 2>/dev/null
+            zellij action move-focus right 2>/dev/null || zellij action focus-next-pane 2>/dev/null
         else
-            # First file - create nvim pane to the left of nnn
-            # This makes nvim the "main" pane and nnn stays on the right
-            zellij run -d left -- nvim --listen "$NNN_NVIM_SOCKET" "$file"
-            # Shrink nnn (now on the right) to ~20%
-            zellij action resize increase left
-            zellij action resize increase left
-            zellij action resize increase left
-            zellij action resize increase left
-            zellij action resize increase left
-            zellij action resize increase left
+            # First file - create nvim pane to the right of nnn so the file browser stays on the left
+            zellij run -d right -- nvim --listen "$NNN_NVIM_SOCKET" "$file"
+            zellij action move-focus right 2>/dev/null || zellij action focus-next-pane 2>/dev/null
+            resize_current_pane left 4
         fi
         return 0
     fi

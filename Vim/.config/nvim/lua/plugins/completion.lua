@@ -38,7 +38,7 @@ return {
             luasnip.lsp_expand(args.body)
           end,
         },
-        completion = { completeopt = 'menu,menuone,noinsert' },
+        completion = { completeopt = 'menu,menuone,noselect' },
         mapping = cmp.mapping.preset.insert({
           -- Select next/previous item
           ['<C-n>'] = cmp.mapping.select_next_item(),
@@ -50,6 +50,13 @@ return {
 
           -- Accept completion
           ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+          ['<CR>'] = cmp.mapping(function(fallback)
+            if cmp.visible() and cmp.get_selected_entry() then
+              cmp.confirm({ select = false })
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
 
           -- Manually trigger completion
           ['<C-Space>'] = cmp.mapping.complete({}),

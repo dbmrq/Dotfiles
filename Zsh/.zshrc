@@ -3,7 +3,29 @@
 # =============================================================================
 
 # Start Zellij automatically (if not already inside Zellij)
-if [[ -z "$ZELLIJ" ]] && command -v zellij &>/dev/null; then
+# Skip when run from Finder scripts (.command/.sh) - detect via parent process
+function _is_finder_script() {
+    # Check if parent process is a .command or .sh script launched from Finder
+    # When Terminal opens a .command file, the parent process name contains the script name
+    local parent_cmd
+    parent_cmd=$(ps -o comm= -p $PPID 2>/dev/null)
+    [[ "$parent_cmd" == *".command" || "$parent_cmd" == *".sh" ]] && return 0
+
+    # Also check grandparent (sometimes there's an intermediate shell)
+    local grandparent_pid grandparent_cmd
+    grandparent_pid=$(ps -o ppid= -p $PPID 2>/dev/null | tr -d ' ')
+    if [[ -n "$grandparent_pid" && "$grandparent_pid" != "1" ]]; then
+        grandparent_cmd=$(ps -o comm= -p "$grandparent_pid" 2>/dev/null)
+        [[ "$grandparent_cmd" == *".command" || "$grandparent_cmd" == *".sh" ]] && return 0
+    fi
+
+    # Check SKIP_ZELLIJ env var (can be set by scripts that don't want zellij)
+    [[ -n "$SKIP_ZELLIJ" ]] && return 0
+
+    return 1
+}
+
+if [[ -z "$ZELLIJ" ]] && command -v zellij &>/dev/null && ! _is_finder_script; then
     # Quick action mode: skip session logic, start fresh
     if [[ -f /tmp/nvim-open-file.txt ]]; then
         zellij
@@ -401,3 +423,4 @@ fi
 # Machine-specific configuration
 # =============================================================================
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+

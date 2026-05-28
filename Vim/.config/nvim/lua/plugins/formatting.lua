@@ -7,7 +7,7 @@ return {
     {
       '<leader>gf',
       function()
-        require('conform').format({ async = true, lsp_fallback = true })
+        require('conform').format({ async = true, lsp_format = 'fallback' })
       end,
       mode = '',
       desc = 'Format buffer',
@@ -16,15 +16,15 @@ return {
   opts = {
     formatters_by_ft = {
       lua = { 'stylua' },
+      python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
       swift = { 'swiftformat' },
       -- Add more as needed:
-      -- python = { 'black' },
       -- javascript = { 'prettier' },
       -- typescript = { 'prettier' },
     },
     format_on_save = {
       timeout_ms = 500,
-      lsp_fallback = true,
+      lsp_format = 'fallback',
     },
     notify_on_error = true,
   },

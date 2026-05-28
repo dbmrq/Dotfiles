@@ -14,6 +14,7 @@ return {
         { '<leader>f', group = 'Find' },
         { '<leader>g', group = 'Git/Format' },
         { '<leader>d', group = 'Document/Delete' },
+        { '<leader>p', group = 'Python' },
         { '<leader>w', group = 'Workspace/Window' },
         { '<leader>t', group = 'Toggle' },
         { '<leader>c', group = 'Code/Change' },

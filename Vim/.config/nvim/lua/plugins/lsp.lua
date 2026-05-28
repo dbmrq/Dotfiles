@@ -16,6 +16,7 @@ return {
         -- LSP servers
         'lua-language-server',
         'pyright',
+        'ruff',
         'typescript-language-server',
         'marksman',  -- Markdown
         -- Formatters
