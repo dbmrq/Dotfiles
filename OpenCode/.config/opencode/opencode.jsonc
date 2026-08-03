@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "plugin": ["./plugin/caffeinate.ts"],
+  "agent": {
+    "explore": {
+      "model": "opencode/deepseek-v4-flash-free"
+    },
+    "general": {
+      "model": "opencode/deepseek-v4-flash-free"
+    }
+  }
+}

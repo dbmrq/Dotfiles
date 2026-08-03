@@ -1061,8 +1061,9 @@ setup_stow() {
     # Call stow.sh which handles everything (installs stow if needed, stows all packages)
     "$SCRIPT_DIR/stow.sh" --force
 
-    # Set up agent symlinks (cross-package symlinks that stow can't handle)
-    setup_agent_symlinks
+    # Install agent skills from the canonical agent-skills repo
+    # (ensures ~/.agents is a real dir, locates/clones the repo, runs install-all.sh)
+    setup_agent_skills
 
     # Install macOS Quick Actions (Services)
     is_macos && install_quick_actions
@@ -1101,9 +1102,10 @@ install_quick_actions() {
     done
 }
 
-setup_agent_symlinks() {
-    # Sets up symlinks from each agent's skills directory to the shared ~/.agents/skills
-    # Also installs catalog skills from the manifest
+setup_agent_skills() {
+    # Installs agent skills from the canonical dbmrq/agent-skills repo.
+    # skills.sh ensures ~/.agents is a real directory, locates/clones the
+    # agent-skills checkout, and runs its scripts/install-all.sh.
 
     if [[ -x "$SCRIPT_DIR/skills.sh" ]]; then
         if $DRY_RUN; then
@@ -1112,7 +1114,7 @@ setup_agent_symlinks() {
             "$SCRIPT_DIR/skills.sh" install
         fi
     else
-        print_warning "skills.sh not found, skipping agent setup"
+        print_warning "skills.sh not found, skipping agent skills setup"
     fi
 }
 

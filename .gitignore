@@ -17,6 +17,13 @@ id_*
 *.pem
 SSH/.ssh/known_hosts*
 
+# App Store Connect / signing credentials (keep in password manager, not here)
+*.p8
+*.p12
+*.cer
+*.csr
+*.key
+
 # GitHub CLI (contains auth tokens and user preferences)
 Vim/.config/gh/
 
@@ -30,10 +37,25 @@ Vim/.config/fish/
 # Hammerspoon Spoons (managed by SpoonInstall)
 Hammerspoon/.hammerspoon/Spoons/
 
-# Project-local agent skills (installed via npx skills from .skills-manifest.txt)
-# These are symlinks/copies created by npx skills for each agent
-.agents/
-.augment/
-.cursor/
-.claude/
-.copilot/
+# Agent skills mirrors. The canonical personal/external/Xcode skills now live
+# in the dbmrq/agent-skills repo and are installed by its scripts/install-all.sh
+# into real dirs outside this repo (~/.agents/skills, ~/.config/opencode/skills,
+# ~/.claude/skills, ...). Never track mirrors or project-local installs here.
+# (Anchored to the repo root: on case-insensitive filesystems an unanchored
+# "Agents/" also matched OpenCode/.config/opencode/agents/.)
+/Agents/
+/.agents/
+/.augment/
+/.cursor/
+/.claude/
+/.copilot/
+
+# OpenCode package: skills and node_modules are generated/installed at runtime
+# (skill mirrors + plugin dependency install tree), not user-authored config.
+OpenCode/.config/opencode/skills/
+OpenCode/.config/opencode/node_modules/
+OpenCode/.config/opencode/.gitignore
+
+# Runtime/cache data that must never be committed
+.cache/
+*.log

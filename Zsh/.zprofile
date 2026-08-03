@@ -45,7 +45,3 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
 elif [[ -x /usr/local/bin/brew ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
 fi
-
-# >>> Codex installer >>>
-export PATH="/Users/dbmrq/.local/bin:$PATH"
-# <<< Codex installer <<<

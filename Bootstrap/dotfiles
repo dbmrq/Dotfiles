@@ -88,7 +88,7 @@ do_update() {
         print_ok "Homebrew updated"
     fi
 
-    # 4. Update agent skills
+    # 4. Update agent skills (runs agent-skills scripts/install-all.sh, idempotent)
     if [[ -x "$SCRIPT_DIR/skills.sh" ]]; then
         "$SCRIPT_DIR/skills.sh" update
     fi
