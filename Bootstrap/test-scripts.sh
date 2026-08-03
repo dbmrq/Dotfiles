@@ -287,6 +287,20 @@ else
 fi
 echo ""
 
+# --- Test 9: Stow adoption safety ---
+echo "9. Stow adoption safety"
+if command -v stow >/dev/null 2>&1 && command -v git >/dev/null 2>&1; then
+    if "$SCRIPT_DIR/test-stow-adopt.sh" >/dev/null 2>&1; then
+        pass "test-stow-adopt.sh: adoption safety tests passed"
+    else
+        fail "test-stow-adopt.sh: adoption safety tests failed"
+        "$SCRIPT_DIR/test-stow-adopt.sh" || true
+    fi
+else
+    warn "stow or git not installed, skipping adoption safety tests"
+fi
+echo ""
+
 # --- Summary ---
 echo "============================="
 if [[ $ERRORS -eq 0 ]]; then

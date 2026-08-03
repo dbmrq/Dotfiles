@@ -114,6 +114,26 @@ jobs:
           fi
           echo "✓ Dry run did not modify filesystem"
 
+  test-stow-adopt-safety:
+    name: Test stow.sh adoption safety
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stow
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install stow
+          else
+            sudo apt-get update && sudo apt-get install -y stow
+          fi
+
+      - name: Run adoption safety tests
+        run: ./Bootstrap/test-stow-adopt.sh
+
   test-lib-functions:
     name: Test lib.sh functions
     runs-on: ubuntu-latest
