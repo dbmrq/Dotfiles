@@ -1058,6 +1058,10 @@ setup_stow() {
         return 0
     fi
 
+    # Pre-create real config dirs before stowing so Stow links individual files
+    # instead of folding ~/.config/opencode and ~/.config/zed into repo symlinks.
+    ensure_managed_config_dirs
+
     # Call stow.sh which handles everything (installs stow if needed, stows all packages)
     "$SCRIPT_DIR/stow.sh" --force
 

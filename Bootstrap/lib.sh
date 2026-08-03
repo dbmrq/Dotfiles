@@ -573,6 +573,31 @@ get_missing_gui_apps() {
     echo "${missing[*]}"
 }
 
+# Ensure $HOME/.config/{opencode,zed} are real directories before stowing.
+#
+# GNU Stow folds a package directory into a single symlink when the matching
+# target directory does not exist (e.g. on a fresh HOME). For opencode and Zed
+# that would make ~/.config/opencode and ~/.config/zed symlinks into this repo,
+# so skill installs and editor runtime files would be written into the working
+# tree. Pre-creating the real directories forces Stow to link each managed file
+# individually, keeping runtime state outside the repo.
+#
+# Idempotent: no-op when the directory already exists (real or symlink). Never
+# deletes anything.
+ensure_managed_config_dirs() {
+    local dir
+    for dir in "$HOME/.config/opencode" "$HOME/.config/zed"; do
+        if [[ -d "$dir" && ! -L "$dir" ]]; then
+            print_ok "$dir is already a real directory"
+        elif [[ -L "$dir" ]]; then
+            print_warn "$dir is a symlink -> $(readlink "$dir"); leaving it untouched"
+        else
+            mkdir -p "$dir"
+            print_ok "Created real $dir"
+        fi
+    done
+}
+
 # Check if dotfiles are properly symlinked
 check_stow_status() {
     if [[ -x "$LIB_DIR/stow.sh" ]]; then

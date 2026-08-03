@@ -56,6 +56,14 @@ OpenCode/.config/opencode/skills/
 OpenCode/.config/opencode/node_modules/
 OpenCode/.config/opencode/.gitignore
 
+# Zed runtime data: created by the editor inside .config/zed (database, prompts
+# index, themes store). Defensive coverage in case a machine still folds the
+# directory into this repo; these must never be committed.
+Zed/.config/zed/db/
+Zed/.config/zed/prompts/
+Zed/.config/zed/themes/
+Zed/.config/zed/logs/
+
 # Runtime/cache data that must never be committed
 .cache/
 *.log

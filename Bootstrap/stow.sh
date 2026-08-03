@@ -173,6 +173,10 @@ main() {
         echo ""
     fi
 
+    # Pre-create real config directories that Stow would otherwise fold into
+    # whole-directory symlinks into the repo (see ensure_managed_config_dirs).
+    ensure_managed_config_dirs
+
     # Stow with --adopt to handle conflicts
     print_info "Stowing packages..."
     if ! stow --adopt --restow --target="$HOME" --ignore='\.DS_Store' "${PACKAGES[@]}" 2>&1; then
