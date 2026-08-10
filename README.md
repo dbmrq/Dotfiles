@@ -15,12 +15,7 @@ Supports macOS (Intel/Apple Silicon) and Linux. The installer offers two options
 
 ## Linux / Debian setup
 
-The same command-line bootstrap works on Debian/Ubuntu. For a full,
-copy-pasteable walkthrough (prereqs → clone → skills → opencode binary →
-credentials → what is skipped on Linux → VaultWarden tip), see
-[debian-setup.md](debian-setup.md).
-
-The short version:
+The same command-line bootstrap works on Debian/Ubuntu:
 
 ```sh
 sudo apt-get install -y git curl stow zsh
@@ -50,9 +45,7 @@ opencode auth list
 ### Self-hosted VaultWarden
 
 For a self-hosted, Bitwarden-compatible password manager on a Debian box, use
-[vaultwarden/server](https://github.com/vaultwarden/server); see
-[debian-setup.md](debian-setup.md#6-optional-self-host-vaultwarden) for a
-starter `docker run` command.
+[vaultwarden/server](https://github.com/vaultwarden/server).
 
 ## Contents
 
