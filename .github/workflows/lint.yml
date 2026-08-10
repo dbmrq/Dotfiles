@@ -32,6 +32,8 @@ jobs:
           fetch-depth: 0
 
       - name: Install gitleaks
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           version=$(gh api repos/gitleaks/gitleaks/releases/latest --jq '.tag_name | ltrimstr("v")')
