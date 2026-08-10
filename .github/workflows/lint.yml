@@ -1,3 +1,57 @@
-Aug 10 19:46:56 2026
-Aug 10 19:47:54 2026
-Aug 10 19:43:22 2026
+name: Lint and Test
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on Bootstrap scripts
+        run: |
+          for script in Bootstrap/*.sh; do
+            echo "Checking $script..."
+            shellcheck --severity=warning "$script"
+          done
+
+  secrets-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          version=$(gh api repos/gitleaks/gitleaks/releases/latest --jq '.tag_name | ltrimstr("v")')
+          curl -fsSL -o /tmp/gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz"
+          sudo tar -xzf /tmp/gitleaks.tar.gz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Run gitleaks
+        run: |
+          gitleaks detect --source "$GITHUB_WORKSPACE" --redact=100 --verbose
+
+  test:
+    name: Bootstrap Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install dependencies
+        run: brew install stow
+
+      - name: Run test suite
+        run: ./Bootstrap/test-scripts.sh
