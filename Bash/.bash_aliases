@@ -35,6 +35,8 @@ fi
 PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 
 # =============================================================================
-# Docker helpers (homelab)
+# Machine-specific configuration
 # =============================================================================
-# Sourced from ~/.bashrc: /home/daniel/docker/scripts/docker-helpers.sh
+# Machine-local overrides and paths (e.g. homelab docker-helpers) belong in
+# ~/.bash_aliases.local, never here. Copy from Bash/.bash_aliases.local.example.
+[ -f "$HOME/.bash_aliases.local" ] && . "$HOME/.bash_aliases.local"

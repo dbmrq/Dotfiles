@@ -1,4 +1,5 @@
-# Never stow machine-local configs or backups
+# Never stow example files or machine-local configs/backups
+\.example$
 \.DS_Store$
 \.local$
 \.swp$

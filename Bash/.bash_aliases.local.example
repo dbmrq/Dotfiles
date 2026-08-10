@@ -1,0 +1,28 @@
+# Machine-specific bash configuration
+# Copy this file to ~/.bash_aliases.local and customize as needed
+#
+# This file is sourced at the end of .bash_aliases and is for settings
+# that vary per machine (tool-specific paths, API keys, etc.)
+#
+# Note: never put machine-specific paths in the tracked .bash_aliases;
+# keep them in ~/.bash_aliases.local instead. It is intentionally not stowed.
+
+# Example: homelab docker-helpers script (machine-local path)
+# Replace <MACHINE_PATH> with the absolute path on this machine.
+# [ -f "<MACHINE_PATH>" ] && . "<MACHINE_PATH>"
+
+# Example: uv (Python package manager)
+# [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+# Example: nvm (Node Version Manager)
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Example: rbenv (Ruby version manager)
+# eval "$(rbenv init - bash)"
+
+# Example: Work-specific aliases
+# alias vpn='networksetup -connectpppoeservice "Work VPN"'
+
+# Example: API keys (be careful with these!)
+# export OPENAI_API_KEY="sk-..."
