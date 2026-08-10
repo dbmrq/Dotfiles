@@ -15,29 +15,44 @@ Supports macOS (Intel/Apple Silicon) and Linux. The installer offers two options
 
 ## Linux / Debian setup
 
-The same command-line bootstrap works on Debian/Ubuntu with the standard
-prereqs installed first:
+The same command-line bootstrap works on Debian/Ubuntu. For a full,
+copy-pasteable walkthrough (prereqs → clone → skills → opencode binary →
+credentials → what is skipped on Linux → VaultWarden tip), see
+[debian-setup.md](debian-setup.md).
+
+The short version:
 
 ```sh
 sudo apt-get install -y git curl stow zsh
+sudo apt-get install -y \
+  $(curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/packages-debian.txt \
+     | grep -vE '^\s*#|^\s*$' | tr '\n' ' ')
 curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/install.sh | bash
 ```
 
-OpenCode on a new machine needs its config and credentials copied from the
-source Mac — never from git:
+OpenCode's config, agents, and plugin are tracked here and delivered by
+`stow.sh`; only the credential file is copied from the source Mac — never
+fetched from git:
 
 ```sh
-scp <mac>:'~/.config/opencode/opencode.jsonc' ~/.config/opencode/opencode.jsonc
-scp <mac>:'~/.local/share/opencode/auth.json'  ~/.local/share/opencode/auth.json
+mkdir -p ~/.local/share/opencode
+scp <mac>:'~/.local/share/opencode/auth.json' ~/.local/share/opencode/auth.json
 chmod 600 ~/.local/share/opencode/auth.json
 ```
 
-Then install the current `opencode` binary and run a profile check:
+Then install the current `opencode` binary and verify the profiles:
 
 ```sh
 curl -fsSL https://opencode.ai/install | bash
 opencode auth list
 ```
+
+### Self-hosted VaultWarden
+
+For a self-hosted, Bitwarden-compatible password manager on a Debian box, use
+[vaultwarden/server](https://github.com/vaultwarden/server); see
+[debian-setup.md](debian-setup.md#6-optional-self-host-vaultwarden) for a
+starter `docker run` command.
 
 ## Contents
 
