@@ -1,2 +1,4 @@
-# Don't symlink example files
+# Don't symlink example files or machine-local overrides
 \.example$
+\.local$
+\.DS_Store$

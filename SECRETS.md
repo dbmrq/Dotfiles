@@ -30,6 +30,22 @@ a new Mac. Machine-specific settings, credentials, and runtime state are
   `*.csr`/`*.key`.
 - Machine-specific overrides that live **only** on each machine (see below).
 
+## OpenCode provider credentials
+
+OpenCode provider API keys live **only** in `~/.local/share/opencode/auth.json`
+(schema: `{ "<provider>": { "type": "api", "key": "…" } }`). The file must stay
+mode `0600` and is never committed.
+
+- `~/.local/share/opencode/auth.json` — the sole credential store for OpenCode
+  (nvidia, abacate, openrouter, opencode-go, …).
+- `OpenCode/.config/opencode/opencode.jsonc` must never contain an inline
+  `provider.<name>.options.apiKey`. Config only declares `baseURL`, model IDs,
+  agent pins, and plugins; opencode loads the key from `auth.json` at runtime.
+- Recreate on a new machine by copying `auth.json` from the source machine
+  (`scp` + `chmod 600`), or use `opencode auth login`. Never commit it.
+- CI runs a secret scan (patterns such as `sk-*`, inline `apiKey`, private
+  keys) to fail any accidental credential commit before it can be pushed.
+
 ## Machine-local files (ignored, recreated per machine)
 
 These files are created by the bootstrap or by hand and are **not** tracked:

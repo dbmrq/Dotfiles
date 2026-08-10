@@ -1,0 +1,7 @@
+# Never stow runtime/debris: credentials, deps, skills, backups
+\.DS_Store$
+node_modules$
+skills/
+auth\.json$
+\.swp$
+~$

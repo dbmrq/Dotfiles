@@ -6,11 +6,13 @@ on:
     paths:
       - "Bootstrap/**"
       - ".github/workflows/test-bootstrap.yml"
+      - ".github/actions/setup-stow/action.yml"
   pull_request:
     branches: [master, main]
     paths:
       - "Bootstrap/**"
       - ".github/workflows/test-bootstrap.yml"
+      - ".github/actions/setup-stow/action.yml"
   workflow_dispatch:
 
 jobs:
@@ -18,10 +20,15 @@ jobs:
     name: Test stow.sh (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install stow
         run: brew install stow
+
+      - name: Assert stow >= 2.4
+        run: |
+          stow --version | grep -E 'version 2\.[4-9]' \
+            || { echo "stow too old (need >= 2.4, the --adopt --restow fix)"; exit 1; }
 
       - name: First run - should succeed
         run: ./Bootstrap/stow.sh --force
@@ -29,57 +36,63 @@ jobs:
       - name: Verify symlinks created
         run: |
           # Check key symlinks exist
-          test -L ~/.zshrc || { echo "~/.zshrc not symlinked"; exit 1; }
-          test -L ~/.vimrc || { echo "~/.vimrc not symlinked"; exit 1; }
-          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked"; exit 1; }
-          echo "✓ Key symlinks verified"
+          test -L ~/.zshrc || { echo "$HOME/.zshrc not symlinked"; exit 1; }
+          test -L ~/.vimrc || { echo "$HOME/.vimrc not symlinked"; exit 1; }
+          test -L ~/.gitconfig || { echo "$HOME/.gitconfig not symlinked"; exit 1; }
+          echo "Key symlinks verified"
 
       - name: Second run - should be idempotent
         run: ./Bootstrap/stow.sh --force
 
       - name: Verify symlinks unchanged
         run: |
-          test -L ~/.zshrc || { echo "~/.zshrc not symlinked after 2nd run"; exit 1; }
-          test -L ~/.vimrc || { echo "~/.vimrc not symlinked after 2nd run"; exit 1; }
-          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked after 2nd run"; exit 1; }
-          echo "✓ Symlinks still valid after second run"
+          test -L ~/.zshrc || { echo "$HOME/.zshrc not symlinked after 2nd run"; exit 1; }
+          test -L ~/.vimrc || { echo "$HOME/.vimrc not symlinked after 2nd run"; exit 1; }
+          test -L ~/.gitconfig || { echo "$HOME/.gitconfig not symlinked after 2nd run"; exit 1; }
+          echo "Symlinks still valid after second run"
 
   test-stow-ubuntu:
     name: Test stow.sh (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - name: Install stow
-        run: sudo apt-get update && sudo apt-get install -y stow
+      # Ubuntu's apt stow is 2.3.1, which has the --adopt --restow unstow bug
+      # fixed in 2.4.0; build a pinned 2.4.x so CI is deterministic.
+      - name: Install stow (pinned build)
+        uses: ./.github/actions/setup-stow
 
       - name: First run - should succeed
         run: ./Bootstrap/stow.sh --force
 
       - name: Verify symlinks created
         run: |
-          test -L ~/.bashrc || test -L ~/.bash_aliases || echo "Bash config linked"
-          test -L ~/.vimrc || { echo "~/.vimrc not symlinked"; exit 1; }
-          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked"; exit 1; }
-          echo "✓ Key symlinks verified"
+          test -L ~/.vimrc || { echo "$HOME/.vimrc not symlinked"; exit 1; }
+          test -L ~/.gitconfig || { echo "$HOME/.gitconfig not symlinked"; exit 1; }
+          echo "Key symlinks verified"
 
       - name: Second run - should be idempotent
         run: ./Bootstrap/stow.sh --force
 
       - name: Verify symlinks unchanged
         run: |
-          test -L ~/.vimrc || { echo "~/.vimrc not symlinked after 2nd run"; exit 1; }
-          test -L ~/.gitconfig || { echo "~/.gitconfig not symlinked after 2nd run"; exit 1; }
-          echo "✓ Symlinks still valid after second run"
+          test -L ~/.vimrc || { echo "$HOME/.vimrc not symlinked after 2nd run"; exit 1; }
+          test -L ~/.gitconfig || { echo "$HOME/.gitconfig not symlinked after 2nd run"; exit 1; }
+          echo "Symlinks still valid after second run"
 
   test-bootstrap-dry-run-macos:
     name: Test bootstrap.sh --dry-run (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install stow
         run: brew install stow
+
+      - name: Assert stow >= 2.4
+        run: |
+          stow --version | grep -E 'version 2\.[4-9]' \
+            || { echo "stow too old (need >= 2.4, the --adopt --restow fix)"; exit 1; }
 
       - name: Run bootstrap in dry-run mode
         run: ./Bootstrap/bootstrap.sh --dry-run
@@ -91,16 +104,16 @@ jobs:
             echo "ERROR: Dry run created symlinks"
             exit 1
           fi
-          echo "✓ Dry run did not modify filesystem"
+          echo "Dry run did not modify filesystem"
 
   test-bootstrap-dry-run-ubuntu:
     name: Test bootstrap.sh --dry-run (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - name: Install stow
-        run: sudo apt-get update && sudo apt-get install -y stow
+      - name: Install stow (pinned build)
+        uses: ./.github/actions/setup-stow
 
       - name: Run bootstrap in dry-run mode
         run: ./Bootstrap/bootstrap.sh --dry-run
@@ -112,7 +125,7 @@ jobs:
             echo "ERROR: Dry run created symlinks"
             exit 1
           fi
-          echo "✓ Dry run did not modify filesystem"
+          echo "Dry run did not modify filesystem"
 
   test-stow-adopt-safety:
     name: Test stow.sh adoption safety
@@ -121,15 +134,21 @@ jobs:
         os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - name: Install stow
+      - name: Install stow (macOS)
+        if: runner.os == 'macOS'
+        run: brew install stow
+
+      - name: Assert stow >= 2.4 (macOS)
+        if: runner.os == 'macOS'
         run: |
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            brew install stow
-          else
-            sudo apt-get update && sudo apt-get install -y stow
-          fi
+          stow --version | grep -E 'version 2\.[4-9]' \
+            || { echo "stow too old (need >= 2.4, the --adopt --restow fix)"; exit 1; }
+
+      - name: Install stow (Ubuntu, pinned build)
+        if: runner.os == 'Linux'
+        uses: ./.github/actions/setup-stow
 
       - name: Run adoption safety tests
         run: ./Bootstrap/test-stow-adopt.sh
@@ -138,7 +157,7 @@ jobs:
     name: Test lib.sh functions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Source and test library functions
         run: |
@@ -149,7 +168,7 @@ jobs:
             echo "ERROR: Should not detect macOS on Ubuntu"
             exit 1
           fi
-          echo "✓ OS detection works"
+          echo "OS detection works"
 
           # Test package manager detection
           pm=$(get_package_manager)
@@ -157,11 +176,10 @@ jobs:
             echo "ERROR: Expected apt, got $pm"
             exit 1
           fi
-          echo "✓ Package manager detection works"
+          echo "Package manager detection works"
 
           # Test color functions exist
           type print_header >/dev/null 2>&1 || { echo "print_header missing"; exit 1; }
           type print_success >/dev/null 2>&1 || { echo "print_success missing"; exit 1; }
           type print_error >/dev/null 2>&1 || { echo "print_error missing"; exit 1; }
-          echo "✓ Color functions defined"
-
+          echo "Color functions defined"

@@ -1,0 +1,5 @@
+# Never stow machine-local configs or backups
+\.DS_Store$
+\.local$
+\.swp$
+~$

@@ -1,0 +1,46 @@
+name: Setup GNU Stow
+description: >-
+  Install a pinned GNU Stow release built from source. GitHub's Ubuntu runners
+  resolve `apt install stow` to 2.3.1, whose --adopt --restow unstow logic has
+  a bug fixed in 2.4.0; building a pinned release keeps CI deterministic across
+  runners. The build is cached, so the common re-run path costs almost nothing.
+inputs:
+  version:
+    description: GNU Stow release to build and install (e.g. 2.4.1)
+    required: false
+    default: "2.4.1"
+runs:
+  using: composite
+  steps:
+    - name: Cache Stow build
+      id: cache-stow
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: ${{ runner.tool_cache }}/stow
+        key: stow-${{ inputs.version }}-${{ runner.os }}
+        restore-keys: stow-${{ runner.os }}
+
+    - name: Build GNU Stow from source
+      if: steps.cache-stow.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        prefix="$RUNNER_TOOL_CACHE/stow"
+        mkdir -p "$prefix"
+        curl -fsSL "https://ftp.gnu.org/gnu/stow/stow-${{ inputs.version }}.tar.gz" -o "/tmp/stow-${{ inputs.version }}.tar.gz"
+        tar -xzf "/tmp/stow-${{ inputs.version }}.tar.gz" -C /tmp
+        cd "/tmp/stow-${{ inputs.version }}"
+        ./configure --prefix="$prefix"
+        make
+        make install
+
+    - name: Add Stow to PATH
+      shell: bash
+      run: |
+        echo "$RUNNER_TOOL_CACHE/stow/bin" >> "$GITHUB_PATH"
+
+    - name: Assert Stow version
+      shell: bash
+      run: |
+        stow --version | grep -E "version ${{ inputs.version }}" \
+          || { echo "stow version mismatch: expected ${{ inputs.version }}"; exit 1; }

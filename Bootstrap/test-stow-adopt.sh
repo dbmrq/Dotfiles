@@ -67,10 +67,18 @@ make_fixture() {
 
 # run_stow <home-dir> <repo-dir> <stow.sh args...>
 # Runs stow.sh against a fake HOME and fake repo via environment overrides.
+# Returns stow.sh's exit code; on failure the captured output is printed to
+# stderr so a CI regression shows the real stow error instead of silently
+# swallowing it behind `>/dev/null 2>&1`.
 run_stow() {
     local home="$1" repo="$2"
     shift 2
-    HOME="$home" DOTFILES_DIR="$repo" "$STOW_SH" "$@"
+    local out rc=0
+    out=$(HOME="$home" DOTFILES_DIR="$repo" "$STOW_SH" "$@" 2>&1) || rc=$?
+    if (( rc != 0 )); then
+        printf 'run_stow failed (exit %s):\n%s\n' "$rc" "$out" >&2
+    fi
+    return "$rc"
 }
 
 echo "stow.sh adoption safety tests"
@@ -82,8 +90,9 @@ R="$T/repo"; H="$T/home"
 make_fixture "$R" "$H"
 printf 'user local version\n' >"$H/.fakerc"
 
-run_stow "$H" "$R" FakePkg --force >/dev/null 2>&1
-expect "clean repo + conflicting HOME file: stow --force succeeds" $?
+rc=0
+run_stow "$H" "$R" FakePkg --force || rc=$?
+expect "clean repo + conflicting HOME file: stow --force succeeds" "$rc"
 
 if [[ -L "$H/.fakerc" ]]; then
     ok "adopted file became a symlink"
@@ -98,8 +107,9 @@ else
 fi
 
 # --- 2. Idempotency ----------------------------------------------------------
-run_stow "$H" "$R" FakePkg --force >/dev/null 2>&1
-expect "second run on clean repo is idempotent" $?
+rc=0
+run_stow "$H" "$R" FakePkg --force || rc=$?
+expect "second run on clean repo is idempotent" "$rc"
 if [[ -z "$(git -C "$R" status --porcelain)" ]]; then
     ok "repo still clean after second run"
 else
@@ -114,7 +124,7 @@ make_fixture "$R" "$H"
 printf 'uncommitted user edit\n' >>"$R/FakePkg/.otherfile"
 printf 'user local version\n' >"$H/.fakerc"
 
-if run_stow "$H" "$R" FakePkg --force >/dev/null 2>&1; then
+if run_stow "$H" "$R" FakePkg --force; then
     bad "dirty repo + --force should abort"
 else
     ok "dirty repo + --force aborts"
@@ -138,9 +148,12 @@ printf 'user local version\n' >"$H/.fakerc"
 
 # Empty input = accept every default: Proceed? y, then Abort before adopting? y.
 set +e
-printf '\n' | HOME="$H" DOTFILES_DIR="$R" "$STOW_SH" FakePkg >/dev/null 2>&1
+out=$(printf '\n' | HOME="$H" DOTFILES_DIR="$R" "$STOW_SH" FakePkg 2>&1)
 rc=$?
 set -e
+if [[ $rc -ne 0 ]]; then
+    printf 'stow.sh failed (exit %s):\n%s\n' "$rc" "$out" >&2
+fi
 if [[ $rc -eq 3 ]]; then
     ok "interactive + dirty repo: default answer aborts (exit 3)"
 else
@@ -159,9 +172,12 @@ printf 'user local version\n' >"$H/.fakerc"
 
 # Proceed? y | Abort before adopting? n | Reset adopted files? y
 set +e
-printf 'y\nn\ny\n' | HOME="$H" DOTFILES_DIR="$R" "$STOW_SH" FakePkg >/dev/null 2>&1
+out=$(printf 'y\nn\ny\n' | HOME="$H" DOTFILES_DIR="$R" "$STOW_SH" FakePkg 2>&1)
 rc=$?
 set -e
+if [[ $rc -ne 0 ]]; then
+    printf 'stow.sh failed (exit %s):\n%s\n' "$rc" "$out" >&2
+fi
 if [[ $rc -eq 0 ]]; then
     ok "interactive proceed-anyway completes (exit 0)"
 else

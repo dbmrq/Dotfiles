@@ -11,16 +11,25 @@ Bootstrap/.bootstrap_state
 .gitconfig.local
 SSH/.ssh/config.local
 
-# SSH keys and known hosts (should never be committed)
+# SSH keys, agent sockets, and known hosts (should never be committed)
 *.pub
 id_*
 *.pem
 SSH/.ssh/known_hosts*
+SSH/.ssh/agent/
 
-# App Store Connect / signing credentials (keep in password manager, not here)
+# Backup/swap files
+*.swp
+*.un~
+*~
+
+# Auth/credential files (keep in password manager/auth store, not here)
+**/auth.json
+credentials.json
 *.p8
 *.p12
 *.cer
+*.crt
 *.csr
 *.key
 

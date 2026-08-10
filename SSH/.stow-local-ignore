@@ -1,0 +1,18 @@
+# Never stow runtime secrets/sockets/host data
+\.DS_Store$
+known_hosts
+agent/
+\.local$
+\.pub$
+id_*
+
+# Auth/credential/backup files
+auth\.json$
+\.pem$
+\.key$
+\.p8$
+\.p12$
+\.cer$
+\.crt$
+\.swp$
+~$

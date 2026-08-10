@@ -1,0 +1,13 @@
+# Never stow Vim runtime state or backups
+\.DS_Store$
+\.vim/undo$
+
+# Auth/credential/backup files
+auth\.json$
+\.pem$
+\.key$
+\.flags$
+\.local$
+\.swp$
+\.un~$
+~$

@@ -254,9 +254,16 @@ main() {
     # silently reset (see pre_adopt_safety_check).
     pre_adopt_safety_check
 
-    # Stow with --adopt to handle conflicts
+    # Stow with --adopt to handle conflicts. Note: --restow is deliberately NOT
+    # combined with --adopt here: GNU Stow 2.3.1 (Ubuntu's apt package) aborts
+    # during --restow's unstow phase on the very non-link target file that
+    # --adopt is meant to adopt ("existing target is neither a link nor a
+    # directory"). 2.4.0 fixed that unstow logic, but dropping --restow is safe
+    # on both versions: --adopt already re-stows, and a re-run on an up-to-date
+    # tree is a no-op. handle_adopted_files below runs --restow separately,
+    # when all targets are symlinks.
     print_info "Stowing packages..."
-    if ! stow --adopt --restow --target="$HOME" --ignore='\.DS_Store' "${PACKAGES[@]}" 2>&1; then
+    if ! stow --adopt --target="$HOME" --ignore='\.DS_Store' "${PACKAGES[@]}" 2>&1; then
         print_error "Stow failed"
         exit "$E_GENERAL"
     fi
