@@ -1,4 +1,4 @@
 # Don't symlink example files or machine-local overrides
-\.example$
+.*\.example$
 \.local$
 \.DS_Store$

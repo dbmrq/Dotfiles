@@ -1,5 +1,5 @@
 # Never stow example files or machine-local configs/backups
-\.example$
+.*\.example$
 \.DS_Store$
 \.local$
 \.swp$
