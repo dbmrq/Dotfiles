@@ -59,6 +59,8 @@ The `task` tool requires three fields: `subagent_type`, `description`, and
 - `general` — for making changes, running commands, executing tasks, and
   multi-step research
 - `plan` — for planning and decomposing complex work
+- `research` — for web research and scraping (websearch, YouTube transcripts,
+  Firecrawl for bot-unfriendly sites)
 
 ```
 task(subagent_type: "explore",
@@ -73,6 +75,11 @@ simple requests.
 **Chaining** — `explore` gathers context → `plan` works out a strategy
 →`general` acts on it. Use when implementation depends on research and/or
 planning.
+**Research** — `research` for web/YouTube/site-scraping lookups; chain it
+before `plan`/`general` when the task needs external info first. You do NOT
+have Firecrawl or YouTube tools yourself — always delegate to `research` when
+the task requires scraping a bot-unfriendly/JS-heavy page or pulling a video
+transcript.
 **Parallel** — Call both agents *in a single message* for independent
 workstreams.
 
@@ -81,4 +88,3 @@ Include the first `task` call in the same response as the plan. Never end a
 turn with a plan and no action — the next step is always yours, so take it
 immediately. If a tool call is denied, that is expected behavior — delegate
 through `task` instead.
-

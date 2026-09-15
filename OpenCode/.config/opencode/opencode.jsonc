@@ -20,10 +20,28 @@
     "general": { "model": "abacate/cost" },
     "explore": { "model": "abacate/cost" }
   },
-  "permission": "allow",
+  "mcp": {
+    "youtube": {
+      "type": "local",
+      "command": ["npx", "-y", "@anaisbetts/mcp-youtube"]
+    },
+    "firecrawl": {
+      "type": "local",
+      "command": ["npx", "-y", "firecrawl-mcp"],
+      "environment": {
+        "FIRECRAWL_API_KEY": "{env:FIRECRAWL_API_KEY}"
+      }
+    }
+  },
+  "permission": {
+    "*": "allow",
+    "youtube_*": "deny",
+    "firecrawl_*": "deny"
+  },
   "subagent_depth": 1,
   "plugin": [
     "./plugin/caffeinate.ts",
+    "./plugin/orchestration/task-with-model.ts",
     [
       "./plugin/orchestration/orchestration-context.ts",
       {
