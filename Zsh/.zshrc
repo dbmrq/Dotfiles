@@ -128,6 +128,15 @@ unsetopt HUP                # Don't kill jobs on shell exit
 unsetopt CHECK_JOBS         # Don't report on jobs when shell exits
 
 # =============================================================================
+# OpenCode: enable the built-in keyless Exa `websearch` tool
+# =============================================================================
+# The `websearch` tool is only active for the OpenCode provider, or when
+# OPENCODE_ENABLE_EXA is truthy (https://opencode.ai/docs/tools/). Persisted
+# here (tracked in the dotfiles repo) alongside the `research` subagent that
+# relies on it. Must be set before opencode starts.
+export OPENCODE_ENABLE_EXA=1
+
+# =============================================================================
 # Common Shell Configuration
 # =============================================================================
 [[ -f "$HOME/.shell_common" ]] && source "$HOME/.shell_common"
@@ -424,3 +433,7 @@ fi
 # =============================================================================
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/dbmrq/.local/bin:$PATH"
