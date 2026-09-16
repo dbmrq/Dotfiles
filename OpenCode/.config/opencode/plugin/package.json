@@ -1,0 +1,14 @@
+{
+  "name": "opencode-orchestration-context-plugin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --preserve-symlinks --preserve-symlinks-main --test ../tests/orchestration-context.test.ts ../tests/task-with-model.test.ts",
+    "check": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.2"
+  }
+}
