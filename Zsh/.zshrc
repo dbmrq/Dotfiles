@@ -432,8 +432,3 @@ fi
 # Machine-specific configuration
 # =============================================================================
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-
-
-
-# Added by Antigravity CLI installer
-export PATH="/Users/dbmrq/.local/bin:$PATH"

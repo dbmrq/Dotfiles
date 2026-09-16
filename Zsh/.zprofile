@@ -46,6 +46,8 @@ elif [[ -x /usr/local/bin/brew ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
 fi
 
-
-# Added by Antigravity CLI installer
-export PATH="/Users/dbmrq/.local/bin:$PATH"
+# User-local binaries (e.g. Antigravity CLI, pipx, uv)
+path=(
+    $HOME/.local/bin
+    $path
+)
