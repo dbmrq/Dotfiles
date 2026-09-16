@@ -20,7 +20,7 @@ jobs:
     name: Test stow.sh (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Install stow
         run: brew install stow
@@ -55,7 +55,7 @@ jobs:
     name: Test stow.sh (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       # Ubuntu's apt stow is 2.3.1, which has the --adopt --restow unstow bug
       # fixed in 2.4.0; build a pinned 2.4.x so CI is deterministic.
@@ -84,7 +84,7 @@ jobs:
     name: Test bootstrap.sh --dry-run (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Install stow
         run: brew install stow
@@ -110,7 +110,7 @@ jobs:
     name: Test bootstrap.sh --dry-run (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Install stow (pinned build)
         uses: ./.github/actions/setup-stow
@@ -134,7 +134,7 @@ jobs:
         os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Install stow (macOS)
         if: runner.os == 'macOS'
@@ -157,7 +157,7 @@ jobs:
     name: Test lib.sh functions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Source and test library functions
         run: |
