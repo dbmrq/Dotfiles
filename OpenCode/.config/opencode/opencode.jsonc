@@ -1,57 +1,30 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "provider": {
-    "abacate": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Abacate",
-      "options": {
-        "baseURL": "https://llm.abacate.top/v1"
-      },
-      "models": {
-        "cost": { "name": "Cost" },
-        "balance": { "name": "Balance" },
-        "performance": { "name": "Performance" }
-      }
-    }
-  },
-  "model": "abacate/cost",
-  "agent": {
-    "build": { "model": "abacate/cost" },
-    "general": { "model": "abacate/cost" },
-    "explore": { "model": "abacate/cost" }
-  },
+
+  // youtube + firecrawl are only usable by the `research` subagent.
+  // The top-level deny below hides their tools from every other agent;
+  // agents/research.md re-allows them for itself. `codemode: false` keeps
+  // them on each agent's native tool list instead of a shared Code Mode
+  // catalog, so other agents never even see their descriptions.
   "mcp": {
-    "youtube": {
-      "type": "local",
-      "command": ["npx", "-y", "@anaisbetts/mcp-youtube"]
-    },
-    "firecrawl": {
-      "type": "local",
-      "command": ["npx", "-y", "firecrawl-mcp"],
-      "environment": {
-        "FIRECRAWL_API_KEY": "{env:FIRECRAWL_API_KEY}"
-      }
-    }
-  },
-  "permission": {
-    "*": "allow",
-    "youtube_*": "deny",
-    "firecrawl_*": "deny"
-  },
-  "subagent_depth": 1,
-  "plugin": [
-    "./plugin/caffeinate.ts",
-    "./plugin/orchestration/task-with-model.ts",
-    [
-      "./plugin/orchestration/orchestration-context.ts",
-      {
-        "context": {
-          "maxContextCharacters": 2000,
-          "scopeDepth": 16,
-          "retentionMaxRecords": 50,
-          "retentionMaxAgeDays": 30
+    "servers": {
+      "youtube": {
+        "type": "local",
+        "command": ["npx", "-y", "@anaisbetts/mcp-youtube"],
+        "codemode": false
+      },
+      "firecrawl": {
+        "type": "local",
+        "command": ["npx", "-y", "firecrawl-mcp"],
+        "codemode": false,
+        "environment": {
+          "FIRECRAWL_API_KEY": "{env:FIRECRAWL_API_KEY}"
         }
       }
-    ]
+    }
+  },
+  "permissions": [
+    { "action": "youtube_*", "resource": "*", "effect": "deny" },
+    { "action": "firecrawl_*", "resource": "*", "effect": "deny" }
   ]
 }

@@ -25,9 +25,9 @@ sudo apt-get install -y \
 curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/install.sh | bash
 ```
 
-OpenCode's config, agents, and plugin are tracked here and delivered by
-`stow.sh`; only the credential file is copied from the source Mac — never
-fetched from git:
+OpenCode's config and agents are tracked here and delivered by `stow.sh` (the
+retired plugin/orchestration stack is kept under `OpenCode/archive/`); only the
+credential file is copied from the source Mac — never fetched from git:
 
 ```sh
 mkdir -p ~/.local/share/opencode
@@ -57,7 +57,7 @@ For a self-hosted, Bitwarden-compatible password manager on a Debian box, use
 | `Git/` | Git configuration and aliases |
 | `Hammerspoon/` | macOS window management |
 | `Neru/` | Keyboard-driven mouse control (macOS) |
-| `OpenCode/` | OpenCode CLI config (opencode.jsonc, agents, plugin) |
+| `OpenCode/` | OpenCode CLI config (opencode.jsonc, agents; retired plugin stack under `archive/`) |
 | `Shell/` | Shared shell configuration |
 | `SSH/` | SSH configuration |
 | `TeX/` | LaTeX configuration |

@@ -5,3 +5,4 @@ skills/
 auth\.json$
 \.swp$
 ~$
+^/archive

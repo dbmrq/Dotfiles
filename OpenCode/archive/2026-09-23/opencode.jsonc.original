@@ -1,0 +1,57 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "abacate": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Abacate",
+      "options": {
+        "baseURL": "https://llm.abacate.top/v1"
+      },
+      "models": {
+        "cost": { "name": "Cost" },
+        "balance": { "name": "Balance" },
+        "performance": { "name": "Performance" }
+      }
+    }
+  },
+  "model": "abacate/cost",
+  "agent": {
+    "build": { "model": "abacate/cost" },
+    "general": { "model": "abacate/cost" },
+    "explore": { "model": "abacate/cost" }
+  },
+  "mcp": {
+    "youtube": {
+      "type": "local",
+      "command": ["npx", "-y", "@anaisbetts/mcp-youtube"]
+    },
+    "firecrawl": {
+      "type": "local",
+      "command": ["npx", "-y", "firecrawl-mcp"],
+      "environment": {
+        "FIRECRAWL_API_KEY": "{env:FIRECRAWL_API_KEY}"
+      }
+    }
+  },
+  "permission": {
+    "*": "allow",
+    "youtube_*": "deny",
+    "firecrawl_*": "deny"
+  },
+  "subagent_depth": 1,
+  "plugin": [
+    "./plugin/caffeinate.ts",
+    "./plugin/orchestration/task-with-model.ts",
+    [
+      "./plugin/orchestration/orchestration-context.ts",
+      {
+        "context": {
+          "maxContextCharacters": 2000,
+          "scopeDepth": 16,
+          "retentionMaxRecords": 50,
+          "retentionMaxAgeDays": 30
+        }
+      }
+    ]
+  ]
+}

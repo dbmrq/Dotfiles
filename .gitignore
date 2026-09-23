@@ -65,6 +65,11 @@ OpenCode/.config/opencode/skills/
 OpenCode/.config/opencode/node_modules/
 OpenCode/.config/opencode/.gitignore
 
+# OpenCode archive: the retired plugin/orchestration stack is tracked for
+# history, but its plan docs are personal notes (private repo and homelab
+# details) and stay local only.
+OpenCode/archive/*/docs/
+
 # Zed runtime data: created by the editor inside .config/zed (database, prompts
 # index, themes store). Defensive coverage in case a machine still folds the
 # directory into this repo; these must never be committed.

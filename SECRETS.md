@@ -9,8 +9,10 @@ a new Mac. Machine-specific settings, credentials, and runtime state are
 
 - Shell (Zsh/Bash), Git, Vim/Neovim, Hammerspoon, Ghostty, Yazi, Zellij,
   TeX, SSH config layout, macOS helpers.
-- OpenCode config (`OpenCode/.config/opencode/`): `opencode.jsonc`, `agents/`,
-  the `plugin/` code, and the plugin's `package.json`/`package-lock.json`.
+- OpenCode config (`OpenCode/.config/opencode/`): `opencode.jsonc` and
+  `agents/`. The retired plugin/orchestration stack (code, tests, old config)
+  is kept under `OpenCode/archive/`; its `docs/` notes are gitignored and stay
+  local.
 - Zed config (`Zed/.config/zed/settings.json`).
 - Agent skills are **not** tracked. They come from the canonical
   `dbmrq/agent-skills` repo, installed by `Bootstrap/skills.sh` → its
@@ -39,8 +41,8 @@ mode `0600` and is never committed.
 - `~/.local/share/opencode/auth.json` — the sole credential store for OpenCode
   (nvidia, abacate, openrouter, opencode-go, …).
 - `OpenCode/.config/opencode/opencode.jsonc` must never contain an inline
-  `provider.<name>.options.apiKey`. Config only declares `baseURL`, model IDs,
-  agent pins, and plugins; opencode loads the key from `auth.json` at runtime.
+  API key. The config only declares MCP servers, permissions, and agent
+  definitions; OpenCode loads credentials from `auth.json` at runtime.
 - Recreate on a new machine by copying `auth.json` from the source machine
   (`scp` + `chmod 600`), or use `opencode auth login`. Never commit it.
 - CI runs a secret scan (patterns such as `sk-*`, inline `apiKey`, private
