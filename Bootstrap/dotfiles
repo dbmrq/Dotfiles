@@ -146,9 +146,10 @@ if [[ $# -gt 0 ]]; then
         edit)   do_edit ;;
         stow)   do_stow ;;
         prefs)  do_prefs ;;
+        vault)  shift; exec "$SCRIPT_DIR/vault.sh" "$@" ;;
         cd)     echo "$DOTFILES_DIR" ;;
         *)
-            echo "Usage: dotfiles [sync|update|status|edit|stow|prefs|cd]"
+            echo "Usage: dotfiles [sync|update|status|edit|stow|prefs|vault|cd]"
             echo "Or just run 'dotfiles' for interactive menu."
             exit 1
             ;;

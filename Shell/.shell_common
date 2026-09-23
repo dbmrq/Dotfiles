@@ -62,7 +62,10 @@ export PATH="$PATH:$HOME/.local/bin"
 # Dotfiles scripts (find location dynamically via symlinked .shell_common)
 if [[ -L "$HOME/.shell_common" ]]; then
     _dotfiles_dir=$(dirname "$(dirname "$(readlink -f "$HOME/.shell_common")")")
-    [[ -d "$_dotfiles_dir/Bootstrap" ]] && export PATH="$_dotfiles_dir/Bootstrap:$PATH"
+    if [[ -d "$_dotfiles_dir/Bootstrap" ]]; then
+        export PATH="$_dotfiles_dir/Bootstrap:$PATH"
+        export DOTFILES_DIR="$_dotfiles_dir"
+    fi
     unset _dotfiles_dir
 fi
 
@@ -153,3 +156,83 @@ alias gl='git pull'
 
 # AI commit alias (git-ai script in ~/.local/bin)
 alias gci='git ai'
+
+# =============================================================================
+# Vaultwarden credentials
+# =============================================================================
+# CLI/SSH/API credentials live in a self-hosted Vaultwarden instance and are
+# managed by Bootstrap/vault.sh. `vault unlock` caches the session, the
+# exported secrets, and the ssh-agent socket under ~/.cache/dotfiles/vault
+# (mode 0600), so new shells and the processes they start pick them up
+# automatically.
+export VAULT_CACHE_DIR="${VAULT_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault}"
+
+if [[ -r "$VAULT_CACHE_DIR/session" ]]; then
+    _vault_session="$(cat "$VAULT_CACHE_DIR/session" 2>/dev/null || true)"
+    if [[ -n "$_vault_session" ]]; then
+        export BW_SESSION="$_vault_session"
+    fi
+    unset _vault_session
+fi
+
+if [[ -n "${BW_SESSION:-}" && -r "$VAULT_CACHE_DIR/env" ]]; then
+    . "$VAULT_CACHE_DIR/env"
+fi
+
+if [[ -r "$VAULT_CACHE_DIR/agent" ]]; then
+    . "$VAULT_CACHE_DIR/agent"
+    # Drop stale sockets (e.g. after a reboot) instead of breaking ssh
+    if [[ -n "${SSH_AUTH_SOCK:-}" && ! -S "$SSH_AUTH_SOCK" ]]; then
+        unset SSH_AUTH_SOCK SSH_AGENT_PID
+    fi
+fi
+
+# vault: thin wrapper around Bootstrap/vault.sh. unlock/env also load the
+# cached session, secrets, and agent socket into the current shell.
+vault() {
+    local _vault_script _vault_cmd
+    if [[ -n "${DOTFILES_DIR:-}" && -x "$DOTFILES_DIR/Bootstrap/vault.sh" ]]; then
+        _vault_script="$DOTFILES_DIR/Bootstrap/vault.sh"
+    elif command -v vault.sh >/dev/null 2>&1; then
+        _vault_script="vault.sh"
+    else
+        echo "vault: Bootstrap/vault.sh not found (is DOTFILES_DIR set?)" >&2
+        return 1
+    fi
+
+    _vault_cmd="${1:-status}"
+    case "$_vault_cmd" in
+        unlock)
+            shift
+            "$_vault_script" unlock "$@" || return
+            if [[ -r "$VAULT_CACHE_DIR/session" ]]; then
+                BW_SESSION="$(cat "$VAULT_CACHE_DIR/session")"
+                export BW_SESSION
+            fi
+            [[ -r "$VAULT_CACHE_DIR/env" ]] && . "$VAULT_CACHE_DIR/env"
+            [[ -r "$VAULT_CACHE_DIR/agent" ]] && . "$VAULT_CACHE_DIR/agent"
+            ;;
+        lock)
+            shift
+            # Capture exported variable names before the script removes the cache
+            local _vault_vars="" _vault_var
+            if [[ -r "$VAULT_CACHE_DIR/env" ]]; then
+                _vault_vars="$(grep -oE '^export [A-Za-z_][A-Za-z0-9_]*' "$VAULT_CACHE_DIR/env" | awk '{print $2}')"
+            fi
+            "$_vault_script" lock "$@" || return
+            unset BW_SESSION
+            while IFS= read -r _vault_var; do
+                [[ -n "$_vault_var" ]] || continue
+                unset "$_vault_var" 2>/dev/null || true
+            done <<< "$_vault_vars"
+            ;;
+        env|refresh)
+            shift
+            "$_vault_script" env "$@" || return
+            [[ -r "$VAULT_CACHE_DIR/env" ]] && . "$VAULT_CACHE_DIR/env"
+            ;;
+        *)
+            "$_vault_script" "$_vault_cmd" "$@"
+            ;;
+    esac
+}

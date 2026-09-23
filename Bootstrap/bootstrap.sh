@@ -374,6 +374,7 @@ gather_choices() {
     GIT_USER_NAME=""
     GIT_USER_EMAIL=""
     DO_SHELL_LOCAL=false
+    DO_VAULT=false
     DO_SSH_KEYS=false
     GITHUB_ACCOUNTS=()
     SELECTED_CLI_PACKAGES=()
@@ -552,6 +553,13 @@ gather_choices() {
         anything_to_do=true
     fi
 
+    # Vaultwarden credentials - unlocks the vault so later steps (skills via
+    # gh, OpenCode keys, SSH keys) can use centralized credentials.
+    if ask_yes_no "Set up Vaultwarden credentials (bw CLI + unlock)?" "y"; then
+        DO_VAULT=true
+        anything_to_do=true
+    fi
+
     # Dotfiles - use cached result
     if [[ "$stow_status" != "ok" ]]; then
         if ask_yes_no "Fix dotfiles symlinks?" "y"; then
@@ -645,6 +653,7 @@ show_summary_and_confirm() {
     $DO_CLEAR_DOCK && echo "  • Clear Dock"
     $DO_TERMINAL_THEME && echo "  • Terminal color scheme"
     $DO_LATEX && echo "  • LaTeX (BasicTeX)"
+    $DO_VAULT && echo "  • Vaultwarden credentials (bw CLI + unlock)"
     $DO_STOW && echo "  • Dotfiles symlinks"
     $DO_GIT_IDENTITY && echo "  • Git identity ($GIT_USER_NAME <$GIT_USER_EMAIL>)"
     $DO_SHELL_LOCAL && echo "  • Shell local config (~/.zshrc.local)"
@@ -1047,6 +1056,31 @@ install_latex() {
         unicode-math upquote xecjk xurl zref 2>/dev/null || true
 
     print_success "LaTeX setup complete (BasicTeX + pandoc support)"
+}
+
+setup_vault() {
+    print_header "Setting up Vaultwarden credentials"
+
+    if $DRY_RUN; then
+        echo -e "  ${BLUE}[dry-run]${NC} $SCRIPT_DIR/vault.sh init"
+        print_success "Vaultwarden would be set up"
+        return 0
+    fi
+
+    # Installs/updates the bw CLI if needed, configures the server, logs in
+    # (password from keychain/keyring or prompt), unlocks, and caches the
+    # session, exported secrets, and ssh-agent socket for later steps.
+    "$SCRIPT_DIR/vault.sh" init
+
+    # Make vault-provided credentials (GH_TOKEN, ...) available to the
+    # remaining bootstrap steps in this process.
+    local vault_env="${VAULT_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault}/env"
+    if [[ -r "$vault_env" ]]; then
+        # shellcheck disable=SC1090
+        . "$vault_env"
+    fi
+
+    print_success "Vaultwarden ready"
 }
 
 setup_stow() {
@@ -1462,6 +1496,7 @@ main() {
     [[ "$DO_CLEAR_DOCK" == "true" ]] && clear_dock
     [[ "$DO_TERMINAL_THEME" == "true" ]] && install_terminal_theme
     [[ "$DO_LATEX" == "true" ]] && install_latex
+    [[ "$DO_VAULT" == "true" ]] && setup_vault
     [[ "$DO_STOW" == "true" ]] && setup_stow
     [[ "$DO_PLUGINS" == "true" ]] && setup_plugins
     [[ "$DO_GIT_IDENTITY" == "true" ]] && setup_git_identity

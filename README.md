@@ -26,26 +26,48 @@ curl -fsSL https://raw.githubusercontent.com/dbmrq/Dotfiles/master/Bootstrap/ins
 ```
 
 OpenCode's config and agents are tracked here and delivered by `stow.sh` (the
-retired plugin/orchestration stack is kept under `OpenCode/archive/`); only the
-credential file is copied from the source Mac — never fetched from git:
+retired plugin/orchestration stack is kept under `OpenCode/archive/`). Provider
+credentials live in the self-hosted Vaultwarden instance and are synced into
+the derived `auth.json` by `vault unlock`:
 
 ```sh
-mkdir -p ~/.local/share/opencode
-scp <mac>:'~/.local/share/opencode/auth.json' ~/.local/share/opencode/auth.json
-chmod 600 ~/.local/share/opencode/auth.json
+vault unlock          # unlocks the vault, regenerates auth.json, loads SSH keys
+opencode auth list    # verify the providers
 ```
 
-Then install the current `opencode` binary and verify the profiles:
+Then install the current `opencode` binary if needed:
 
 ```sh
 curl -fsSL https://opencode.ai/install | bash
-opencode auth list
 ```
 
-### Self-hosted VaultWarden
+### Self-hosted Vaultwarden
 
-For a self-hosted, Bitwarden-compatible password manager on a Debian box, use
-[vaultwarden/server](https://github.com/vaultwarden/server).
+CLI, SSH, and API credentials live in a self-hosted
+[vaultwarden/server](https://github.com/vaultwarden/server) instance, accessed
+with the Bitwarden CLI (`bw`). `Bootstrap/vault.sh` installs/points the CLI,
+logs in, unlocks, caches the session under `~/.cache/dotfiles/vault/` (0600),
+exports the secrets listed in `Bootstrap/vault-env.conf`, regenerates
+OpenCode's `auth.json`, and loads the vault SSH keys into the ssh-agent
+(Bitwarden desktop agent first, `ssh-add` fallback). The shell exposes it as
+`vault` (and `dotfiles vault`):
+
+```sh
+vault unlock      # log in/unlock, cache session + env + ssh-agent
+vault status      # server, account, lock state
+vault get ITEM    # print a secret
+vault put ITEM    # store a new secret (stdin/prompt)
+vault ssh-load    # refresh the ssh-agent from the vault
+vault ssh-upload ~/.ssh/id_ed25519_somekey
+vault gh-login    # authenticate gh from the vault token
+vault asc-restore # restore ~/.config/app-store-connect
+vault lock        # lock and clear cached secrets
+```
+
+After unlocking, new shells pick up `BW_SESSION`, the exported credentials,
+and the agent socket automatically, so OpenCode, `gh`, `ssh`, and scripts work
+without re-entering the master password. See [SECRETS.md](SECRETS.md) for the
+full item inventory and new-machine flow.
 
 ## Contents
 
@@ -92,15 +114,17 @@ dotfiles sync     # Pull latest and re-stow
 dotfiles update   # Update everything
 dotfiles status   # Check git status
 dotfiles edit     # Open dotfiles in editor
+dotfiles vault    # Vaultwarden credentials (unlock/status/get/...)
 ```
 
-Individual scripts in `Bootstrap/` can also be run independently (`brew.sh`, `stow.sh`, `prefs.sh`, etc.).
+Individual scripts in `Bootstrap/` can also be run independently (`brew.sh`, `stow.sh`, `prefs.sh`, `vault.sh`, etc.).
 
 ## Security
 
 This repo only tracks portable configuration. Machine-specific settings and
-credentials (git identity, GitHub/gh auth, App Store Connect keys, API keys)
-live in ignored local files or the macOS keychain. OpenCode provider keys live
-only in `~/.local/share/opencode/auth.json` (mode 0600), never in the config.
-See [SECRETS.md](SECRETS.md) for what is managed, what is excluded, and how to
-recreate a new Mac.
+credentials live in the self-hosted Vaultwarden instance (see
+[SECRETS.md](SECRETS.md)) or in ignored local files. `vault unlock` caches the
+session and the exported secrets under `~/.cache/dotfiles/vault/` (mode 0600)
+and loads SSH keys into the ssh-agent; OpenCode's `auth.json` is generated from
+the vault. No real credential is ever committed — CI runs a secret scan on
+every push.

@@ -47,6 +47,8 @@ brew "eza"                    # Modern ls replacement (aliased to ls)
 brew "htop"                   # Process viewer
 brew "zoxide"                 # Smarter cd command
 brew "lazygit"                # Terminal UI for git
+brew "jq"                     # JSON processor (vault helper, CI scripts)
+brew "bitwarden-cli"          # bw CLI for Vaultwarden credentials
 
 # =============================================================================
 # Terminal Multiplexer

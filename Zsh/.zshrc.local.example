@@ -2,7 +2,11 @@
 # Copy this file to ~/.zshrc.local and customize as needed
 #
 # This file is sourced at the end of .zshrc and is for settings
-# that vary per machine (tool-specific paths, API keys, etc.)
+# that vary per machine (tool-specific paths, aliases, etc.)
+#
+# Credentials live in the Vaultwarden store: run `vault unlock` and the
+# variables listed in Bootstrap/vault-env.conf are exported automatically.
+# Do not hardcode secrets here.
 
 # Example: uv (Python package manager)
 # [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
@@ -17,6 +21,6 @@
 # Example: Work-specific aliases
 # alias vpn='networksetup -connectpppoeservice "Work VPN"'
 
-# Example: API keys (be careful with these!)
-# export OPENAI_API_KEY="sk-..."
+# Example: non-vault API keys (prefer `vault put MY_ITEM` + vault-env.conf)
+# export SOME_API_KEY="..."
 

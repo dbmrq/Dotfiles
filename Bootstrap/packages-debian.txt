@@ -30,6 +30,9 @@ trash-cli
 nnn
 zoxide
 lazygit
+jq
+unzip
+libsecret-tools
 
 # =============================================================================
 # Terminal Multiplexer

@@ -2,10 +2,11 @@
 # Copy this file to ~/.bash_aliases.local and customize as needed
 #
 # This file is sourced at the end of .bash_aliases and is for settings
-# that vary per machine (tool-specific paths, API keys, etc.)
+# that vary per machine (tool-specific paths, aliases, etc.)
 #
 # Note: never put machine-specific paths in the tracked .bash_aliases;
 # keep them in ~/.bash_aliases.local instead. It is intentionally not stowed.
+# Credentials belong in the Vaultwarden store (run `vault unlock`), not here.
 
 # Example: homelab docker-helpers script (machine-local path)
 # Replace <MACHINE_PATH> with the absolute path on this machine.
