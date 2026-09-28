@@ -1,6 +1,15 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
+  // Host-local agent skills (eq12 homelab tree). OpenCode auto-discovers
+  // ~/.config/opencode/skills, ~/.claude/skills and ~/.agents/skills globally;
+  // this adds the hub's host-specific skills. SKILL.md files are picked up at
+  // any depth, so the category folders (media/, smart-home/, ...) are fine and
+  // machines without the homelab checkout simply find nothing here.
+  "skills": [
+    "/mnt/data/protected/admin/homelab/skills"
+  ],
+
   // youtube + firecrawl are only usable by the `research` subagent.
   // The top-level deny below hides their tools from every other agent;
   // agents/research.md re-allows them for itself. `codemode: false` keeps
