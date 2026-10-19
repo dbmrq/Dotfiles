@@ -70,7 +70,8 @@ credentials available without re-entering the master password.
 | `EQ12` | SSH/SMB login for the homelab mini PC (`eq12.local` / `10.0.0.10`) |
 | `SSH_KEY_*` | SSH key pairs (type 5) loaded into the ssh-agent by `vault ssh-load` |
 | `APPSTORE_CONNECT` | App Store Connect `credentials.json` + `AuthKey_*.p8`; restore with `vault asc-restore` |
-| `CLOUDFLARE_*`, `DOCKERHUB_*`, `LITELLM_*`, `WUD_*` | Homelab service credentials |
+| `CLOUDFLARE_*`, `DOCKERHUB`, `WUD_ADMIN`, `LITELLM_*` (incl. `LITELLM_UI`), `JELLYFIN_API_KEY`, `TAILSCALE_API_KEY`, `OPENCODE_SERVER_PASSWORD` | Homelab service credentials (collections: cloud, services, ai-keys) |
+| `HA_*`, `NUT_*`, `OMADA`, `ADGUARD_ADMIN_PASSWORD`, `OPENSPRINKLER_PASSWORD`, `EWELINK` | Home Assistant / smart-home credentials (collection: home-assistant) |
 
 Add new credentials from the repo itself:
 
@@ -81,6 +82,26 @@ vault ssh-upload ~/.ssh/id_ed25519_something   # stores the key pair in the vaul
 
 Then add a line to `Bootstrap/vault-env.conf` (`ENV_VAR=ITEM_NAME`) if the
 value should be exported to the environment.
+
+All homelab items live in the **Homelab organization** (collections `cloud`,
+`services`, `ai-keys`, `home-assistant`, `host`). Updates to an existing
+organization item keep it org-scoped; new items are created in the organization
+when the machine-local shell config exports `VAULT_ORG_ID` and
+`VAULT_COLLECTION_ID` (`VAULT_SSH_COLLECTION_ID` for `ssh-upload`), otherwise
+they are created in the personal vault.
+
+### Pruning the personal vault
+
+`vault-prune` lists (dry-run) and, with `--apply`, soft-deletes (trash)
+personal-vault login items that have been moved to another password manager.
+It needs the owner's own `bw` session, never the machine account:
+
+```sh
+bw unlock
+vault-prune                        # dry run; notes/cards/identities/SSH keys stay
+vault-prune --apply                # JSON export first, then trash
+vault-prune --apply --keep 'EQ12*' # protect items by name glob
+```
 
 ### Environment variables
 

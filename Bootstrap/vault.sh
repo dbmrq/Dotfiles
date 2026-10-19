@@ -34,6 +34,9 @@
 #   VAULT_CACHE_DIR        Session/env cache (default ~/.cache/dotfiles/vault)
 #   VAULT_ENV_CONF         Env mapping file (default Bootstrap/vault-env.conf)
 #   VAULT_SSH_ITEM_PREFIX  SSH key item prefix (default SSH_KEY_)
+#   VAULT_ORG_ID           Organization for newly created items ("" = personal vault)
+#   VAULT_COLLECTION_ID    Collection for newly created items (requires VAULT_ORG_ID)
+#   VAULT_SSH_COLLECTION_ID  Collection for ssh-upload items (defaults to VAULT_COLLECTION_ID)
 #   BW_PASSWORD            Master password, bypasses keychain/prompt
 #
 # The master password is read from BW_PASSWORD, then the macOS keychain (or
@@ -59,6 +62,9 @@ VAULT_KEYCHAIN_SERVICE="${VAULT_KEYCHAIN_SERVICE:-vault.abacate.top}"
 VAULT_CACHE_DIR="${VAULT_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/vault}"
 VAULT_ENV_CONF="${VAULT_ENV_CONF:-$SCRIPT_DIR/vault-env.conf}"
 VAULT_SSH_ITEM_PREFIX="${VAULT_SSH_ITEM_PREFIX:-SSH_KEY_}"
+VAULT_ORG_ID="${VAULT_ORG_ID:-}"                # organization for NEW items ("" = personal vault)
+VAULT_COLLECTION_ID="${VAULT_COLLECTION_ID:-}"  # collection for NEW items (requires VAULT_ORG_ID)
+VAULT_SSH_COLLECTION_ID="${VAULT_SSH_COLLECTION_ID:-$VAULT_COLLECTION_ID}"
 OPENCODE_AUTH_JSON="${OPENCODE_AUTH_JSON:-$HOME/.local/share/opencode/auth.json}"
 ASC_DIR="${ASC_DIR:-$HOME/.config/app-store-connect}"
 ASC_ITEM_NAME="${ASC_ITEM_NAME:-APPSTORE_CONNECT}"
@@ -107,7 +113,8 @@ Commands:
   asc-upload               Store ~/.config/app-store-connect in the vault
 
 Environment overrides: VAULT_SERVER_URL, VAULT_ACCOUNT, VAULT_KEYCHAIN_SERVICE,
-VAULT_CACHE_DIR, VAULT_ENV_CONF, VAULT_SSH_ITEM_PREFIX, BW_PASSWORD
+VAULT_CACHE_DIR, VAULT_ENV_CONF, VAULT_SSH_ITEM_PREFIX, BW_PASSWORD,
+VAULT_ORG_ID, VAULT_COLLECTION_ID, VAULT_SSH_COLLECTION_ID
 EOF
 }
 
@@ -161,12 +168,28 @@ bw_item_field() {
     esac
 }
 
-# Create or update an item by name. Arguments: name, item-json (without id).
+# Create or update an item by name. Arguments: name, item-json (without id),
+# optional collection id for new items (defaults to VAULT_COLLECTION_ID).
+#
+# Updates never change the scope of an existing item: an organization item
+# stays in its organization/collections (a plain edit payload carries
+# organizationId: null and would otherwise move it back to the personal
+# vault). New items go to the personal vault unless VAULT_ORG_ID is set.
 save_item_by_name() {
-    local name="$1" item_json="$2"
-    local existing_id
-    existing_id="$(vault_items | jq -r --arg n "$name" '[.[] | select(.name == $n)][0].id // empty')"
-    local encoded
+    local name="$1" item_json="$2" create_collection="${3:-$VAULT_COLLECTION_ID}"
+    local existing existing_id org col_ids encoded
+    existing="$(vault_items | jq -c --arg n "$name" '[.[] | select(.name == $n)][0] // null')"
+    existing_id="$(printf '%s' "$existing" | jq -r '.id // empty')"
+    if [[ -n "$existing_id" ]]; then
+        org="$(printf '%s' "$existing" | jq -r '.organizationId // empty')"
+        if [[ -n "$org" ]]; then
+            col_ids="$(printf '%s' "$existing" | jq -c '.collectionIds // []')"
+            item_json="$(printf '%s' "$item_json" | jq -c --arg o "$org" --argjson c "$col_ids" '.organizationId = $o | .collectionIds = $c')"
+        fi
+    elif [[ -n "$VAULT_ORG_ID" ]]; then
+        col_ids="$(printf '%s' "$create_collection" | jq -R -c 'split(",") | map(select(length > 0))')"
+        item_json="$(printf '%s' "$item_json" | jq -c --arg o "$VAULT_ORG_ID" --argjson c "$col_ids" '.organizationId = $o | .collectionIds = $c')"
+    fi
     encoded="$(printf '%s' "$item_json" | bw encode)"
     if [[ -n "$existing_id" ]]; then
         bw edit item "$existing_id" "$encoded" --session "$BW_SESSION" >/dev/null
@@ -687,7 +710,7 @@ cmd_ssh_upload() {
     local item_json
     item_json="$(jq -n --arg n "$name" --rawfile priv "$keyfile" --arg pub "$pub" --arg fp "$fp" \
         '{organizationId: null, folderId: null, type: 5, name: $n, notes: null, favorite: false, fields: [], sshKey: {privateKey: $priv, publicKey: $pub, keyFingerprint: $fp}}')"
-    save_item_by_name "$name" "$item_json"
+    save_item_by_name "$name" "$item_json" "$VAULT_SSH_COLLECTION_ID"
 }
 
 cmd_gh_upload() {
