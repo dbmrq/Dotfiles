@@ -553,8 +553,8 @@ gather_choices() {
         anything_to_do=true
     fi
 
-    # Vaultwarden credentials - unlocks the vault so later steps (skills via
-    # gh, OpenCode keys, SSH keys) can use centralized credentials.
+    # Vaultwarden credentials - unlocks the vault so later steps (OpenCode
+    # keys, SSH keys) can use centralized credentials.
     if ask_yes_no "Set up Vaultwarden credentials (bw CLI + unlock)?" "y"; then
         DO_VAULT=true
         anything_to_do=true
@@ -1099,10 +1099,6 @@ setup_stow() {
     # Call stow.sh which handles everything (installs stow if needed, stows all packages)
     "$SCRIPT_DIR/stow.sh" --force
 
-    # Install agent skills from the canonical agent-skills repo
-    # (ensures ~/.agents is a real dir, locates/clones the repo, runs install-all.sh)
-    setup_agent_skills
-
     # Install macOS Quick Actions (Services)
     is_macos && install_quick_actions
 
@@ -1138,22 +1134,6 @@ install_quick_actions() {
         fi
         echo "  Installed: $name"
     done
-}
-
-setup_agent_skills() {
-    # Installs agent skills from the canonical dbmrq/agent-skills repo.
-    # skills.sh ensures ~/.agents is a real directory, locates/clones the
-    # agent-skills checkout, and runs its scripts/install-all.sh.
-
-    if [[ -x "$SCRIPT_DIR/skills.sh" ]]; then
-        if $DRY_RUN; then
-            echo -e "  ${BLUE}[dry-run]${NC} $SCRIPT_DIR/skills.sh install"
-        else
-            "$SCRIPT_DIR/skills.sh" install
-        fi
-    else
-        print_warning "skills.sh not found, skipping agent skills setup"
-    fi
 }
 
 setup_plugins() {

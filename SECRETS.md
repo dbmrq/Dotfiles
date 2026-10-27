@@ -14,11 +14,10 @@ a new Mac. Machine-specific settings, credentials, and runtime state are
   is kept under `OpenCode/archive/`; its `docs/` notes are gitignored and stay
   local.
 - Zed config (`Zed/.config/zed/settings.json`).
-- Agent skills are **not** tracked. They come from the canonical
-  `dbmrq/agent-skills` repo, installed by `Bootstrap/skills.sh` → its
-  `scripts/install-all.sh`. Skill mirrors live in real directories outside this
-  repo (`~/.agents/skills`, `~/.config/opencode/skills`, `~/.claude/skills`,
-  etc.) and are never committed.
+- Agent skills are **not** tracked. They are managed with Skills Manager from
+  the private `dbmrq/agent-skills-private` repo and deployed as symlinks into
+  real directories outside this repo (`~/.claude/skills`,
+  `~/.config/opencode/skills`, etc.). Never commit them.
 
 ## What is intentionally excluded (never commit)
 
@@ -199,10 +198,9 @@ starting points.
 5. **Machine shell config** — create `~/.zshrc.local` (it is sourced by
    `~/.zshrc`) for tool paths and machine-specific settings. Credentials belong
    in the vault, not here.
-6. **Agent skills** — `dotfiles sync` or `Bootstrap/skills.sh install` locates
-   the `dbmrq/agent-skills` checkout (override with `AGENT_SKILLS_DIR`), clones
-   it if absent, and runs its `scripts/install-all.sh`. Requires `gh` to be
-   authenticated (`vault unlock` provides `GH_TOKEN`).
+6. **Agent skills** — install Skills Manager and restore from the private
+   `dbmrq/agent-skills-private` backup. Presets, deployments, and per-agent
+   toggles are app state; bootstrap does not install skills.
 7. **SSH keys** — the shared `SSH_KEY_HOMELAB` key comes from the vault:
    `vault unlock && vault ssh-load`. Keys for GitHub accounts can be stored
    with `vault ssh-upload` and loaded the same way; private keys never belong

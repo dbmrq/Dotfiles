@@ -92,18 +92,14 @@ full item inventory and new-machine flow.
 
 ### Agent skills
 
-Personal, external, and Apple Xcode agent skills are **not** tracked here.
-The canonical source is the [`dbmrq/agent-skills`](https://github.com/dbmrq/agent-skills)
-repo; `Bootstrap/skills.sh` locates it (override with `AGENT_SKILLS_DIR`),
-clones it if absent, and runs its `scripts/install-all.sh`, which installs into
-real directories such as `~/.agents/skills` and `~/.config/opencode/skills`.
-Run `./Bootstrap/skills.sh status` to inspect the current layout.
+Agent skills are **not** tracked here. They are managed with Skills Manager
+from the private `dbmrq/agent-skills-private` repo, which is both the source
+and the backup. The app deploys symlinks into each agent's skills directory
+(`~/.claude/skills`, `~/.config/opencode/skills`, etc.); bootstrap does not
+install or update them.
 
-Seven of the skills are Apple/macOS-only exports (installed via
-`xcrun agent skills export`, not CI): `audit-xcode-security-settings`,
-`c-bounds-safety`, `device-interaction`, `modernize-tests`, `swiftui-specialist`,
-`swiftui-whats-new-27`, and `uikit-app-modernization`. They are intentionally
-absent on Linux; the remaining skills install cross-platform.
+Apple Xcode skills are refreshed manually from the installed Xcode toolchain;
+see the `manage-agent-skills` skill for the export commands.
 
 ## Usage
 

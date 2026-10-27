@@ -46,10 +46,10 @@ Vim/.config/fish/
 # Hammerspoon Spoons (managed by SpoonInstall)
 Hammerspoon/.hammerspoon/Spoons/
 
-# Agent skills mirrors. The canonical personal/external/Xcode skills now live
-# in the dbmrq/agent-skills repo and are installed by its scripts/install-all.sh
-# into real dirs outside this repo (~/.agents/skills, ~/.config/opencode/skills,
-# ~/.claude/skills, ...). Never track mirrors or project-local installs here.
+# Agent skills deployment dirs. Skills Manager deploys symlinks from its
+# library into real dirs outside this repo (~/.claude/skills,
+# ~/.config/opencode/skills, ...). Never track skill mirrors or project-local
+# installs here.
 # (Anchored to the repo root: on case-insensitive filesystems an unanchored
 # "Agents/" also matched OpenCode/.config/opencode/agents/.)
 /Agents/
