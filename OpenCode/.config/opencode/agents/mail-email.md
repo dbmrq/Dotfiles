@@ -134,37 +134,53 @@ run a second agent.
 
 ## Filter pipeline
 
-The workflow is `configs/n8n/workflows/mail-02-sync-filters.json`; the planner
-source is `configs/n8n/code/mail-02-plan-groups.js`. `mail_rules` is the rule
-table and `mail_filters` maps stable `rules-N` chunk keys to Gmail filter IDs.
-`mailctl filters` is the supported write and inspection surface:
+The policy is now intentionally flat:
 
-- `mailctl filters list [--category ...] [--status ...] [--query ...]`
-- `mailctl filters show <rule-id>`
-- `mailctl filters create --match-query "..." --category <category>`
-- `mailctl filters update <rule-id> [--match-query ...] [--category ...]`
-- `mailctl filters retire <rule-id> --reason "..."` — sets `inactive` and keeps
-  provenance; preferred over deleting a rule.
-- `mailctl filters activate <rule-id> --reason "..."` — reverses a retire.
-- `mailctl filters verify` — read-only drift check; exits non-zero on drift.
-- `mailctl filters sync` — runs Mail 02 and prints its summary.
-- `mailctl filters map` — shows chunk state, filter IDs, and membership.
+- `mail_filter_terms` is the normal source of truth. Each row is one reusable
+  predicate: `sender`, `subject`, `body`, `query`, or `exclude`.
+- `mail_rules` is only for rare exceptions that cannot be expressed as a term
+  (for example per-sender `keep`/`pause`, or a different action later).
+- `mail_filters` maps stable `rules-N` chunk keys to compiled Gmail filters.
+- `configs/n8n/code/mail-02-plan-groups.js` compiles terms plus active
+  exceptions into the stable chunk plan. `scripts/mail_policy.py` is the
+  verifier twin.
+
+Prefer terms:
+
+- `mailctl terms list [--kind ...] [--status ...] [--query ...]`
+- `mailctl terms add --kind sender --value someone@example.com`
+- `mailctl terms add --kind subject --value "sua experiência com"`
+- `mailctl terms add --kind body --value "share your feedback"`
+- `mailctl terms add --kind exclude --value 'subject:recibo'`
+- `mailctl terms add --kind query --value 'from:x@example.com subject:"special"'`
+- `mailctl terms retire <term-id> --reason "..."`
+- `mailctl terms activate <term-id> --reason "..."`
+
+`query` terms are the escape hatch for a sender-specific subject or a
+cross-sender predicate. They are still one row, not a new rule.
+
+Exception rules remain available, but use them only when a term cannot express
+the semantics:
+
+- `mailctl filters list/show/create/update/retire/activate`
+- `mailctl filters verify`
+- `mailctl filters sync`
+- `mailctl filters map`
 
 Rules for filter work:
 
-1. Read the current rules and `mailctl filters verify` before changing
-   anything. Report drift precisely.
-2. Keep one rule's `match_query` under 600 characters. Split broad rules
-   instead of letting one fragment monopolise a chunk; `mailctl` rejects
-   longer writes.
-3. Use `retire` for redundant rules; do not delete them unless Daniel
-   explicitly asks for irreversible deletion.
-4. After changes, run `mailctl filters verify`. A successful `filters
-   update/retire` summary should show `unchanged` chunks staying put and only
-   affected chunks in `updated`/`created`/`deleted`.
-5. If the workflow/code is wrong, you may fix the repo copy and run the tests;
-   the live service uses root-owned installed copies, so a human applies
-   service installs. Never weaken the draft-only boundary.
+1. Run `mailctl filters verify` before changing anything.
+2. Add or retire a term first. If the new case is sender-specific subject
+   matching, use a `query` term rather than a rule.
+3. Create an exception rule only for keep/pause/disable semantics or a
+   genuinely different action, and include a reason in the notes.
+4. Keep any one fragment under 600 characters; a chunk stays under 1200.
+5. After changes, run `mailctl filters verify`. The sync summary should show
+   only the affected chunks in `created`/`updated`/`deleted`, with the rest
+   `unchanged`.
+6. If the workflow/code is wrong, fix the repo copy and run the tests; the live
+   service uses root-owned installed copies, so a human applies service installs.
+   Never weaken the draft-only boundary.
 
 ## Host work and safety
 
