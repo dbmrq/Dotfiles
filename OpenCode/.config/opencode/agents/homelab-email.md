@@ -11,6 +11,12 @@ permissions:
   - action: shell
     resource: "mailctl *"
     effect: deny
+  - action: shell
+    resource: "/home/daniel/.local/bin/mailctl *"
+    effect: deny
+  - action: shell
+    resource: "$HOME/.local/bin/mailctl *"
+    effect: deny
   - action: read
     resource: "/mnt/data/protected/secrets/**"
     effect: deny
