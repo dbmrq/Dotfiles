@@ -342,8 +342,18 @@ def group_simulators(args: argparse.Namespace, total: list[int]) -> None:
         }
         fully_removed = {runtime["runtime_identifier"] for runtime in runtime_delete} - kept_runtime_ids
         for device in devices:
-            if device["runtime"] in fully_removed:
-                total[0] += device["size"]
+            if device["runtime"] not in fully_removed:
+                continue
+            total[0] += device["size"]
+            if DRY_RUN:
+                log(f"  would delete simulator {device['name']} ({human(device['size'])})")
+                continue
+            result = run(["xcrun", "simctl", "delete", device["udid"]], timeout=120)
+            if result and result.returncode == 0:
+                log(f"  deleted simulator {device['name']} ({human(device['size'])})")
+            else:
+                detail = (result.stderr or result.stdout).strip() if result else ""
+                log(f"  WARNING: could not delete simulator {device['name']}: {detail}")
 
     # Devices whose runtime is gone (or marked unavailable) are now collapsible.
     if not DRY_RUN:
