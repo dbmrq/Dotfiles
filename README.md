@@ -78,6 +78,7 @@ full item inventory and new-machine flow.
 | `Ghostty/` | Ghostty terminal configuration |
 | `Git/` | Git configuration and aliases |
 | `Hammerspoon/` | macOS window management |
+| `Maintenance/` | `dev-clean` disk-space automation (installed by its own script) |
 | `Neru/` | Keyboard-driven mouse control (macOS) |
 | `OpenCode/` | OpenCode CLI config (opencode.jsonc, agents; retired plugin stack under `archive/`) |
 | `Shell/` | Shared shell configuration |
