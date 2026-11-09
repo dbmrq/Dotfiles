@@ -54,3 +54,7 @@ Logs: `~/Library/Logs/dev-clean.log`. Uninstall with `./install.sh --uninstall`.
 - It skips a `.ralph-loop` whose PID file points at a live process.
 - It never deletes a `.build` or `build/` entry that contains Git-tracked files.
 - `.xcarchive` folders and `build/export/` outputs are never deleted.
+- Chrome caches are deliberately excluded; clearing them can drop open tabs and
+  profiles. Use Chrome's own settings when you want that.
+- If `simctl` reports that it removed a runtime but could not reclaim its
+  MobileAsset, run the `sudo rm -rf` command it prints.
