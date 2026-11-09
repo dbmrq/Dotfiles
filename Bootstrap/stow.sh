@@ -68,6 +68,7 @@ get_packages() {
         for dir in */; do
             # Skip non-stow directories
             [[ "$dir" == "Bootstrap/" ]] && continue
+            [[ "$dir" == "Maintenance/" ]] && continue  # installed by its own script
             [[ "$dir" == "macOS/" ]] && continue  # macOS-specific (apps, not symlinks)
             if [[ "$os" != "Darwin" ]]; then
                 [[ "$dir" == "Hammerspoon/" ]] && continue

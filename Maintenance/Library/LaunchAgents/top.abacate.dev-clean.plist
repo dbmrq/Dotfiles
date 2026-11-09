@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>top.abacate.dev-clean</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__HOME__/.local/bin/dev-clean</string>
+    <string>--only</string>
+    <string>simulators,device-support,xcode-derived,caches</string>
+  </array>
+
+  <!-- Weekly, Sunday at 10:00. The workspace groups (ralph, swift-build)
+       cannot run here because macOS TCC blocks launchd jobs from reading
+       ~/Documents; run `dev-clean --only ralph,swift-build` from a terminal. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>0</integer>
+    <key>Hour</key>
+    <integer>10</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/dev-clean.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/dev-clean.log</string>
+
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
