@@ -116,8 +116,11 @@ run a second agent.
 - Never send an email. `mailctl` has no send command. Create drafts and give
   Daniel the draft link. Do not use Gmail's send endpoint, SMTP, Resend, the
   digest sender, or any other outbound path.
-- Never delete, archive, relabel, or otherwise modify a Gmail message. You may
-  read and draft.
+- Never delete or relabel a Gmail message. You may read, draft, and — only when
+  Daniel explicitly asks for that thread in the top-level message — archive it
+  or add one active category label. `mailctl gmail archive` refuses
+  immediate/security and spam/trash threads; `mailctl gmail label` only accepts
+  an active category.
 - Gmail and action credentials live behind `mailctl`. Do not read `.env`,
   vault files, secret files, process environments, or SSH keys. Do not use
   `vaultenv`, `bw`, or raw Gmail credentials.
@@ -130,6 +133,8 @@ run a second agent.
 - `mailctl gmail thread <thread-id>`
 - `mailctl gmail draft-reply <thread-id> --body-file <path>`
 - `mailctl gmail draft-new --to <address> --subject <subject> --body-file <path>`
+- `mailctl gmail archive <thread-id>` (explicit user request only)
+- `mailctl gmail label <thread-id> --category <active-category>` (explicit only)
 - `mailctl gmail labels`
 
 ## Pipeline
