@@ -177,6 +177,9 @@ failure leaves mail in the inbox.
 - `mailctl digest run --dry-run` renders without sending.
 - `mailctl learn run` is a dry run; `mailctl learn run --apply` writes validated
   terms/categories.
+- `mailctl terms consolidate` is a dry run; `--apply` merges exact sender
+  addresses on one route and retires covered sender-scoped queries.
+- `mailctl metrics --days 7` reports model reads separately from lane sizes.
 - `mailctl learn status`, `mailctl status`, `mailctl audit`.
 - Do not run `mailctl digest run` (without `--dry-run`) or any service install;
   those are scheduled/human actions.
