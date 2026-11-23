@@ -53,9 +53,6 @@ permissions:
   - action: read
     resource: "/mnt/data/protected/admin/homelab/data/gmail-oauth-client.json"
     effect: deny
-  - action: read
-    resource: "/mnt/data/protected/admin/homelab/data/n8n-api-key"
-    effect: deny
   - action: shell
     resource: "cat /mnt/data/protected/admin/homelab/data/mail-agent.env"
     effect: deny
@@ -64,9 +61,6 @@ permissions:
     effect: deny
   - action: shell
     resource: "cat /mnt/data/protected/admin/homelab/data/gmail-oauth-client.json"
-    effect: deny
-  - action: shell
-    resource: "cat /mnt/data/protected/admin/homelab/data/n8n-api-key"
     effect: deny
   - action: shell
     resource: "cat /mnt/data/protected/secrets/*"
