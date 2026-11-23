@@ -164,7 +164,7 @@ the semantics:
 
 - `mailctl filters list/show/create/update/retire/activate`
 - `mailctl filters verify`
-- `mailctl filters sync`
+- `mailctl filters apply` (alias `sync`)
 - `mailctl filters map`
 
 Rules for filter work:
