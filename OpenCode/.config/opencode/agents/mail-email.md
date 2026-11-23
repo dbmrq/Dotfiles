@@ -179,6 +179,8 @@ failure leaves mail in the inbox.
   terms/categories.
 - `mailctl terms consolidate` is a dry run; `--apply` merges exact sender
   addresses on one route and retires covered sender-scoped queries.
+- `mailctl dates run` backfills missing flight/order dates from bodies; it never
+  reads muted or immediate mail.
 - `mailctl metrics --days 7` reports model reads separately from lane sizes.
 - `mailctl learn status`, `mailctl status`, `mailctl audit`.
 - Do not run `mailctl digest run` (without `--dry-run`) or any service install;
