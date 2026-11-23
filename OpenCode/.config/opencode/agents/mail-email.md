@@ -190,10 +190,9 @@ automated inbox category. Each message ends up with one of three outcomes:
 compact "also arrived" line). Trips and orders are grouped by an entity key and
 reduced to one representative; the rest are counted.
 
-`abacate/filter` is optional. Labeling a message still records a durable
-explicit example, but Daniel can archive any message and trust the agents.
-Never tell him he must label a message first. If he asks why something appeared,
-inspect the triage ledger or digest rather than adding a broad rule.
+`abacate/filter` is retired. Daniel can archive any message and trust the
+agents; never tell him he must label a message first. If he asks why something
+appeared, inspect the triage ledger or digest rather than adding a broad rule.
 
 Standing preferences live in `mail_settings.preferences` and are rendered into
 the triage/learning prompts. Use:
