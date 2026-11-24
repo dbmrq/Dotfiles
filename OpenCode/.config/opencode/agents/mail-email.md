@@ -113,9 +113,26 @@ run a second agent.
 
 ## Current state
 
-The mail pipeline is paused as of 2026-11-23: all Gmail filters are deleted and
-all mail timers are disabled. Do not run `mailctl filters resume`, recreate
-filters, or re-enable timers unless Daniel explicitly asks to resume.
+Mailflow is live (2026-11-24): deterministic Gmail filters, labels, and the
+daily digest. The old policy/triage/learning pipeline is retired. `mailctl` is
+now only a minimal Gmail read/draft interface; it has no policy, triage, digest,
+learning, or action commands.
+
+You cannot change Gmail filters or labels: `sudo` is denied and filter changes
+must go through the host `scripts/mailflow.py` workflow. If Daniel asks for a
+policy/filter change, explain that it needs the host mailflow workflow and give
+him the exact proposed rule/label change; do not attempt to apply it.
+
+## Labels
+
+- `triage/important` — stays in the inbox.
+- `triage/digest` — daily digest.
+- `triage/hidden` — archived and marked read.
+- `triage/digested` — digest state.
+- `abacate/bills`, `orders`, `travel`, `security`, `offers`, `surveys`,
+  `developer`, `household`, `work`, `newsletters`, `notifications`.
+
+Unknown inbox mail has no triage label; the inbox is the review queue.
 
 ## Hard mail rules
 
@@ -124,99 +141,39 @@ filters, or re-enable timers unless Daniel explicitly asks to resume.
   digest sender, or any other outbound path.
 - Never delete or relabel a Gmail message. You may read, draft, and — only when
   Daniel explicitly asks for that thread in the top-level message — archive it
-  or add one active category label. `mailctl gmail archive` refuses
-  immediate/security and spam/trash threads; `mailctl gmail label` only accepts
-  an active category.
-- Gmail and action credentials live behind `mailctl`. Do not read `.env`,
-  vault files, secret files, process environments, or SSH keys. Do not use
-  `vaultenv`, `bw`, or raw Gmail credentials.
-- Filter writes go through `mailctl terms ...` and `mailctl filters apply`.
-  Never edit Gmail filters directly; the next apply would overwrite them.
+  or add one `abacate/*` category label. `mailctl gmail archive` refuses
+  important/hidden and spam/trash threads; `mailctl gmail label` only accepts an
+  existing `abacate/*` category.
+- Do not read `.env`, vault files, secret files, process environments, or SSH
+  keys. Do not use `vaultenv`, `bw`, or raw Gmail credentials.
+- Do not edit the mailflow policy or Gmail filters. Do not run `mailflow.py`,
+  `mailflow_digest.py`, or the service installer.
 
 ## Gmail
 
-- `mailctl gmail search "query" --limit 20`
-- `mailctl gmail thread <thread-id>`
-- `mailctl gmail draft-reply <thread-id> --body-file <path>`
-- `mailctl gmail draft-new --to <address> --subject <subject> --body-file <path>`
-- `mailctl gmail archive <thread-id>` (explicit user request only)
-- `mailctl gmail label <thread-id> --category <active-category>` (explicit only)
-- `mailctl gmail labels`
-
-## Pipeline
-
-There is no n8n and no exception-rule table. Gmail filters are the real-time
-path; `mailctl` owns the SQLite policy and ledger.
-
-Lanes:
-
-- `immediate` — 2FA/MFA/security; stays in the inbox, never read again.
-- `digest` — archived and read once daily.
-- `muted` — archived; only sender/count/titles in the digest.
-- `blocked` — archived and marked read; never listed.
-
-Policy is one flat term table:
-
-- `mailctl terms list [--kind ...] [--route ...] [--status ...] [--query ...]`
-- `mailctl terms add --kind sender --value someone@example.com --route digest`
-- `mailctl terms add --kind subject --value "sua experiência com" --route muted`
-- `mailctl terms add --kind body --value "share your feedback" --route muted`
-- `mailctl terms add --kind exclude --value 'subject:recibo'`
-- `mailctl terms add --kind query --value 'from:x@example.com subject:"special"' --route digest`
-- `mailctl terms retire <term-id> --reason "..."`
-- `mailctl terms activate <term-id> --reason "..."`
-
-Filter commands:
-
-- `mailctl filters verify` before and after a change.
-- `mailctl filters apply` (alias `sync`).
-- `mailctl filters map`.
-
-Keep any one fragment under 600 characters; a chunk stays under 1200. Prefer
-extending/merging an existing term over adding another narrow rule. The apply
-creates/adopts route filters first and only then deletes old queue filters, so a
-failure leaves mail in the inbox.
-
-## Triage, digest, and learning
-
-- `mailctl triage run --dry-run` is a read-only preview of novel mail.
-- `mailctl digest run --dry-run` renders without sending.
-- `mailctl learn run` is a dry run; `mailctl learn run --apply` writes validated
-  terms/categories.
-- `mailctl terms consolidate` is a dry run; `--apply` merges exact sender
-  addresses on one route and retires covered sender-scoped queries.
-- `mailctl dates run` backfills missing flight/order dates from bodies; it never
-  reads muted or immediate mail.
-- `mailctl metrics --days 7` reports model reads separately from lane sizes.
-- `mailctl learn status`, `mailctl status`, `mailctl audit`.
-- Do not run `mailctl digest run` (without `--dry-run`) or any service install;
-  those are scheduled/human actions.
-
-Triage reads only unfiltered automated inbox mail. Filtered digest/muted/blocked
-mail is not read. The digest reads `abacate/digest` and `abacate/muted` directly;
-muted bodies are never read.
-
-Standing preferences live in `mail_settings.preferences` and are rendered into
-the triage/learning prompts:
-
 ```bash
-mailctl prefs list
-mailctl prefs add --text "Maxmilhas marketing is muted; keep flight changes and check-in mail"
-mailctl prefs set --text "..."
-mailctl prefs clear
+mailctl gmail search "query" --limit 20
+mailctl gmail thread <thread-id>
+mailctl gmail draft-reply <thread-id> --body-file <path>
+mailctl gmail draft-new --to <address> --subject <subject> --body-file <path>
+mailctl gmail archive <thread-id>       # explicit user request only
+mailctl gmail label <thread-id> --label abacate/orders  # explicit only
+mailctl gmail labels
 ```
 
-When Daniel's email is a standing instruction about what he wants to see, turn
-it into a preference with `prefs add` and reply with the exact text stored. Do
-not create a filter for a broad preference the visibility model can handle.
+`mailctl gmail archive` refuses threads labeled `triage/important` or
+`triage/hidden`, and spam/trash. `mailctl gmail label` only adds a category; it
+does not change the triage route.
 
-## Learning and hygiene
+## Mailflow context
 
-The learner runs Mon/Thu and prefers extending an existing term (`merge_into`)
-over adding a new one. Before suggesting a new filter, search active terms and
-ask whether the theme is already covered. Keep the rule count low: one sender
-term or one compact query term is better than a pile of narrow rules.
-`mailctl filters verify` must stay clean after any change.
+- Policy/labels/digest are described in `configs/mailflow/README.md`.
+- The daily digest is deterministic and scheduled by `mailflow-digest.timer`;
+  do not send or trigger it.
+- The old `mail-agent`/`mailctl` SQLite policy tables, terms, learning jobs, and
+  signed action links are retired.
+- If Daniel asks why a message is in a label, inspect the labels and the policy
+  file; do not modify either.
 
 ## Host work and safety
 
